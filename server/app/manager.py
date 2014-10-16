@@ -1,6 +1,9 @@
 # -*- coding: utf-8 -*-
 from __init__ import db
+from datetime import datetime
 
+# Datetime format in posts
+FORMAT_TIME = "%d-%m-%Y %H:%M"
 # In user-hashmap
 KEY_PASSWORD = 'password'
 # In post-hashmap
@@ -32,6 +35,15 @@ def populate_test():
 	print " $ Printing database values"
 	for post in get_posts(None):
 		print post
+
+def populate_test2():
+	insert_user('seven', '123')
+	post = { 
+		KEY_TITLE : "How to install Node.js",
+		KEY_CONTENTS: "Doswload files and sudo make, sudo make intall",
+		KEY_TAGS: ["node.js", "How-to"]
+	}
+	insert_post(post, 'seven')
 
 def _is_user_created(username):
 	"""
@@ -157,13 +169,17 @@ def insert_post(post, username):
 	"""
 	Inserts a new post in the db.
 	"""
-	post_id = db.incr(POST_ID)
+	print "[MANAGER] : { post: %s, user: %s} " % (post, username)
+	post_id = str(db.incr(POST_ID)) + APPEND_KEY_POSTS
+	print "[MANAGER] post-id:", post_id
 	db.hset(post_id, KEY_TITLE, post[KEY_TITLE])
-	db.hset(post_id, KEY_DATE, post[KEY_DATE])
+	db.hset(post_id, KEY_DATE, datetime.now().strftime(FORMAT_TIME))
 	db.hset(post_id, KEY_CONTENTS, post[KEY_CONTENTS])
 	# Set a new set of tags
-	tags_id = db.incr(TAG_ID)
+	tags_id = str(db.incr(TAG_ID)) + APPEND_KEY_TAG
+	print "[MANAGER] tags-id:", tags_id
 	for tag in post[KEY_TAGS]: # TODO: See if can be made without the for
+		print "[MANAGER] add tag:", tag
 		db.sadd(tags_id, tag)
 	db.hset(post_id, KEY_TAGS, tags_id)
 	# Add post id to users post-set

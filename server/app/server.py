@@ -122,5 +122,5 @@ api.add_resource(PostAPI, '/yilpil/post/<int:id>', endpoint = 'post')
 
 if __name__ == '__main__':
 	# Populate database with test data
-	manager.populate_test()
+	manager.populate_test2()
 	app.run(debug = True)
