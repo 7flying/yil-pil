@@ -5,7 +5,8 @@ import redis
 import manager
 from config import REDIS_HOST, REDIS_PORT, REDIS_DB
 from flask import Flask, abort, jsonify, make_response
-from flask.ext.restful import Api, Resource, reqparse, fields, marshal
+from flask.ext.restful import Api, Resource, reqparse, fields, marshal, \
+	 marshal_with
 from flask.ext.httpauth import HTTPBasicAuth
 
 # Flask general
@@ -44,16 +45,16 @@ class UserAPI(Resource):
 
 api.add_resource(UserAPI, '/users/<int:id>', endpoint = 'user')
 
-post_fields = {
+post_field = {
 	'contents' : fields.String,
 	'title' : fields.String,
 	'tags' : fields.List(fields.String),
-	'date' : fields.String,
-	'uri' : fields.Url('post')
+	'date' : fields.String
+#	'uri' : fields.Url('post')
 }
 
 posts_fields = {
-	'post' : fields.List(fields.Nested(post_fields))
+	'post' : fields.List(fields.Nested(post_field))
 }
 
 class PostsAPI(Resource):
@@ -95,7 +96,8 @@ class PostAPI(Resource):
 		post = manager.get_post(id)
 		if post == None:
 			abort(404)
-		return { 'post' : marshal(post, post_fields) }
+		return { 'post' : marshal(post, post_field) }
+		
 
 
 	def put(self, id):

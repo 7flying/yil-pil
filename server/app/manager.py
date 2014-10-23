@@ -130,7 +130,7 @@ def insert_tag_post_tags(post_id, tag):
 	"""
 	Inserts a tag to the post's set of tags.
 	"""
-	debug("Inserting tag '" + tag + "' to post #" + post_id)
+	debug("Inserting tag '" + tag + "' to post #" + str(post_id))
 	# Element isn't inserted if present
 	if _is_post_created(post_id):
 		db.sadd(get_post(post_id)[KEY_TAGS], tag)
@@ -139,7 +139,7 @@ def delete_tag_from_post(post_id, tag):
 	"""
 	Deletes a tag from the post's set of tags
 	"""
-	debug("Deleting tag '" + tag + "' to post #" + post_id )
+	debug("Deleting tag '" + tag + "' to post #" + str(post_id))
 	if _is_post_created(post_id):
 		db.srem(get_post(post_id)[KEY_TAGS], tag)
 
@@ -154,34 +154,37 @@ def _is_post_created(post_id):
 		debug("Post #" + str(post_id) + " not found")
 		return False
 
-def get_post_tags(post_id):
+def get_post_tags(post_id): # OK
 	"""
-	Returns the tags of a post, empty array if there aren't tags for the
-	given post.
+	Returns the tags of a post given its integer-id.
+	An empty array is returned if there	aren't tags for the	given post.
 	"""
-	debug("Getting tags of post #" + post_id)
-	tags = db.smembers(post_id + APPEND_KEY_TAG)
+	debug("Getting tags of post #" + str(post_id))
+	tags = db.smembers(str(post_id)+ APPEND_KEY_TAG)
+	
 	ensure_array = []
 	for tag in tags:
 		ensure_array.append(tag)
 	return ensure_array
 
-def get_post(key):
+def get_post(key): # OK
 	"""
-	Returns a dictionary representing a post given its id.
-	None if there aren't posts with that id.
+	Returns a dictionary representing a post given its integer-id.
+	None is returned if there aren't posts with that id.
 	"""
-	key = str(key) + APPEND_KEY_POSTS
-	if _is_post_created(key):
+	debug("Requested post with id: " + str(key))
+	db_key = str(key) + APPEND_KEY_POSTS
+	if _is_post_created(db_key):
 		post = {}
-		post[KEY_TITLE] = db.hget(key, KEY_TITLE)
-		post[KEY_CONTENTS] = db.hget(key, KEY_CONTENTS)
-		post[KEY_DATE] = db.hget(key, KEY_DATE)
+		post[KEY_TITLE] = db.hget(db_key, KEY_TITLE)
+		post[KEY_CONTENTS] = db.hget(db_key, KEY_CONTENTS)
+		post[KEY_DATE] = db.hget(db_key, KEY_DATE)
 		post[KEY_TAGS] = get_post_tags(key)
 		debug("Getting post: " + str(post))
 		return post
 	else:
 		return None
+	
 
 def get_posts(username):
 	"""
