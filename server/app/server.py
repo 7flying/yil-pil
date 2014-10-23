@@ -91,6 +91,7 @@ class PostAPI(Resource):
 		super(PostAPI, self).__init__()
 
 	def get(self, id):
+		print "GET POST id: " + str(id)
 		post = manager.get_post(id)
 		if post == None:
 			abort(404)
