@@ -52,6 +52,14 @@ def populate_test2():
 		KEY_TAGS: ["node.js", "How-to"]
 	}
 	insert_post(post, 'seven')
+	post2 = { 
+		KEY_TITLE : "On eating doughnuts",
+		KEY_CONTENTS: "You shouldn't eat those. They have oxygenated fat.",
+		KEY_TAGS: ["food", "health"]
+	}
+	insert_post(post2, 'seven')
+
+### User related stuff ###
 
 def _is_user_created(username):
 	"""
@@ -126,6 +134,10 @@ def _delete_tag_from_all_user_posts(username, tag):
 	for post_id in db.smembers(username + APPEND_KEY_POSTS):
 		delete_tag_from_post(post_id)
 
+### End of user-related stuff ###
+
+### Post-related ###
+
 def insert_tag_post_tags(post_id, tag):
 	"""
 	Inserts a tag to the post's set of tags.
@@ -141,13 +153,13 @@ def delete_tag_from_post(post_id, tag):
 	"""
 	debug("Deleting tag '" + tag + "' to post #" + str(post_id))
 	if _is_post_created(post_id):
-		db.srem(get_post(post_id)[KEY_TAGS], tag)
+		db.srem(get_post(post_id)[KEY_TAGS] + APPEND_KEY_TAG, tag)
 
 def _is_post_created(post_id):
 	"""
 	Checks if a post, given its id is created.
 	"""
-	if db.hexists(post_id, KEY_TITLE) == 1:
+	if db.hexists(post_id + APPEND_KEY_POSTS, KEY_TITLE) == 1:
 		debug("Post #" + str(post_id) + " found")
 		return True
 	else:
@@ -160,7 +172,7 @@ def get_post_tags(post_id): # OK
 	An empty array is returned if there	aren't tags for the	given post.
 	"""
 	debug("Getting tags of post #" + str(post_id))
-	tags = db.smembers(str(post_id)+ APPEND_KEY_TAG)
+	tags = db.smembers(str(post_id) + APPEND_KEY_TAG)
 	
 	ensure_array = []
 	for tag in tags:
@@ -174,7 +186,7 @@ def get_post(key): # OK
 	"""
 	debug("Requested post with id: " + str(key))
 	db_key = str(key) + APPEND_KEY_POSTS
-	if _is_post_created(db_key):
+	if _is_post_created(str(key)):
 		post = {}
 		post[KEY_TITLE] = db.hget(db_key, KEY_TITLE)
 		post[KEY_CONTENTS] = db.hget(db_key, KEY_CONTENTS)
@@ -183,37 +195,39 @@ def get_post(key): # OK
 		debug("Getting post: " + str(post))
 		return post
 	else:
-		return None
-	
+		return None	
 
-def get_posts(username):
+def get_posts(username): # OK
 	"""
 	Returns all the posts written by a user.
 	"""
 	posts_ids = db.smembers(username + APPEND_KEY_POSTS)
 	posts = []
-	for key in posts_ids:
-		posts.append(get_post(key))
 	debug("Getting posts of user: " + username)
+	for key in posts_ids:
+		print "key", key
+		posts.append(get_post(key))
 	return posts
 
-def insert_post(post, username):
+def insert_post(post, username): # OK
 	"""
 	Inserts a new post in the db.
 	"""
 	print "[MANAGER] : { post: %s, user: %s} " % (post, username)
-	post_id = str(db.incr(POST_ID)) + APPEND_KEY_POSTS
+	post_id = str(db.incr(POST_ID))
+	db_post_id = post_id + APPEND_KEY_POSTS
 	print "[MANAGER] post-id:", post_id
-	db.hset(post_id, KEY_TITLE, post[KEY_TITLE])
-	db.hset(post_id, KEY_DATE, datetime.now().strftime(FORMAT_TIME))
-	db.hset(post_id, KEY_CONTENTS, post[KEY_CONTENTS])
+	db.hset(db_post_id, KEY_TITLE, post[KEY_TITLE])
+	db.hset(db_post_id, KEY_DATE, datetime.now().strftime(FORMAT_TIME))
+	db.hset(db_post_id, KEY_CONTENTS, post[KEY_CONTENTS])
 	# Set a new set of tags
-	tags_id = str(db.incr(TAG_ID)) + APPEND_KEY_TAG
-	print "[MANAGER] tags-id:", tags_id
+	tag_id = str(db.incr(TAG_ID))
+	db_tag_id = tag_id + APPEND_KEY_TAG
+	print "[MANAGER] tags-id (db):", db_tag_id
 	for tag in post[KEY_TAGS]: # TODO: See if can be made without the for
 		print "[MANAGER] add tag:", tag
-		db.sadd(tags_id, tag)
-	db.hset(post_id, KEY_TAGS, tags_id)
+		db.sadd(db_tag_id, tag)
+	db.hset(db_post_id, KEY_TAGS, tag_id)
 	# Add post id to users post-set
 	db.sadd(username + APPEND_KEY_POSTS, post_id)
 
@@ -221,6 +235,7 @@ def update_post(post, post_id, username):
 	"""
 	Updates a post in the db.
 	"""
+	post_id = str(post_id)
 	debug("Updating " + username + "'s post #" + post_id + " with: " + post)
 	db.hset(post_id, KEY_TITLE, post[KEY_TITLE])
 	db.hset(post_id, KEY_DATE, post[KEY_DATE])
@@ -234,6 +249,7 @@ def delete_post(post_id, username):
 	"""
 	Deletes a post (as well as its related set of tags).
 	"""
+	post_id = str(post_id)
 	debug("Deleting " + username + "'s post #" + post_id)
 	db.hdel(post_id, KEY_TITLE)
 	db.hdel(post_id, KEY_DATE)

@@ -71,13 +71,14 @@ class PostsAPI(Resource):
 			default = '', location = 'json')
 		super(PostsAPI, self).__init__()
 
-	def get(self):
-		posts = manager.get_posts(None)
+	def get(self, username):
+		posts = manager.get_posts(username)
 		print "[SERVER] Returning: "
 		return jsonify(posts=posts)
 
 	def post(self):
 		pass
+
 
 class PostAPI(Resource):
 	"""Class for the Post resource."""	
@@ -97,10 +98,9 @@ class PostAPI(Resource):
 		if post == None:
 			abort(404)
 		return { 'post' : marshal(post, post_field) }
-		
-
 
 	def put(self, id):
+		print "PUT POST id:", str(id)
 		post = manager.get_post(id)
 		if post == None:
 			abort(404)
@@ -120,7 +120,7 @@ class PostAPI(Resource):
 
 # 'add_resource' is used to register the routes with the framework.
 # The endpoint is not necessary since Flask-RESTful generates one. 
-api.add_resource(PostsAPI, '/yilpil/posts', endpoint = 'posts')
+api.add_resource(PostsAPI, '/yilpil/posts/<string:username>', endpoint = 'posts')
 api.add_resource(PostAPI, '/yilpil/post/<int:id>', endpoint = 'post')
 
 if __name__ == '__main__':
