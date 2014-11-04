@@ -107,6 +107,11 @@ def insert_user(username, password):
 		debug("User creation failed")
 		return False
 
+def delete_user(username):
+	if _is_user_created(username):
+		return db.delete(username) > 0
+	return False
+
 def insert_tag_user_tags(username, tag):
 	"""
 	Inserts a tag to the user's set of tags.
