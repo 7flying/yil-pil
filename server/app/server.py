@@ -26,16 +26,16 @@ auth = HTTPBasicAuth()
 def get_password(username):
 	return manager.get_password(username)
 
-@auth.error_handler
-def unauthorized():
-	return make_response(jsonify({ 'message' , 'Unauthorized access'}), 403)
-
 
 class UserAPI(Resource):
 	""" Class for the User resource."""
 
-	def get(self, id):
-		pass
+	def __init__(self):
+		self.reqparse = reqparse.RequestParser()
+		self.reqparse.add_argument('username', type=str, required=True,
+			location='json')
+		self.required.add_argument('password', type=str, required=True,
+			location='json')
 
 	def put(self, id):
 		pass
@@ -90,6 +90,7 @@ class PostAPI(Resource):
 		self.reqparse.add_argument('contents', type = str, location = 'json')
 		self.reqparse.add_argument('tags', type = str, action = 'append',
 			location = 'json')
+		self.reqparse.add_argument('username', type=str, location='form')
 		super(PostAPI, self).__init__()
 
 	def get(self, id):
@@ -99,7 +100,7 @@ class PostAPI(Resource):
 			abort(404)
 		return { 'post' : marshal(post, post_field) }
 
-	def put(self, id):
+	def put(self, id, username):
 		print "PUT POST id:", str(id)
 		post = manager.get_post(id)
 		if post == None:
@@ -108,7 +109,7 @@ class PostAPI(Resource):
 		post['title'] = args['title']
 		post['contents'] = args['contents']
 		post['tags'] = args['tags']
-		manager.update_post(post)
+		manager.update_post(post, id, username)
 		return { 'post': marshal(post, post_fields) }
 
 	def delete(self, id):

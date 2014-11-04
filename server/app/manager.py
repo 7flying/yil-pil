@@ -93,9 +93,6 @@ def change_password(username, new_pass):
 	else:
 		return False
 
-def get_user():
-	pass
-
 def insert_user(username, password):
 	"""
 	Inserts a user in the db. Returns False if there is already a user in the
