@@ -36,16 +36,15 @@ class UserAPI(Resource):
 
 	def __init__(self):
 		self.reqparse = reqparse.RequestParser()
-		self.reqparse.add_argument('username', type=str, required=True,
-			location='json')
+		self.reqparse.add_argument('username', type=str, location='json')
 		self.reqparse.add_argument('password', type=str, location='form')
-		self.required.add_argument('newpassword', type=str, location='json')
+		self.reqparse.add_argument('newpassword', type=str, location='json')
 		super(UserAPI, self).__init__()
 
 	def post(self, username):
 		""" Handles POST requests to create new users."""
 		#mode = str(request.form['mode'])
-		password = str(request.form['password'])
+		password = self.reqparse.parse_args()['password']
 		user = {'name': username, 'password': password }
 		print "POST USER: %s %s" % (username, password)
 		if manager.insert_user(username, password):
@@ -56,7 +55,8 @@ class UserAPI(Resource):
 	@auth.login_required
 	def put(self, username):
 		""" Handles PUT requests to update existing users."""
-		password = str(request.form['newpassword'])
+		password = self.reqparse.parse_args()['newpassword']
+		#password = str(request.form['newpassword'])
 		if manager.change_password(username, password):
 			return {'user': marshal(manager.get_user(username), UserAPI.user_field)}
 
@@ -65,7 +65,7 @@ class UserAPI(Resource):
 		""" Hanldes DELETE requests to delete an existing user."""
 		print "DELETE USER: %s", username
 		if manager.delete_user(username):
-			return 201 # Change "Ok, created"
+			return 200 # Change "Ok, created"
 		else:
 			abort(400) # Change
 
@@ -92,13 +92,15 @@ class PostAPI(Resource):
 		super(PostAPI, self).__init__()
 
 	def get(self, id):
+		""" Gets a post given its id."""
 		print "GET POST id: " + str(id)
 		post = manager.get_post(id)
 		if post == None:
 			abort(404)
 		return { 'post' : marshal(post, PostAPI.post_field) }
 
-	def put(self, id, username):
+	def put(self, id, username): # TODO: REVIEW
+		""" Handles PUT request. Updates an existing post data."""
 		print "PUT POST id:", str(id)
 		post = manager.get_post(id)
 		if post == None:
@@ -111,11 +113,12 @@ class PostAPI(Resource):
 		return { 'post': marshal(post, PostAPI.post_field) }
 
 	def delete(self, id):
+		""" Deletes an existing post."""
 		post = manager.get_post(id)
 		if post == None:
 			abort(404)
 		manager.delete_post(id)
-		return { 'result': True }
+		
 
 
 class PostsAPI(Resource):

@@ -90,7 +90,7 @@ def change_password(username, new_pass):
 	"""
 	debug("Changing " + username + "'s password")
 	if _is_user_created(username):
-		db.hset(user + APPEND_KEY_USER, KEY_PASSWORD, new_pass)
+		db.hset(username + APPEND_KEY_USER, KEY_PASSWORD, new_pass)
 		return True
 	else:
 		return False
