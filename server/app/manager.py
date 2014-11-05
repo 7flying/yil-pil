@@ -15,6 +15,8 @@ KEY_TAGS = 'tags'
 APPEND_KEY_TAG = '-tags'
 # User-posts key
 APPEND_KEY_POSTS = '-posts'
+# User tag
+APPEND_KEY_USER = '-user'
 # Identifiers. This ids are used to reference the tags and the posts.
 POST_ID = 'key-post-id'
 TAG_ID = 'tag-id'
@@ -65,7 +67,7 @@ def _is_user_created(username):
 	"""
 	Checks if a user, given its id is created.
 	"""
-	if db.hexists(username, KEY_PASSWORD) == 1:
+	if db.hexists(username + APPEND_KEY_USER, KEY_PASSWORD) == 1:
 		debug(username + " found")
 		return True
 	else:
@@ -78,7 +80,7 @@ def get_password(username):
 	"""
 	debug("Getting " + username + "'s password")
 	if _is_user_created(username):
-		return db.hget(username, KEY_PASSWORD)
+		return db.hget(username + APPEND_KEY_USER, KEY_PASSWORD)
 	else:
 		return None
 
@@ -88,29 +90,38 @@ def change_password(username, new_pass):
 	"""
 	debug("Changing " + username + "'s password")
 	if _is_user_created(username):
-		db.hset(user, KEY_PASSWORD, new_pass)
+		db.hset(user + APPEND_KEY_USER, KEY_PASSWORD, new_pass)
 		return True
 	else:
 		return False
 
-def insert_user(username, password):
+def insert_user(username, password): #OK
 	"""
 	Inserts a user in the db. Returns False if there is already a user in the
 	db with that username.
 	"""
 	debug("Creating user '" + username + "' with some secret password")
 	if not _is_user_created(username):
-		db.hset(username, KEY_PASSWORD, password)
+		db.hset(username + APPEND_KEY_USER, KEY_PASSWORD, password)
 		debug("User successfully created")
 		return True
 	else:
 		debug("User creation failed")
 		return False
 
-def delete_user(username):
+def delete_user(username): #OK
 	if _is_user_created(username):
-		return db.delete(username) > 0
+		return db.delete(username + APPEND_KEY_USER) > 0
 	return False
+
+def get_user(username):
+	if _is_user_created(username):
+		user = {}
+		user['name'] = username
+		user['password'] = get_password(username + APPEND_KEY_USER)
+		return user
+	else:
+		return None
 
 def insert_tag_user_tags(username, tag):
 	"""

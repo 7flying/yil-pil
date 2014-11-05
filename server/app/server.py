@@ -38,43 +38,34 @@ class UserAPI(Resource):
 		self.reqparse = reqparse.RequestParser()
 		self.reqparse.add_argument('username', type=str, required=True,
 			location='json')
-		self.reqparse.add_argument('mode', type=str, location='form')
 		self.reqparse.add_argument('password', type=str, location='form')
-		self.reqparse.add_argument('oldpassword', type=str, location='form')
-
-		"""
-		self.required.add_argument('oldpassword', type=str, required=True,
-			location='json')
-		"""
+		self.required.add_argument('newpassword', type=str, location='json')
 		super(UserAPI, self).__init__()
 
-	def put(self, username):
-		""" Handles PUT requests.
-			If mode=CREATE : we wish to create a new user.
-			If mode=UPDATE : we want to change an existing user's password.
-		"""
-		mode = str(request.form['mode'])
+	def post(self, username):
+		""" Handles POST requests to create new users."""
+		#mode = str(request.form['mode'])
 		password = str(request.form['password'])
 		user = {'name': username, 'password': password }
-		print "PUT %s USER: %s %s" % (mode, username, password)
-		if mode == "CREATE":
-			if manager.insert_user(username, password):
-				return {'user': marshal(user, UserAPI.user_field)}
-			else:
-				abort(400) # Should be "User already created" or something.
-		elif mode == "UPDATE":
-			oldpassword = str(request.form['oldpassword'])
-			if oldpassword == manager.get_password(username):
-				manager.change_password(username, password)
-				return {'user': marshal(user, UserAPI.user_field)}
-			else:
-				abort()
+		print "POST USER: %s %s" % (username, password)
+		if manager.insert_user(username, password):
+			return {'user': marshal(user, UserAPI.user_field)}
 		else:
-			abort(400)
+			abort(400) # Should be "User already created" or something.
+
 	@auth.login_required
-	def delete(self, username):
+	def put(self, username):
+		""" Handles PUT requests to update existing users."""
+		password = str(request.form['newpassword'])
+		if manager.change_password(username, password):
+			return {'user': marshal(manager.get_user(username), UserAPI.user_field)}
+
+	@auth.login_required
+	def delete(self, username): #OK
+		""" Hanldes DELETE requests to delete an existing user."""
+		print "DELETE USER: %s", username
 		if manager.delete_user(username):
-			return 201 # Change
+			return 201 # Change "Ok, created"
 		else:
 			abort(400) # Change
 
