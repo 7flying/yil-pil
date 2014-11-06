@@ -25,7 +25,7 @@ _DEBUG_ = True
 
 def debug(to_print):
 	if _DEBUG_:
-		print "[MANAGER]:", to_print
+		print "[ MANAGER ]:", to_print
 
 def populate_test():
 	db.flushdb()
@@ -80,11 +80,13 @@ def get_password(username):
 	"""
 	debug("Getting " + username + "'s password")
 	if _is_user_created(username):
-		return db.hget(username + APPEND_KEY_USER, KEY_PASSWORD)
+		password = db.hget(username + APPEND_KEY_USER, KEY_PASSWORD)
+		debug(username + "'s password: " + password)
+		return password
 	else:
 		return None
 
-def change_password(username, new_pass):
+def change_password(username, new_pass): #OK
 	"""
 	 Changes the user's password. Returns False if the db hasn't that user.
 	"""
@@ -172,7 +174,7 @@ def _is_post_created(post_id):
 	"""
 	Checks if a post, given its id is created.
 	"""
-	if db.hexists(post_id + APPEND_KEY_POSTS, KEY_TITLE) == 1:
+	if db.hexists(str(post_id) + APPEND_KEY_POSTS, KEY_TITLE) == 1:
 		debug("Post #" + str(post_id) + " found")
 		return True
 	else:
@@ -226,19 +228,19 @@ def insert_post(post, username): # OK
 	"""
 	Inserts a new post in the db.
 	"""
-	print "[MANAGER] : { post: %s, user: %s} " % (post, username)
+	print "[ MANAGER ] : { post: %s, user: %s} " % (post, username)
 	post_id = str(db.incr(POST_ID))
 	db_post_id = post_id + APPEND_KEY_POSTS
-	print "[MANAGER] post-id:", post_id
+	print "[ MANAGER ] post-id:", post_id
 	db.hset(db_post_id, KEY_TITLE, post[KEY_TITLE])
 	db.hset(db_post_id, KEY_DATE, datetime.now().strftime(FORMAT_TIME))
 	db.hset(db_post_id, KEY_CONTENTS, post[KEY_CONTENTS])
 	# Set a new set of tags
 	tag_id = str(db.incr(TAG_ID))
 	db_tag_id = tag_id + APPEND_KEY_TAG
-	print "[MANAGER] tags-id (db):", db_tag_id
+	print "[ MANAGER ] tags-id (db):", db_tag_id
 	for tag in post[KEY_TAGS]: # TODO: See if can be made without the for
-		print "[MANAGER] add tag:", tag
+		print "[ MANAGER ] add tag:", tag
 		db.sadd(db_tag_id, tag)
 	db.hset(db_post_id, KEY_TAGS, tag_id)
 	# Add post id to users post-set
@@ -263,13 +265,18 @@ def delete_post(post_id, username):
 	Deletes a post (as well as its related set of tags).
 	"""
 	post_id = str(post_id)
-	debug("Deleting " + username + "'s post #" + post_id)
-	db.hdel(post_id, KEY_TITLE)
-	db.hdel(post_id, KEY_DATE)
-	db.hdel(post_id, KEY_CONTENTS)
-	# Delete the set of tags that the post has
-	tags_id = db.hget(post_id, KEY_TAGS)
-	db.delete(tags_id)
-	db.hdel(post_id, KEY_TAGS)
-	# Delete the post id from the user's post list
-	db.srem(username + APPEND_KEY_POSTS, post_id)
+	if _is_post_created(post_id):
+		db.hdel(post_id + APPEND_KEY_POSTS, KEY_TITLE)
+		db.hdel(post_id + APPEND_KEY_POSTS, KEY_DATE)
+		db.hdel(post_id + APPEND_KEY_POSTS, KEY_CONTENTS)
+		# Delete the set of tags that the post has
+		tags_id = db.hget(post_id + APPEND_KEY_POSTS, KEY_TAGS)
+		db.delete(tags_id + APPEND_KEY_TAG)
+		# First reference to the post to ensure that is not retrieved
+		# Delete the post id from the user's post list
+		db.srem(username + APPEND_KEY_POSTS, post_id)
+		# Delete the post
+		db.hdel(post_id  + APPEND_KEY_POSTS, KEY_TAGS)
+		return True
+	else:
+		return False

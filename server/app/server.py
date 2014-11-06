@@ -1,3 +1,4 @@
+#!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
 import os
@@ -38,10 +39,9 @@ class UserAPI(Resource):
 		self.reqparse = reqparse.RequestParser()
 		self.reqparse.add_argument('username', type=str, location='json')
 		self.reqparse.add_argument('password', type=str, location='form')
-		self.reqparse.add_argument('newpassword', type=str, location='json')
 		super(UserAPI, self).__init__()
 
-	def post(self, username):
+	def post(self, username): #OK
 		""" Handles POST requests to create new users."""
 		#mode = str(request.form['mode'])
 		password = self.reqparse.parse_args()['password']
@@ -53,12 +53,16 @@ class UserAPI(Resource):
 			abort(400) # Should be "User already created" or something.
 
 	@auth.login_required
-	def put(self, username):
+	def put(self, username): #OK
 		""" Handles PUT requests to update existing users."""
-		password = self.reqparse.parse_args()['newpassword']
+		password = self.reqparse.parse_args()['password']
 		#password = str(request.form['newpassword'])
 		if manager.change_password(username, password):
-			return {'user': marshal(manager.get_user(username), UserAPI.user_field)}
+			user = {}
+			user['name'] = username
+			user['password'] = password
+			return {'user': marshal(user, UserAPI.user_field)} # Igual mejor un 200
+		
 
 	@auth.login_required
 	def delete(self, username): #OK
@@ -74,7 +78,6 @@ api.add_resource(UserAPI, '/yilpil/user/<string:username>', endpoint='user')
 
 class PostAPI(Resource):
 	"""Class for the Post resource."""	
-	decorators = [auth.login_required]
 	post_field = {
 		'contents' : fields.String,
 		'title' : fields.String,
@@ -91,7 +94,7 @@ class PostAPI(Resource):
 		self.reqparse.add_argument('username', type=str, location='form')
 		super(PostAPI, self).__init__()
 
-	def get(self, id):
+	def get(self, id): #OK
 		""" Gets a post given its id."""
 		print "GET POST id: " + str(id)
 		post = manager.get_post(id)
@@ -112,18 +115,26 @@ class PostAPI(Resource):
 		manager.update_post(post, id, username)
 		return { 'post': marshal(post, PostAPI.post_field) }
 
+	@auth.login_required
 	def delete(self, id):
 		""" Deletes an existing post."""
+		username = self.reqparse.parse_args()['username']
+		print "[ SERVER ] DELETE POST id:", id,"user", username
 		post = manager.get_post(id)
-		if post == None:
-			abort(404)
-		manager.delete_post(id)
-		
+		#if post == None:
+		#abort(404)
+		if manager.delete_post(id, username):
+			return 200 # Ok. Post deleted
+		else:
+			return 404 # Meaning post not found
+
+# 'add_resource' is used to register the routes with the framework.
+# The endpoint is not necessary since Flask-RESTful generates one. 
+api.add_resource(PostAPI, '/yilpil/post/<int:id>', endpoint = 'post')
 
 
 class PostsAPI(Resource):
 	"""Class for the Posts resource."""
-	decorators = [auth.login_required]
 	posts_fields = {
 		'posts' : fields.List(fields.Nested(PostAPI.post_field))
 	}
@@ -140,17 +151,13 @@ class PostsAPI(Resource):
 
 	def get(self, username):
 		posts = manager.get_posts(username)
-		print "[SERVER] Returning: "
+		print "[ SERVER ] Returning: "
 		return jsonify(posts=posts)
 
 	def post(self):
 		pass
 
-
-# 'add_resource' is used to register the routes with the framework.
-# The endpoint is not necessary since Flask-RESTful generates one. 
 api.add_resource(PostsAPI, '/yilpil/posts/<string:username>', endpoint = 'posts')
-api.add_resource(PostAPI, '/yilpil/post/<int:id>', endpoint = 'post')
 
 if __name__ == '__main__':
 	# Populate database with test data
