@@ -102,7 +102,7 @@ def insert_user(username, password): #OK
 	Inserts a user in the db. Returns False if there is already a user in the
 	db with that username.
 	"""
-	debug("Creating user '" + username + "' with some secret password")
+	debug("Create user '" + username + "' pass: '" + password + "'")
 	if not _is_user_created(username):
 		db.hset(username + APPEND_KEY_USER, KEY_PASSWORD, password)
 		debug("User successfully created")
@@ -232,8 +232,17 @@ def insert_post(post, username): # OK
 	post_id = str(db.incr(POST_ID))
 	db_post_id = post_id + APPEND_KEY_POSTS
 	print "[ MANAGER ] post-id:", post_id
+	# Set returning id
+	post['id'] = post_id
+	# Set author to returning post
+	post['author'] = username
+	# Set title
 	db.hset(db_post_id, KEY_TITLE, post[KEY_TITLE])
-	db.hset(db_post_id, KEY_DATE, datetime.now().strftime(FORMAT_TIME))
+	# Set date-time
+	date = datetime.now().strftime(FORMAT_TIME)
+	db.hset(db_post_id, KEY_DATE, date)
+	post[KEY_DATE] = date
+	# Set contents
 	db.hset(db_post_id, KEY_CONTENTS, post[KEY_CONTENTS])
 	# Set a new set of tags
 	tag_id = str(db.incr(TAG_ID))
@@ -245,6 +254,7 @@ def insert_post(post, username): # OK
 	db.hset(db_post_id, KEY_TAGS, tag_id)
 	# Add post id to users post-set
 	db.sadd(username + APPEND_KEY_POSTS, post_id)
+	return post
 
 def update_post(post, post_id, username):
 	"""

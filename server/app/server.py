@@ -37,7 +37,7 @@ class UserAPI(Resource):
 
 	def __init__(self):
 		self.reqparse = reqparse.RequestParser()
-		self.reqparse.add_argument('username', type=str, location='json')
+		self.reqparse.add_argument('username', type=str, location='form')
 		self.reqparse.add_argument('password', type=str, location='form')
 		super(UserAPI, self).__init__()
 
@@ -85,23 +85,46 @@ class PostAPI(Resource):
 		'date' : fields.String
 	}
 
+	response_post_field = {
+		'contents' : fields.String,
+		'title' : fields.String,
+		'tags' : fields.List(fields.String),
+		'date' : fields.String,
+		'id' : fields.Integer,
+		'author' : fields.String
+	}
+
 	def __init__(self):
 		self.reqparse = reqparse.RequestParser()
-		self.reqparse.add_argument('title', type = str,	location = 'json')
-		self.reqparse.add_argument('contents', type = str, location = 'json')
+		self.reqparse.add_argument('title', type = str,	location = 'form')
+		self.reqparse.add_argument('contents', type = str, location = 'form')
 		self.reqparse.add_argument('tags', type = str, action = 'append',
-			location = 'json')
+			location = 'form')
 		self.reqparse.add_argument('username', type=str, location='form')
 		super(PostAPI, self).__init__()
 
 	def get(self, id): #OK
 		""" Gets a post given its id."""
-		print "GET POST id: " + str(id)
+		print "[ SERVER ] GET POST id: " + str(id)
 		post = manager.get_post(id)
 		if post == None:
 			abort(404)
 		return { 'post' : marshal(post, PostAPI.post_field) }
 
+	@auth.login_required
+	def post(self, id): # OK
+		""" Handles a POST request. Creates a new post. """
+		print "[ SERVER ] POST a post"
+		args = self.reqparse.parse_args()
+		post = {}
+		post['contents'] = args['contents']
+		post['title'] = args['title']
+		post['tags'] = args['tags']
+		user = args['username']
+		created_post = manager.insert_post(post, user)
+		return {'post': marshal(created_post, PostAPI.response_post_field)}
+
+	@auth.login_required
 	def put(self, id, username): # TODO: REVIEW
 		""" Handles PUT request. Updates an existing post data."""
 		print "PUT POST id:", str(id)
@@ -116,7 +139,7 @@ class PostAPI(Resource):
 		return { 'post': marshal(post, PostAPI.post_field) }
 
 	@auth.login_required
-	def delete(self, id):
+	def delete(self, id): # OK
 		""" Deletes an existing post."""
 		username = self.reqparse.parse_args()['username']
 		print "[ SERVER ] DELETE POST id:", id,"user", username
