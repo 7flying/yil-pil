@@ -6,11 +6,15 @@ from datetime import datetime
 FORMAT_TIME = "%d-%m-%Y %H:%M"
 # In user-hashmap
 KEY_PASSWORD = 'password'
+KEY_EMAIL = 'email'
+KEY_USER = 'name'
 # In post-hashmap
 KEY_TITLE = 'title'
 KEY_CONTENTS = 'contents'
 KEY_DATE = 'date'
 KEY_TAGS = 'tags'
+KEY_AUTHOR = 'author'
+KEY_ID = 'id'
 # User-tag, post-tag set key
 APPEND_KEY_TAG = '-tags'
 # User-posts key
@@ -27,27 +31,9 @@ def debug(to_print):
 	if _DEBUG_:
 		print "[ MANAGER ]:", to_print
 
-def populate_test():
-	db.flushdb()
-	db.hset('post-1', 'title', 'How to fly')
-	db.hset('post-1', 'date', '20141007')
-	db.hset('post-1', 'contents', 'Take an aircraft')
-	db.hset('post-1', 'tags', 'how-to')
-	db.hset('post-2', 'title', 'How to eat')
-	db.hset('post-2', 'date', '20141007')
-	db.hset('post-2', 'contents', 'Open your mouth and close it repeteately')
-	db.hset('post-2', 'tags', 'how-to')
-
-	db.hset('user', 'name', 'seven')
-	db.hset('user', 'pass', '123')
-
-	print " $ Printing database values"
-	for post in get_posts(None):
-		print post
-
 def populate_test2():
 	db.flushdb()
-	insert_user('seven', '123')
+	insert_user('seven', '123', 'seven@server.com')
 	post = { 
 		KEY_TITLE : "How to install Node.js",
 		KEY_CONTENTS: "Download files and sudo make, sudo make intall",
@@ -67,14 +53,14 @@ def _is_user_created(username):
 	"""
 	Checks if a user, given its id is created.
 	"""
-	if db.hexists(username + APPEND_KEY_USER, KEY_PASSWORD) == 1:
+	if db.hexists(username + APPEND_KEY_USER, KEY_USER) == 1:
 		debug(username + " found")
 		return True
 	else:
 		debug(username + " not found")
 		return False
 
-def get_password(username):
+def get_password(username): #OK
 	"""
 	Returns the user's password. None if ain't a user with that username.
 	"""
@@ -97,7 +83,7 @@ def change_password(username, new_pass): #OK
 	else:
 		return False
 
-def insert_user(username, password): #OK
+def insert_user(username, password, email): #OK
 	"""
 	Inserts a user in the db. Returns False if there is already a user in the
 	db with that username.
@@ -105,8 +91,9 @@ def insert_user(username, password): #OK
 	debug("Create user '" + username + "' pass: '" + password + "'")
 	if not _is_user_created(username):
 		db.hset(username + APPEND_KEY_USER, KEY_PASSWORD, password)
+		db.hset(username + APPEND_KEY_USER, KEY_EMAIL, email)
 		debug("User successfully created")
-		return True
+		return get_user(username)
 	else:
 		debug("User creation failed")
 		return False
@@ -117,11 +104,21 @@ def delete_user(username): #OK
 	return False
 
 def get_user(username):
+	""" Returns a user. """
 	if _is_user_created(username):
+		debug('Returning user :' + username)
 		user = {}
-		user['name'] = username
-		user['password'] = get_password(username + APPEND_KEY_USER)
+		user[KEY_USER] = db.hget(username + APPEND_KEY_USER, KEY_USER)
+		user[KEY_EMAIL] = db.hget(username + APPEND_KEY_USER, KEY_EMAIL)
 		return user
+	else:
+		return None
+
+def get_user_tags(username):
+	""" Gets the tags of a user. """
+	debug("Getting the tags of: " + username)
+	if _is_user_created(username):
+		return db.sget(username + APPEND_KEY_TAG)
 	else:
 		return None
 
@@ -207,6 +204,8 @@ def get_post(key): # OK
 		post[KEY_CONTENTS] = db.hget(db_key, KEY_CONTENTS)
 		post[KEY_DATE] = db.hget(db_key, KEY_DATE)
 		post[KEY_TAGS] = get_post_tags(key)
+		post[KEY_AUTHOR] = db.hget(db_key, KEY_AUTHOR)
+		post[KEY_ID] = db.hget(db_key, KEY_ID)
 		debug("Getting post: " + str(post))
 		return post
 	else:
@@ -232,16 +231,15 @@ def insert_post(post, username): # OK
 	post_id = str(db.incr(POST_ID))
 	db_post_id = post_id + APPEND_KEY_POSTS
 	print "[ MANAGER ] post-id:", post_id
-	# Set returning id
-	post['id'] = post_id
-	# Set author to returning post
-	post['author'] = username
+	# Set id
+	db.hset(db_post_id, KEY_ID, post_id)
+	# Set author
+	db.hset(db_post_id, KEY_AUTHOR, username)
 	# Set title
 	db.hset(db_post_id, KEY_TITLE, post[KEY_TITLE])
 	# Set date-time
 	date = datetime.now().strftime(FORMAT_TIME)
 	db.hset(db_post_id, KEY_DATE, date)
-	post[KEY_DATE] = date
 	# Set contents
 	db.hset(db_post_id, KEY_CONTENTS, post[KEY_CONTENTS])
 	# Set a new set of tags
@@ -254,9 +252,9 @@ def insert_post(post, username): # OK
 	db.hset(db_post_id, KEY_TAGS, tag_id)
 	# Add post id to users post-set
 	db.sadd(username + APPEND_KEY_POSTS, post_id)
-	return post
+	return get_post(post_id)
 
-def update_post(post, post_id, username):
+def update_post(post, post_id, username): #OK
 	"""
 	Updates a post in the db.
 	"""

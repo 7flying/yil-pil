@@ -32,22 +32,24 @@ class UserAPI(Resource):
 	""" Class for the User resource."""
 	user_field = {
 		'name' : fields.String,
+		'email' : fields.String,
 		'password' : fields.String
 	}
 
 	def __init__(self):
 		self.reqparse = reqparse.RequestParser()
 		self.reqparse.add_argument('username', type=str, location='form')
+		self.reqparse.add_argument('email', type=str, location='form')
 		self.reqparse.add_argument('password', type=str, location='form')
 		super(UserAPI, self).__init__()
 
 	def post(self, username): #OK
 		""" Handles POST requests to create new users."""
-		#mode = str(request.form['mode'])
 		password = self.reqparse.parse_args()['password']
-		user = {'name': username, 'password': password }
+		email = self.reqparse.parse_args()['email']
+		user = {'name': username, 'password': password, 'email' : email}
 		print "POST USER: %s %s" % (username, password)
-		if manager.insert_user(username, password):
+		if manager.insert_user(username, password, email):
 			return {'user': marshal(user, UserAPI.user_field)}
 		else:
 			abort(400) # Should be "User already created" or something.
@@ -109,7 +111,7 @@ class PostAPI(Resource):
 		post = manager.get_post(id)
 		if post == None:
 			abort(404)
-		return { 'post' : marshal(post, PostAPI.post_field) }
+		return { 'post' : marshal(post, PostAPI.response_post_field) }
 
 	@auth.login_required
 	def post(self, id): # OK
@@ -170,37 +172,29 @@ class PostsAPI(Resource):
 	}
 
 	def __init__(self):
-		self.reqparse = reqparse.RequestParser()
-		self.reqparse.add_argument('title', type = str, default = '', 
-			location = 'json')
-		self.reqparse.add_argument('contents', type = str, required = True,
-			help = 'No post contents provided.', location = 'json')
-		self.reqparse.add_argument('tags', type = str, action = 'append',
-			default = '', location = 'json')
 		super(PostsAPI, self).__init__()
 
-	def get(self):
+	def get(self, username): #OK, but review jsonify again
 		# Get posts given a username
 		posts = manager.get_posts(username)
 		print "[ SERVER ] Returning: "
 		return jsonify(posts=posts)
 
-	def post(self):
-		pass
-
 api.add_resource(PostsAPI, '/yilpil/posts/<string:username>', endpoint = 'posts')
 
 
-class TagAPI(Resource):
-	""" Class for the tag resource."""
+class TagsAPI(Resource):
+	""" Class for the tags resource."""
 	def __init__(self):
 		self.reqparse = reqparse.RequestParser()
+
 		super(TagAPI, self).__init__()
 
-	def delete(self, postid):
-		pass
-
-api.add_resource(PostsAPI, '/yilpil/tag/<int:postid>', endpoint = 'tag')
+	def get(self, user):
+		""" Gets all the tags used by a user."""
+		return manager.get_user_tags(user)
+		
+api.add_resource(PostsAPI, '/yilpil/tags/<string:user>', endpoint = 'tag')
 
 
 if __name__ == '__main__':
