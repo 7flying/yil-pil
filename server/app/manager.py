@@ -261,14 +261,17 @@ def update_post(post, post_id, username):
 	Updates a post in the db.
 	"""
 	post_id = str(post_id)
-	debug("Updating " + username + "'s post #" + post_id + " with: " + post)
-	db.hset(post_id, KEY_TITLE, post[KEY_TITLE])
-	db.hset(post_id, KEY_DATE, post[KEY_DATE])
-	db.hset(post_id, KEY_CONTENTS, post[KEY_CONTENTS])
-	tag_id = db.hget(post_id, KEY_TAGS)
-	# Add new tags (if any)
-	for tag in post[KEY_TAGS]:
-		db.sadd(tag_id, tag)
+	debug("Updating " + username + "'s post #" + post_id + " with: " + str(post))
+	if post[KEY_TITLE] is not None:
+		db.hset(post_id + APPEND_KEY_POSTS, KEY_TITLE, post[KEY_TITLE])
+	if post[KEY_CONTENTS] is not None:
+		db.hset(post_id + APPEND_KEY_POSTS, KEY_CONTENTS, post[KEY_CONTENTS])
+	if post[KEY_TAGS] is not None:
+		tag_id = db.hget(post_id + APPEND_KEY_POSTS, KEY_TAGS)
+		# Add new tags (if any)
+		for tag in post[KEY_TAGS]:
+			db.sadd(tag_id + APPEND_KEY_TAG, tag)
+	return get_post(post_id)
 
 def delete_post(post_id, username):
 	"""

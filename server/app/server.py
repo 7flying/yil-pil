@@ -125,18 +125,25 @@ class PostAPI(Resource):
 		return {'post': marshal(created_post, PostAPI.response_post_field)}
 
 	@auth.login_required
-	def put(self, id, username): # TODO: REVIEW
+	def put(self, id): # OK
 		""" Handles PUT request. Updates an existing post data."""
-		print "PUT POST id:", str(id)
+		print "[ SERVER ] PUT POST id:", str(id)
 		post = manager.get_post(id)
 		if post == None:
 			abort(404)
 		args = self.reqparse.parse_args()
-		post['title'] = args['title']
-		post['contents'] = args['contents']
-		post['tags'] = args['tags']
-		manager.update_post(post, id, username)
-		return { 'post': marshal(post, PostAPI.post_field) }
+		if 'username' in args.keys():
+			username = args['username']
+			if 'title' in args.keys():
+				post['title'] = args['title']
+			if 'post' in args.keys():
+				post['contents'] = args['contents']
+			if 'tags' in args.keys():
+				post['tags'] = args['tags']
+			post = manager.update_post(post, id, username)
+			return { 'post': marshal(post, PostAPI.post_field) }
+		else:
+			abot(404)
 
 	@auth.login_required
 	def delete(self, id): # OK
@@ -172,7 +179,8 @@ class PostsAPI(Resource):
 			default = '', location = 'json')
 		super(PostsAPI, self).__init__()
 
-	def get(self, username):
+	def get(self):
+		# Get posts given a username
 		posts = manager.get_posts(username)
 		print "[ SERVER ] Returning: "
 		return jsonify(posts=posts)
@@ -181,6 +189,19 @@ class PostsAPI(Resource):
 		pass
 
 api.add_resource(PostsAPI, '/yilpil/posts/<string:username>', endpoint = 'posts')
+
+
+class TagAPI(Resource):
+	""" Class for the tag resource."""
+	def __init__(self):
+		self.reqparse = reqparse.RequestParser()
+		super(TagAPI, self).__init__()
+
+	def delete(self, postid):
+		pass
+
+api.add_resource(PostsAPI, '/yilpil/tag/<int:postid>', endpoint = 'tag')
+
 
 if __name__ == '__main__':
 	# Populate database with test data
