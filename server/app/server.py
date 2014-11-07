@@ -186,15 +186,14 @@ api.add_resource(PostsAPI, '/yilpil/posts/<string:username>', endpoint = 'posts'
 class TagsAPI(Resource):
 	""" Class for the tags resource."""
 	def __init__(self):
-		self.reqparse = reqparse.RequestParser()
-
-		super(TagAPI, self).__init__()
+		super(TagsAPI, self).__init__()
 
 	def get(self, user):
 		""" Gets all the tags used by a user."""
+		print "[SERVER] Get '", user, "'s tags"
 		return manager.get_user_tags(user)
 		
-api.add_resource(PostsAPI, '/yilpil/tags/<string:user>', endpoint = 'tag')
+api.add_resource(TagsAPI, '/yilpil/tags/<string:user>', endpoint = 'tags')
 
 
 if __name__ == '__main__':

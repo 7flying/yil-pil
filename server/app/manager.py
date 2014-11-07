@@ -90,6 +90,7 @@ def insert_user(username, password, email): #OK
 	"""
 	debug("Create user '" + username + "' pass: '" + password + "'")
 	if not _is_user_created(username):
+		db.hset(username + APPEND_KEY_USER, KEY_USER, username)
 		db.hset(username + APPEND_KEY_USER, KEY_PASSWORD, password)
 		db.hset(username + APPEND_KEY_USER, KEY_EMAIL, email)
 		debug("User successfully created")
@@ -118,7 +119,12 @@ def get_user_tags(username):
 	""" Gets the tags of a user. """
 	debug("Getting the tags of: " + username)
 	if _is_user_created(username):
-		return db.sget(username + APPEND_KEY_TAG)
+		array = []
+		vals = db.smembers(username + APPEND_KEY_TAG)
+		for val in vals:
+			print val
+			array.append(val)
+		return array
 	else:
 		return None
 
@@ -215,13 +221,16 @@ def get_posts(username): # OK
 	"""
 	Returns all the posts written by a user.
 	"""
-	posts_ids = db.smembers(username + APPEND_KEY_POSTS)
-	posts = []
-	debug("Getting posts of user: " + username)
-	for key in posts_ids:
-		print "key", key
-		posts.append(get_post(key))
-	return posts
+	if _is_user_created(username):
+		posts_ids = db.smembers(username + APPEND_KEY_POSTS)
+		posts = []
+		debug("Getting posts of user: " + username)
+		for key in posts_ids:
+			print "key", key
+			posts.append(get_post(key))
+		return posts
+	else:
+		return None
 
 def insert_post(post, username): # OK
 	"""
@@ -231,6 +240,7 @@ def insert_post(post, username): # OK
 	post_id = str(db.incr(POST_ID))
 	db_post_id = post_id + APPEND_KEY_POSTS
 	print "[ MANAGER ] post-id:", post_id
+	# Post fields
 	# Set id
 	db.hset(db_post_id, KEY_ID, post_id)
 	# Set author
@@ -242,13 +252,17 @@ def insert_post(post, username): # OK
 	db.hset(db_post_id, KEY_DATE, date)
 	# Set contents
 	db.hset(db_post_id, KEY_CONTENTS, post[KEY_CONTENTS])
-	# Set a new set of tags
+	# Set a new set of tags-post to the db
 	tag_id = str(db.incr(TAG_ID))
 	db_tag_id = tag_id + APPEND_KEY_TAG
 	print "[ MANAGER ] tags-id (db):", db_tag_id
-	for tag in post[KEY_TAGS]: # TODO: See if can be made without the for
+	for tag in post[KEY_TAGS]:
 		print "[ MANAGER ] add tag:", tag
+		# Add tag to the tag-post
 		db.sadd(db_tag_id, tag)
+		# Add tag to the user's tags
+		insert_tag_user_tags(username, tag)
+
 	db.hset(db_post_id, KEY_TAGS, tag_id)
 	# Add post id to users post-set
 	db.sadd(username + APPEND_KEY_POSTS, post_id)
