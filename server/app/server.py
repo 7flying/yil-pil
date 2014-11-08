@@ -93,7 +93,8 @@ class PostAPI(Resource):
 		'tags' : fields.List(fields.String),
 		'date' : fields.String,
 		'id' : fields.Integer,
-		'author' : fields.String
+		'author' : fields.String,
+		'votes' : fields.Integer
 	}
 
 	def __init__(self):
@@ -188,13 +189,44 @@ class TagsAPI(Resource):
 	def __init__(self):
 		super(TagsAPI, self).__init__()
 
-	def get(self, user):
+	def get(self, user): #OK
 		""" Gets all the tags used by a user."""
-		print "[SERVER] Get '", user, "'s tags"
+		print "[ SERVER ] Get '", user, "'s tags"
 		return manager.get_user_tags(user)
 		
 api.add_resource(TagsAPI, '/yilpil/tags/<string:user>', endpoint = 'tags')
 
+class VotingAPI(Resource):
+	""" Class for voting a post. """
+	decorators = [auth.login_required]
+
+	def __init__(self):
+		self.reqparse = reqparse.RequestParser()
+		self.reqparse.add_argument('up', type=bool, location='form',
+			required=True)
+		self.reqparse.add_argument('username', type=str, location='form',
+			required=True)
+		super(VotingAPI, self).__init__()
+
+	def put(self, post_id):
+		""" PUT request. Updates the value of the post by a vote up or down. """
+		print "[ SERVER ] Vote to post ", post_id
+		args = self.reqparse.parse_args()
+		res = None
+		if args['up']:
+			# vote up
+			res = manager.vote_positive(post_id, args['username'])
+		else:
+			# vote down
+			res = manager.vote_negative(post_id, args['username'])
+		if res == None:
+			return "Post-id not found", 404
+		if res:
+			return "Vote stored", 200
+		else:
+			return "Already voted on that post", 200
+
+api.add_resource(VotingAPI, '/yilpil/voting/<int:post_id>', endpoint='voting')	
 
 if __name__ == '__main__':
 	# Populate database with test data

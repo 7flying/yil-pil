@@ -15,15 +15,21 @@ KEY_DATE = 'date'
 KEY_TAGS = 'tags'
 KEY_AUTHOR = 'author'
 KEY_ID = 'id'
+KEY_VOTES = 'votes'
 # User-tag, post-tag set key
 APPEND_KEY_TAG = '-tags'
 # User-posts key
 APPEND_KEY_POSTS = '-posts'
 # User tag
 APPEND_KEY_USER = '-user'
+# Vote-post
+APPEND_KEY_VOTE = '-vote'
+# Votes made by a user
+APPEND_KEY_HAS_VOTED = 'has-voted'
 # Identifiers. This ids are used to reference the tags and the posts.
-POST_ID = 'key-post-id'
-TAG_ID = 'tag-id'
+POST_ID = 'next-key-post-id'
+TAG_ID = 'next-tag-id'
+VOTE_ID = 'next-vote-id'
 
 _DEBUG_ = True
 
@@ -212,6 +218,7 @@ def get_post(key): # OK
 		post[KEY_TAGS] = get_post_tags(key)
 		post[KEY_AUTHOR] = db.hget(db_key, KEY_AUTHOR)
 		post[KEY_ID] = db.hget(db_key, KEY_ID)
+		post[KEY_VOTES] = db.get(db.hget(db_key, KEY_VOTES) + APPEND_KEY_VOTE)
 		debug("Getting post: " + str(post))
 		return post
 	else:
@@ -243,6 +250,11 @@ def insert_post(post, username): # OK
 	# Post fields
 	# Set id
 	db.hset(db_post_id, KEY_ID, post_id)
+	# Create the vote counter and set it to 0 votes
+	vote_id = str(db.incr(VOTE_ID)) # get the next vote id
+	db.set(vote_id + APPEND_KEY_VOTE, "0")
+	# Set the id of the vote counter
+	db.hset(db_post_id, KEY_VOTES, vote_id)
 	# Set author
 	db.hset(db_post_id, KEY_AUTHOR, username)
 	# Set title
@@ -297,7 +309,10 @@ def delete_post(post_id, username):
 		# Delete the set of tags that the post has
 		tags_id = db.hget(post_id + APPEND_KEY_POSTS, KEY_TAGS)
 		db.delete(tags_id + APPEND_KEY_TAG)
-		# First reference to the post to ensure that is not retrieved
+		# Delete the counter of votes that the post has
+		votes_id = db.hget(post_id + APPEND_KEY_POSTS, KEY_VOTES)
+		db.delete(votes_id + APPEND_KEY_VOTE)
+		# First, delete the reference to the post to ensure that is not retrieved
 		# Delete the post id from the user's post list
 		db.srem(username + APPEND_KEY_POSTS, post_id)
 		# Delete the post
@@ -305,3 +320,38 @@ def delete_post(post_id, username):
 		return True
 	else:
 		return False
+
+# CHECK THIS ONE
+def vote_positive(post_id, voting_user):
+	""" Votes +1 to a post.
+		Returns True if the vote was made; False if the user had already voted
+		and so, he/she cannot vote again and None if no post for that id was
+		found.
+	"""
+	post_id = str(post_id)
+	if _is_post_created(post_id):
+		if db.sismember(voting_user + APPEND_KEY_HAS_VOTED, post_id) == 0:
+			db.sadd(voting_user + APPEND_KEY_HAS_VOTED, post_id)
+			debug("votes of post no incre: " + post_id + ": " + str(db.get(db.hget(post_id + APPEND_KEY_POSTS, KEY_VOTES))))
+			db.incr(db.get(db.hget(post_id + APPEND_KEY_POSTS, KEY_VOTES)))
+			debug("votes of post after incre: " + post_id + ": " + str(db.get(db.hget(post_id + APPEND_KEY_POSTS, KEY_VOTES))))
+			return True
+		else:
+			return False
+	else:
+		return None
+
+def vote_negative(post_id, voting_user):
+	""" Votes -1 to a post.
+		Returns True if the vote was made; False if the user had already voted
+		and so, he/she cannot vote again and None if no post for that id was
+		found.
+	"""
+
+	if _is_post_created(str(post_id)):
+		if db.sismember(voting_user + APPEND_KEY_HAS_VOTED, post_id) == 0:
+			db.sadd(voting_user + APPEND_KEY_HAS_VOTED, post_id)
+			db.decr(db.get(db.hget(post_id + APPEND_KEY_POSTS, KEY_VOTES)))	
+		return True
+	else:
+		return None
