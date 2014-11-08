@@ -1,4 +1,3 @@
- 	#!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
 import os
@@ -239,6 +238,20 @@ class VotingAPI(Resource): #Ok
 			return "Already voted on that post", 200
 
 api.add_resource(VotingAPI, '/yilpil/voting/<int:post_id>', endpoint='voting')	
+
+
+class SearchTagsAPI(Resource):
+	""" Provides search in all the tags. """
+	def __init__():
+		self.reqparse = reqparse.RequestParser()
+		self.reqparse.add_argument('page', type=int, location='form')
+		super(SearchTagsAPI, self).__init__()
+
+	def get(self, query):
+		""" Search tags given the text query."""
+		pass
+
+api.add_resource(SearchTagsAPI, 'yilpil/search/tags/<string:query>', endpoint='tags')
 
 if __name__ == '__main__':
 	# Populate database with test data

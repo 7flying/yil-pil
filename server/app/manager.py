@@ -9,7 +9,7 @@ FORMAT_TIME = "%d-%m-%Y %H:%M"
 KEY_PASSWORD = 'password'
 KEY_EMAIL = 'email'
 KEY_USER = 'name'
-# In post-hashmap
+# In post-hash map
 KEY_TITLE = 'title'
 KEY_CONTENTS = 'contents'
 KEY_DATE = 'date'
@@ -31,6 +31,11 @@ APPEND_KEY_HAS_VOTED = '-has-voted'
 POST_ID = 'next-key-post-id'
 TAG_ID = 'next-tag-id'
 VOTE_ID = 'next-vote-id'
+## -- Search related stuff -- ##
+# Id for the sorted set of tag name + score.
+# The score is the upper case ASCII value of the character
+SEARCH_TAGS_LETTER = 'search-tags-letter'
+
 
 _DEBUG_ = True
 
@@ -155,6 +160,8 @@ def insert_tag_user_tags(username, tag):
 	debug("INSERT TAG :" + tag + ", to:" + username)
 	# Since it is a set, the elements aren't inserted if present
 	db.sadd(username + APPEND_KEY_TAG, tag)
+	# Add to global
+	_insert_tags_global(tag)
 
 def delete_tag_user_tags(username, tag):
 	"""
@@ -185,6 +192,8 @@ def insert_tag_post_tags(post_id, tag):
 	# Element isn't inserted if present
 	if _is_post_created(post_id):
 		db.sadd(get_post(post_id)[KEY_TAGS], tag)
+		# Add to global tags
+		_insert_tags_global(tag)
 
 def delete_tag_from_post(post_id, tag):
 	"""
@@ -249,7 +258,7 @@ def get_posts(username, int_page): # OK
 		posts_ids = db.lrange(username + APPEND_KEY_POSTS,
 		 # Start index
 		 (int_page - 1) * API_PAGINATION,
-		 # End index (included)
+		 # End index (included in lrange)
 		 int_page * API_PAGINATION - 1)
 		posts = []
 		for key in posts_ids:
@@ -295,6 +304,8 @@ def insert_post(post, username): # OK
 		db.sadd(db_tag_id, tag)
 		# Add tag to the user's tags
 		insert_tag_user_tags(username, tag)
+		# Add tag to the global tags
+		_insert_tags_global(tag)
 
 	db.hset(db_post_id, KEY_TAGS, tag_id)
 	# Add post id to the head of the user's post-list
@@ -349,6 +360,7 @@ def delete_post(post_id, username):
 	else:
 		return False
 
+### Voting related stuff ###
 
 def _vote(post_id, voting_user, positive): #OK
 	""" Private method for handling postivite and negative votes. """
@@ -391,3 +403,49 @@ def vote_negative(post_id, voting_user): # OK
 		found.
 	"""
 	return _vote(post_id, voting_user, False)
+
+### End of Voting related stuff ###
+
+### Search stuff!! ###
+
+def _insert_tags_global(tag_name):
+	""" Inserts a tag in all the global tag structures. """
+	if tag_name != None and len(tag_name) > 0:
+		_insert_tag_names_letter(tag_name)
+
+def _insert_tag_names_letter(tag_name):
+	""" 
+	Insert the tag in the sorted-set of tags by first-letter score.
+	The first-letter-tag sorted set is useful when retrieving all the tags given
+	a letter. Like an index.
+	"""
+	db.zadd(SEARCH_TAGS_LETTER, ord(tag_name[0].upper()), tag_name.upper())
+
+def _raw_paginate(some_array, page):
+	""" Performs a raw pagination on an array. """
+	return some_array[(page - 1) * API_PAGINATION : page * API_PAGINATION]
+
+def search_tag_names_letter(letter, page=0):
+	"""
+	Gets the tags starting by the given letter.
+	By default retrieves all the matching elements.
+	- Support for pagination by providing a positive 'page' value.
+	  Pagination works with yil-pil's pagination configuration.
+	"""
+	if len(str(letter)) == 1:
+		if page == 0:
+			# Normal behaviour
+			return db.zrangebyscore(SEARCH_TAGS_LETTER,
+				ord(str(letter).upper()), ord(str(letter).upper())) # One score
+		elif page > 0:
+			# Pagination
+			return _raw_paginate(db.zrangebyscore(SEARCH_TAGS_LETTER,
+				ord(str(letter).upper()), ord(str(letter).upper())), page)
+		else:
+			# Bad request
+			return False
+	else:
+		# Bad request, we are searching by a single letter.
+		return False
+
+### End of search stuff ###
