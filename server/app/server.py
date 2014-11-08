@@ -33,7 +33,7 @@ def get_password(username):
 	return manager.get_password(username)
 
 
-class UserAPI(Resource):
+class UsersAPI(Resource):
 	""" Class for the User resource."""
 	user_field = {
 		'name' : fields.String,
@@ -46,7 +46,7 @@ class UserAPI(Resource):
 		self.reqparse.add_argument('username', type=str, location='form')
 		self.reqparse.add_argument('email', type=str, location='form')
 		self.reqparse.add_argument('password', type=str, location='form')
-		super(UserAPI, self).__init__()
+		super(UsersAPI, self).__init__()
 
 	def post(self, username): #OK
 		""" Handles POST requests to create new users."""
@@ -80,7 +80,7 @@ class UserAPI(Resource):
 		else:
 			abort(400) # Change
 
-api.add_resource(UserAPI, '/yilpil/user/<string:username>', endpoint='user')
+api.add_resource(UsersAPI, '/yilpil/users/<string:username>', endpoint='users')
 
 
 class PostAPI(Resource):
@@ -200,10 +200,11 @@ class TagsAPI(Resource):
 
 	def get(self, user): #OK
 		""" Gets all the tags used by a user."""
-		debug("(GET) Get '", user, "'s tags")
+		debug("(GET) Get '" + str(user) + "'s tags")
 		return manager.get_user_tags(user)
 		
 api.add_resource(TagsAPI, '/yilpil/tags/<string:user>', endpoint = 'tags')
+
 
 class VotingAPI(Resource): #Ok
 	""" Class for voting a post. """
@@ -242,16 +243,30 @@ api.add_resource(VotingAPI, '/yilpil/voting/<int:post_id>', endpoint='voting')
 
 class SearchTagsAPI(Resource):
 	""" Provides search in all the tags. """
-	def __init__():
+
+	def __init__(self):
 		self.reqparse = reqparse.RequestParser()
 		self.reqparse.add_argument('page', type=int, location='form')
+		self.reqparse.add_argument('letter', type=str, location='form')
 		super(SearchTagsAPI, self).__init__()
 
-	def get(self, query):
-		""" Search tags given the text query."""
-		pass
+	def get(self):
+		""" Search within the tags given the query."""
+		args = self.reqparse.parse_args()
+		# Search by starting letter	
+		if args['letter'] != None and len(args['letter']) == 1:
+			result = None
+			if args['page'] != None:
+				# Pagination requested
+				result = manager.search_tag_names_letter(
+					args['letter'],
+					int(args['page']))
+			else:
+				result = manager.search_tag_names_letter(args['letter'])
+			return jsonify(tags=result)
 
-api.add_resource(SearchTagsAPI, 'yilpil/search/tags/<string:query>', endpoint='tags')
+
+api.add_resource(SearchTagsAPI, '/yilpil/search/tag', endpoint='tag')
 
 if __name__ == '__main__':
 	# Populate database with test data

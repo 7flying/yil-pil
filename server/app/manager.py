@@ -243,7 +243,7 @@ def get_post(key): # OK
 		post[KEY_AUTHOR] = db.hget(db_key, KEY_AUTHOR)
 		post[KEY_ID] = db.hget(db_key, KEY_ID)
 		post[KEY_VOTES] = db.get(db.hget(db_key, KEY_VOTES) + APPEND_KEY_VOTE)
-		debug("\treturning post: \n\t" + str(post))
+		debug("\treturning post with id:" + str(key))
 		return post
 	else:
 		return None	
@@ -419,7 +419,7 @@ def _insert_tag_names_letter(tag_name):
 	The first-letter-tag sorted set is useful when retrieving all the tags given
 	a letter. Like an index.
 	"""
-	db.zadd(SEARCH_TAGS_LETTER, ord(tag_name[0].upper()), tag_name.upper())
+	db.zadd(SEARCH_TAGS_LETTER, ord(tag_name[0].upper()), tag_name)
 
 def _raw_paginate(some_array, page):
 	""" Performs a raw pagination on an array. """
@@ -434,6 +434,7 @@ def search_tag_names_letter(letter, page=0):
 	"""
 	if len(str(letter)) == 1:
 		if page == 0:
+			debug("SEARCH BY LETTER: " + letter)
 			# Normal behaviour
 			return db.zrangebyscore(SEARCH_TAGS_LETTER,
 				ord(str(letter).upper()), ord(str(letter).upper())) # One score
@@ -443,9 +444,16 @@ def search_tag_names_letter(letter, page=0):
 				ord(str(letter).upper()), ord(str(letter).upper())), page)
 		else:
 			# Bad request
-			return False
+			return None
 	else:
 		# Bad request, we are searching by a single letter.
-		return False
+		return None
+
+def search_tag_autocomplete(word, max):
+	"""
+	Provides autocomplete for searching tags.
+	# ZRANGEBYLEX myzset [ab [axxf
+	"""
+	pass
 
 ### End of search stuff ###
