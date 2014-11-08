@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+ 	#!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
 import os
@@ -22,6 +22,12 @@ db = redis.StrictRedis(host=REDIS_HOST, port=REDIS_PORT, db=REDIS_DB)
 # Authentication
 auth = HTTPBasicAuth()
 
+
+_DEBUG_ = True
+
+def debug(to_print):
+	if _DEBUG_:
+		print "[ SERVER ] ", to_print
 
 @auth.get_password
 def get_password(username):
@@ -48,7 +54,7 @@ class UserAPI(Resource):
 		password = self.reqparse.parse_args()['password']
 		email = self.reqparse.parse_args()['email']
 		user = {'name': username, 'password': password, 'email' : email}
-		print "POST USER: %s %s" % (username, password)
+		debug("POST USER: ", username, password)
 		if manager.insert_user(username, password, email):
 			return {'user': marshal(user, UserAPI.user_field)}
 		else:
@@ -69,7 +75,7 @@ class UserAPI(Resource):
 	@auth.login_required
 	def delete(self, username): #OK
 		""" Hanldes DELETE requests to delete an existing user."""
-		print "DELETE USER: %s", username
+		debug("DELETE USER:", username)
 		if manager.delete_user(username):
 			return 200 # Change "Ok, created"
 		else:
@@ -108,7 +114,7 @@ class PostAPI(Resource):
 
 	def get(self, id): #OK
 		""" Gets a post given its id."""
-		print "[ SERVER ] GET POST id: " + str(id)
+		debug("GET POST id: " + str(id))
 		post = manager.get_post(id)
 		if post == None:
 			abort(404)
@@ -117,7 +123,7 @@ class PostAPI(Resource):
 	@auth.login_required
 	def post(self, id): # OK
 		""" Handles a POST request. Creates a new post. """
-		print "[ SERVER ] POST a post"
+		debug("POST a post")
 		args = self.reqparse.parse_args()
 		post = {}
 		post['contents'] = args['contents']
@@ -130,7 +136,7 @@ class PostAPI(Resource):
 	@auth.login_required
 	def put(self, id): # OK
 		""" Handles PUT request. Updates an existing post data."""
-		print "[ SERVER ] PUT POST id:", str(id)
+		debug("PUT POST id:", str(id))
 		post = manager.get_post(id)
 		if post == None:
 			abort(404)
@@ -152,10 +158,7 @@ class PostAPI(Resource):
 	def delete(self, id): # OK
 		""" Deletes an existing post."""
 		username = self.reqparse.parse_args()['username']
-		print "[ SERVER ] DELETE POST id:", id,"user", username
-		post = manager.get_post(id)
-		#if post == None:
-		#abort(404)
+		debug("DELETE POST id:", str(id),"user", username)
 		if manager.delete_post(id, username):
 			return 200 # Ok. Post deleted
 		else:
@@ -173,12 +176,19 @@ class PostsAPI(Resource):
 	}
 
 	def __init__(self):
+		self.reqparse = reqparse.RequestParser()
+		self.reqparse.add_argument('page', type=int, location='form', 
+			required=True)
 		super(PostsAPI, self).__init__()
 
 	def get(self, username): #OK, but review jsonify again
-		# Get posts given a username
-		posts = manager.get_posts(username)
-		print "[ SERVER ] Returning: "
+		""" Get posts given a username. """
+		debug("GET POSTS")
+		args = self.reqparse.parse_args()
+		if args['page'] == 0:
+			abort(404)
+		posts = manager.get_posts(username, args['page'])
+		
 		return jsonify(posts=posts)
 
 api.add_resource(PostsAPI, '/yilpil/posts/<string:username>', endpoint = 'posts')
@@ -191,12 +201,12 @@ class TagsAPI(Resource):
 
 	def get(self, user): #OK
 		""" Gets all the tags used by a user."""
-		print "[ SERVER ] (GET) Get '", user, "'s tags"
+		debug("(GET) Get '", user, "'s tags")
 		return manager.get_user_tags(user)
 		
 api.add_resource(TagsAPI, '/yilpil/tags/<string:user>', endpoint = 'tags')
 
-class VotingAPI(Resource):
+class VotingAPI(Resource): #Ok
 	""" Class for voting a post. """
 	decorators = [auth.login_required]
 
@@ -208,18 +218,18 @@ class VotingAPI(Resource):
 			required=True)
 		super(VotingAPI, self).__init__()
 
-	def put(self, post_id):
+	def put(self, post_id): #Ok
 		""" PUT request. Updates the value of the post by a vote up or down. """
 		args = self.reqparse.parse_args()
-		print "[ SERVER ] (PUT) Vote to post ", post_id, ". Vote up? ", args['up']
+		debug("(PUT) Vote to post ", str(post_id), ". Vote up? ", str(args['up']))
 		res = None
 		if str(args['up']) == 'true':
 			# vote up
-			print "[ SERVER] voting up"
+			debug("voting up")
 			res = manager.vote_positive(post_id, args['username'])
 		elif str(args['up']) == 'false':
 			# vote down
-			print "[ SERVER] voting down"
+			debug("voting down")
 			res = manager.vote_negative(post_id, args['username'])
 		if res == None:
 			return "Post-id not found", 404

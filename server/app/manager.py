@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 from __init__ import db
 from datetime import datetime
+from config import API_PAGINATION
 
 # Datetime format in posts
 FORMAT_TIME = "%d-%m-%Y %H:%M"
@@ -53,6 +54,17 @@ def populate_test2():
 		KEY_TAGS: ["food", "health"]
 	}
 	insert_post(post2, 'seven')
+
+	post_tem = {
+		KEY_TITLE : "",
+		KEY_CONTENTS: "Lorem ipsum dolor sit amet, consectetur adipiscing elit,\
+		 sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.",
+		KEY_TAGS: ["lorem", "ipsum"]
+	}
+	for i in range(13):
+		post_tem[KEY_TITLE] = "Post Num " + str(i)
+		post_tem[KEY_TAGS].append("Tag number " + str(i))
+		insert_post(post_tem, 'seven')
 	
 
 ### User related stuff ###
@@ -227,13 +239,18 @@ def get_post(key): # OK
 	else:
 		return None	
 
-def get_posts(username): # OK
+def get_posts(username, int_page): # OK
 	"""
-	Returns all the posts written by a user.
+	Returns all the posts written by a user, ordered by latest - oldest.
+	int_page: is used for the pagination.
 	"""
 	debug("GET POSTS OF USER: " + username)
 	if _is_user_created(username):
-		posts_ids = db.smembers(username + APPEND_KEY_POSTS)
+		posts_ids = db.lrange(username + APPEND_KEY_POSTS,
+		 # Start index
+		 (int_page - 1) * API_PAGINATION,
+		 # End index (included)
+		 int_page * API_PAGINATION - 1)
 		posts = []
 		for key in posts_ids:
 			posts.append(get_post(key))
@@ -280,8 +297,8 @@ def insert_post(post, username): # OK
 		insert_tag_user_tags(username, tag)
 
 	db.hset(db_post_id, KEY_TAGS, tag_id)
-	# Add post id to users post-set
-	db.sadd(username + APPEND_KEY_POSTS, post_id)
+	# Add post id to the head of the user's post-list
+	db.lpush(username + APPEND_KEY_POSTS, post_id)
 	debug("POST CREATED")
 	return get_post(post_id)
 
@@ -324,7 +341,8 @@ def delete_post(post_id, username):
 		db.delete(votes_id + APPEND_KEY_VOTE)
 		# First, delete the reference to the post to ensure that is not retrieved
 		# Delete the post id from the user's post list
-		db.srem(username + APPEND_KEY_POSTS, post_id)
+		# (1 is the number of items to be removed)
+		db.lrem(username + APPEND_KEY_POSTS, 1, post_id)
 		# Delete the post
 		db.hdel(post_id  + APPEND_KEY_POSTS, KEY_TAGS)
 		return True
