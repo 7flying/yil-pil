@@ -191,7 +191,7 @@ class TagsAPI(Resource):
 
 	def get(self, user): #OK
 		""" Gets all the tags used by a user."""
-		print "[ SERVER ] Get '", user, "'s tags"
+		print "[ SERVER ] (GET) Get '", user, "'s tags"
 		return manager.get_user_tags(user)
 		
 api.add_resource(TagsAPI, '/yilpil/tags/<string:user>', endpoint = 'tags')
@@ -202,7 +202,7 @@ class VotingAPI(Resource):
 
 	def __init__(self):
 		self.reqparse = reqparse.RequestParser()
-		self.reqparse.add_argument('up', type=bool, location='form',
+		self.reqparse.add_argument('up', type=str, location='form',
 			required=True)
 		self.reqparse.add_argument('username', type=str, location='form',
 			required=True)
@@ -210,14 +210,16 @@ class VotingAPI(Resource):
 
 	def put(self, post_id):
 		""" PUT request. Updates the value of the post by a vote up or down. """
-		print "[ SERVER ] Vote to post ", post_id
 		args = self.reqparse.parse_args()
+		print "[ SERVER ] (PUT) Vote to post ", post_id, ". Vote up? ", args['up']
 		res = None
-		if args['up']:
+		if str(args['up']) == 'true':
 			# vote up
+			print "[ SERVER] voting up"
 			res = manager.vote_positive(post_id, args['username'])
-		else:
+		elif str(args['up']) == 'false':
 			# vote down
+			print "[ SERVER] voting down"
 			res = manager.vote_negative(post_id, args['username'])
 		if res == None:
 			return "Post-id not found", 404

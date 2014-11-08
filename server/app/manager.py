@@ -25,7 +25,7 @@ APPEND_KEY_USER = '-user'
 # Vote-post
 APPEND_KEY_VOTE = '-vote'
 # Votes made by a user
-APPEND_KEY_HAS_VOTED = 'has-voted'
+APPEND_KEY_HAS_VOTED = '-has-voted'
 # Identifiers. This ids are used to reference the tags and the posts.
 POST_ID = 'next-key-post-id'
 TAG_ID = 'next-tag-id'
@@ -35,7 +35,7 @@ _DEBUG_ = True
 
 def debug(to_print):
 	if _DEBUG_:
-		print "[ MANAGER ]:", to_print
+		print "[ MANAGER ] ", to_print
 
 def populate_test2():
 	db.flushdb()
@@ -46,12 +46,14 @@ def populate_test2():
 		KEY_TAGS: ["node.js", "How-to"]
 	}
 	insert_post(post, 'seven')
+	
 	post2 = { 
 		KEY_TITLE : "On eating doughnuts",
 		KEY_CONTENTS: "You shouldn't eat those. They have oxygenated fat.",
 		KEY_TAGS: ["food", "health"]
 	}
 	insert_post(post2, 'seven')
+	
 
 ### User related stuff ###
 
@@ -60,20 +62,20 @@ def _is_user_created(username):
 	Checks if a user, given its id is created.
 	"""
 	if db.hexists(username + APPEND_KEY_USER, KEY_USER) == 1:
-		debug(username + " found")
+		debug(username + " EXISTS")
 		return True
 	else:
-		debug(username + " not found")
+		debug(username + " does NOT EXIST")
 		return False
 
 def get_password(username): #OK
 	"""
 	Returns the user's password. None if ain't a user with that username.
 	"""
-	debug("Getting " + username + "'s password")
+	debug("GET PASS for: " + username )
 	if _is_user_created(username):
 		password = db.hget(username + APPEND_KEY_USER, KEY_PASSWORD)
-		debug(username + "'s password: " + password)
+		debug(username + "'s PASS: " + password)
 		return password
 	else:
 		return None
@@ -82,7 +84,7 @@ def change_password(username, new_pass): #OK
 	"""
 	 Changes the user's password. Returns False if the db hasn't that user.
 	"""
-	debug("Changing " + username + "'s password")
+	debug("CHANGE " + username + "'s password")
 	if _is_user_created(username):
 		db.hset(username + APPEND_KEY_USER, KEY_PASSWORD, new_pass)
 		return True
@@ -94,15 +96,15 @@ def insert_user(username, password, email): #OK
 	Inserts a user in the db. Returns False if there is already a user in the
 	db with that username.
 	"""
-	debug("Create user '" + username + "' pass: '" + password + "'")
+	debug("CREATE USER :" + username + ",pass:" + password + ",email:" + email)
 	if not _is_user_created(username):
 		db.hset(username + APPEND_KEY_USER, KEY_USER, username)
 		db.hset(username + APPEND_KEY_USER, KEY_PASSWORD, password)
 		db.hset(username + APPEND_KEY_USER, KEY_EMAIL, email)
-		debug("User successfully created")
+		debug("\tUser successfully created")
 		return get_user(username)
 	else:
-		debug("User creation failed")
+		debug("\tUser creation failed")
 		return False
 
 def delete_user(username): #OK
@@ -112,8 +114,8 @@ def delete_user(username): #OK
 
 def get_user(username):
 	""" Returns a user. """
+	debug('GET user :' + username)
 	if _is_user_created(username):
-		debug('Returning user :' + username)
 		user = {}
 		user[KEY_USER] = db.hget(username + APPEND_KEY_USER, KEY_USER)
 		user[KEY_EMAIL] = db.hget(username + APPEND_KEY_USER, KEY_EMAIL)
@@ -123,12 +125,12 @@ def get_user(username):
 
 def get_user_tags(username):
 	""" Gets the tags of a user. """
-	debug("Getting the tags of: " + username)
+	debug("GET TAGS of: " + username)
 	if _is_user_created(username):
 		array = []
 		vals = db.smembers(username + APPEND_KEY_TAG)
+		debug("\t returning:" + str(vals))
 		for val in vals:
-			print val
 			array.append(val)
 		return array
 	else:
@@ -138,7 +140,7 @@ def insert_tag_user_tags(username, tag):
 	"""
 	Inserts a tag to the user's set of tags.
 	"""
-	debug("Inserting tag '" + tag + "' to " + username )
+	debug("INSERT TAG :" + tag + ", to:" + username)
 	# Since it is a set, the elements aren't inserted if present
 	db.sadd(username + APPEND_KEY_TAG, tag)
 
@@ -147,7 +149,7 @@ def delete_tag_user_tags(username, tag):
 	Deletes a tag from the user's set of tags
 	and from the posts the user has written.
 	"""
-	debug("Deleting tag '" + tag + "' to " + username )
+	debug("DELETE TAG :" + tag + ", from:" + username)
 	db.srem(user + APPEND_KEY_TAG, tag)
 	_delete_tag_from_all_user_posts(username, tag)
 
@@ -155,6 +157,7 @@ def _delete_tag_from_all_user_posts(username, tag):
 	"""
 	Deletes a tag from all the posts a given user has.
 	"""
+	debug("DELETE TAG FROM USER POSTS. tag:" + tag + ", user:" + username )
 	for post_id in db.smembers(username + APPEND_KEY_POSTS):
 		delete_tag_from_post(post_id)
 
@@ -166,7 +169,7 @@ def insert_tag_post_tags(post_id, tag):
 	"""
 	Inserts a tag to the post's set of tags.
 	"""
-	debug("Inserting tag '" + tag + "' to post #" + str(post_id))
+	debug("INSERT TAG to post. tag:" + tag + " post #:" + str(post_id))
 	# Element isn't inserted if present
 	if _is_post_created(post_id):
 		db.sadd(get_post(post_id)[KEY_TAGS], tag)
@@ -175,7 +178,7 @@ def delete_tag_from_post(post_id, tag):
 	"""
 	Deletes a tag from the post's set of tags
 	"""
-	debug("Deleting tag '" + tag + "' to post #" + str(post_id))
+	debug("DELETE TAG from post. tag:" + tag + ", post #:" + str(post_id))
 	if _is_post_created(post_id):
 		db.srem(get_post(post_id)[KEY_TAGS] + APPEND_KEY_TAG, tag)
 
@@ -184,10 +187,10 @@ def _is_post_created(post_id):
 	Checks if a post, given its id is created.
 	"""
 	if db.hexists(str(post_id) + APPEND_KEY_POSTS, KEY_TITLE) == 1:
-		debug("Post #" + str(post_id) + " found")
+		debug("Post #" + str(post_id) + " EXITS")
 		return True
 	else:
-		debug("Post #" + str(post_id) + " not found")
+		debug("Post #" + str(post_id) + " does NOT EXITS")
 		return False
 
 def get_post_tags(post_id): # OK
@@ -195,12 +198,12 @@ def get_post_tags(post_id): # OK
 	Returns the tags of a post given its integer-id.
 	An empty array is returned if there	aren't tags for the	given post.
 	"""
-	debug("Getting tags of post #" + str(post_id))
+	debug("GET TAGS FROM POST #" + str(post_id))
 	tags = db.smembers(str(post_id) + APPEND_KEY_TAG)
-	
 	ensure_array = []
 	for tag in tags:
 		ensure_array.append(tag)
+	debug("\t TAGS: " + str(ensure_array))
 	return ensure_array
 
 def get_post(key): # OK
@@ -208,7 +211,7 @@ def get_post(key): # OK
 	Returns a dictionary representing a post given its integer-id.
 	None is returned if there aren't posts with that id.
 	"""
-	debug("Requested post with id: " + str(key))
+	debug("GET POST #: " + str(key))
 	db_key = str(key) + APPEND_KEY_POSTS
 	if _is_post_created(str(key)):
 		post = {}
@@ -219,7 +222,7 @@ def get_post(key): # OK
 		post[KEY_AUTHOR] = db.hget(db_key, KEY_AUTHOR)
 		post[KEY_ID] = db.hget(db_key, KEY_ID)
 		post[KEY_VOTES] = db.get(db.hget(db_key, KEY_VOTES) + APPEND_KEY_VOTE)
-		debug("Getting post: " + str(post))
+		debug("\treturning post: \n\t" + str(post))
 		return post
 	else:
 		return None	
@@ -228,12 +231,11 @@ def get_posts(username): # OK
 	"""
 	Returns all the posts written by a user.
 	"""
+	debug("GET POSTS OF USER: " + username)
 	if _is_user_created(username):
 		posts_ids = db.smembers(username + APPEND_KEY_POSTS)
 		posts = []
-		debug("Getting posts of user: " + username)
 		for key in posts_ids:
-			print "key", key
 			posts.append(get_post(key))
 		return posts
 	else:
@@ -243,15 +245,18 @@ def insert_post(post, username): # OK
 	"""
 	Inserts a new post in the db.
 	"""
-	print "[ MANAGER ] : { post: %s, user: %s} " % (post, username)
+	debug("INSERT POST.")
+	debug("\t username: " + username)
+	debug("\t post: " + str(post))
 	post_id = str(db.incr(POST_ID))
 	db_post_id = post_id + APPEND_KEY_POSTS
-	print "[ MANAGER ] post-id:", post_id
+	debug("\tASIGNED ID:" + str(post_id))
 	# Post fields
 	# Set id
 	db.hset(db_post_id, KEY_ID, post_id)
 	# Create the vote counter and set it to 0 votes
 	vote_id = str(db.incr(VOTE_ID)) # get the next vote id
+	debug("\tASIGNED POST-VOTE-ID:" + str(vote_id))
 	db.set(vote_id + APPEND_KEY_VOTE, "0")
 	# Set the id of the vote counter
 	db.hset(db_post_id, KEY_VOTES, vote_id)
@@ -267,9 +272,8 @@ def insert_post(post, username): # OK
 	# Set a new set of tags-post to the db
 	tag_id = str(db.incr(TAG_ID))
 	db_tag_id = tag_id + APPEND_KEY_TAG
-	print "[ MANAGER ] tags-id (db):", db_tag_id
+	debug("\tASIGNED POST-TAGS-ID:" + str(tag_id))
 	for tag in post[KEY_TAGS]:
-		print "[ MANAGER ] add tag:", tag
 		# Add tag to the tag-post
 		db.sadd(db_tag_id, tag)
 		# Add tag to the user's tags
@@ -278,6 +282,7 @@ def insert_post(post, username): # OK
 	db.hset(db_post_id, KEY_TAGS, tag_id)
 	# Add post id to users post-set
 	db.sadd(username + APPEND_KEY_POSTS, post_id)
+	debug("POST CREATED")
 	return get_post(post_id)
 
 def update_post(post, post_id, username): #OK
@@ -285,12 +290,16 @@ def update_post(post, post_id, username): #OK
 	Updates a post in the db.
 	"""
 	post_id = str(post_id)
-	debug("Updating " + username + "'s post #" + post_id + " with: " + str(post))
+	debug("UPDATE POST. username:" + username + ",post:" + post_id + \
+		 "\n\t values:" + str(post))
 	if post[KEY_TITLE] is not None:
+		debug("\t-UPDATE title")
 		db.hset(post_id + APPEND_KEY_POSTS, KEY_TITLE, post[KEY_TITLE])
 	if post[KEY_CONTENTS] is not None:
+		debug("\t-UPDATE contents")
 		db.hset(post_id + APPEND_KEY_POSTS, KEY_CONTENTS, post[KEY_CONTENTS])
 	if post[KEY_TAGS] is not None:
+		debug("\t-UPDATE tags")
 		tag_id = db.hget(post_id + APPEND_KEY_POSTS, KEY_TAGS)
 		# Add new tags (if any)
 		for tag in post[KEY_TAGS]:
@@ -301,6 +310,7 @@ def delete_post(post_id, username):
 	"""
 	Deletes a post (as well as its related set of tags).
 	"""
+	debug("DELETE POST. username:" + username + ",post:" + str(post_id))
 	post_id = str(post_id)
 	if _is_post_created(post_id):
 		db.hdel(post_id + APPEND_KEY_POSTS, KEY_TITLE)
@@ -321,37 +331,45 @@ def delete_post(post_id, username):
 	else:
 		return False
 
-# CHECK THIS ONE
-def vote_positive(post_id, voting_user):
-	""" Votes +1 to a post.
-		Returns True if the vote was made; False if the user had already voted
-		and so, he/she cannot vote again and None if no post for that id was
-		found.
-	"""
+
+def _vote(post_id, voting_user, positive): #OK
+	""" Private method for handling postivite and negative votes. """
 	post_id = str(post_id)
+	debug("VOTE POSITIVE. user:" + voting_user + ", post:" + post_id)
 	if _is_post_created(post_id):
+		debug("\t CURRENT VOTES of USER.")
+		debug("\t\t-user: " + voting_user)
+		debug("\t\t-voted to: " + str(db.smembers(voting_user + APPEND_KEY_HAS_VOTED)))
 		if db.sismember(voting_user + APPEND_KEY_HAS_VOTED, post_id) == 0:
+			debug("PREVIOUS POST-VOTE-VALUE: " + \
+				str(db.get(db.hget(post_id + APPEND_KEY_POSTS, KEY_VOTES) + APPEND_KEY_VOTE)))
+			vote_id = db.hget(post_id + APPEND_KEY_POSTS, KEY_VOTES)
+			debug("\t vote_id: " + str(vote_id))
+			if positive:
+				db.incr(vote_id + APPEND_KEY_VOTE)
+			else:
+				db.decr(vote_id + APPEND_KEY_VOTE)
+			debug("CURRENT POST-VOTE-VALUE: " + \
+				str(db.get(db.hget(post_id + APPEND_KEY_POSTS, KEY_VOTES) + APPEND_KEY_VOTE)))
 			db.sadd(voting_user + APPEND_KEY_HAS_VOTED, post_id)
-			debug("votes of post no incre: " + post_id + ": " + str(db.get(db.hget(post_id + APPEND_KEY_POSTS, KEY_VOTES))))
-			db.incr(db.get(db.hget(post_id + APPEND_KEY_POSTS, KEY_VOTES)))
-			debug("votes of post after incre: " + post_id + ": " + str(db.get(db.hget(post_id + APPEND_KEY_POSTS, KEY_VOTES))))
 			return True
 		else:
 			return False
 	else:
 		return None
 
-def vote_negative(post_id, voting_user):
+def vote_positive(post_id, voting_user): # OK
+	""" Votes +1 to a post.
+		Returns True if the vote was made; False if the user had already voted
+		and so, he/she cannot vote again and None if no post for that id was
+		found.
+	"""
+	return _vote(post_id, voting_user, True)
+
+def vote_negative(post_id, voting_user): # OK
 	""" Votes -1 to a post.
 		Returns True if the vote was made; False if the user had already voted
 		and so, he/she cannot vote again and None if no post for that id was
 		found.
 	"""
-
-	if _is_post_created(str(post_id)):
-		if db.sismember(voting_user + APPEND_KEY_HAS_VOTED, post_id) == 0:
-			db.sadd(voting_user + APPEND_KEY_HAS_VOTED, post_id)
-			db.decr(db.get(db.hget(post_id + APPEND_KEY_POSTS, KEY_VOTES)))	
-		return True
-	else:
-		return None
+	return _vote(post_id, voting_user, False)
