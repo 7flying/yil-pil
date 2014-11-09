@@ -254,7 +254,7 @@ class SearchTagsAPI(Resource):
 		""" Search within the tags given the query."""
 		args = self.reqparse.parse_args()
 		# Search by starting letter	
-		if args['letter'] != None and len(args['letter']) == 1:
+		if args['letter'] != None and len(args['letter']) == 1: #OK
 			result = None
 			if args['page'] != None:
 				# Pagination requested
@@ -265,8 +265,51 @@ class SearchTagsAPI(Resource):
 				result = manager.search_tag_names_letter(args['letter'])
 			return jsonify(tags=result)
 
-
 api.add_resource(SearchTagsAPI, '/yilpil/search/tag', endpoint='tag')
+
+
+class SearchPostsDateAPI(Resource):
+	""" Provides search of posts by date. """
+
+	def __init__(self):
+		self.reqparse = reqparse.RequestParser()
+		self.reqparse.add_argument('page', type=int, location='form')
+		self.reqparse.add_argument('user', type=str, location='form',
+			required=True)
+		self.reqparse.add_argument('dateini', type=int, location='form',
+			required=True)
+		self.reqparse.add_argument('dateend', type=int, location='form')
+		super(SearchPostsDateAPI, self).__init__()
+
+	def get(self):
+		""" Search within the posts given the query. """
+		args = self.reqparse.parse_args()
+		if len(args['user']) > 0 \
+		and args['dateini'] != None and len(str(args['dateini'])) == 8:
+			debug("GET search of posts user-date")
+			result = None
+			page = 0 # All by default
+			if args['page'] != None and args['page'] > 0:
+				page = args['page']
+			# Interval requested
+			if args['dateend'] != None and len(str(args['dateend'])) == 8:
+				if int(args['dateend']) >= int(args['dateini']):
+					result = manager.search_posts_user_date(
+						args['user'],
+						args['dateini'], args['dateend'],
+						page)
+				else:
+					abort(400)
+			# Get the posts of a certain day
+			else:
+				result = manager.search_posts_user_date(
+					args['user'],
+					args['dateini'], args['dateini'],
+					page)
+			return jsonify(posts=result)
+
+api.add_resource(SearchPostsDateAPI, '/yilpil/search/posts/date', endpoint='date')
+
 
 if __name__ == '__main__':
 	# Populate database with test data

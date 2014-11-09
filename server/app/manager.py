@@ -5,6 +5,8 @@ from config import API_PAGINATION
 
 # Datetime format in posts
 FORMAT_TIME = "%d-%m-%Y %H:%M"
+# Datetime format in score for timedate stuff
+FORMAT_TIME_SEARCH = "%Y%m%d"
 # In user-hashmap
 KEY_PASSWORD = 'password'
 KEY_EMAIL = 'email'
@@ -32,10 +34,15 @@ POST_ID = 'next-key-post-id'
 TAG_ID = 'next-tag-id'
 VOTE_ID = 'next-vote-id'
 ## -- Search related stuff -- ##
+# Tags:
 # Id for the sorted set of tag name + score.
 # The score is the upper case ASCII value of the character
 SEARCH_TAGS_LETTER = 'search-tags-letter'
-
+# tags-autocomplete : TODO!
+# Posts-user:
+# Id for the sorted set of post-id + score.
+# The score is the time date concatenated ej: 20141109
+APPEND_SEARCH_POST_TIMEDATE = '-search-post-user-timedate'
 
 _DEBUG_ = True
 
@@ -291,7 +298,8 @@ def insert_post(post, username): # OK
 	# Set title
 	db.hset(db_post_id, KEY_TITLE, post[KEY_TITLE])
 	# Set date-time
-	date = datetime.now().strftime(FORMAT_TIME)
+	timedatenow = datetime.now()
+	date = timedatenow.strftime(FORMAT_TIME)
 	db.hset(db_post_id, KEY_DATE, date)
 	# Set contents
 	db.hset(db_post_id, KEY_CONTENTS, post[KEY_CONTENTS])
@@ -304,12 +312,14 @@ def insert_post(post, username): # OK
 		db.sadd(db_tag_id, tag)
 		# Add tag to the user's tags
 		insert_tag_user_tags(username, tag)
-		# Add tag to the global tags
+		## Add tag to the global tags
 		_insert_tags_global(tag)
 
 	db.hset(db_post_id, KEY_TAGS, tag_id)
 	# Add post id to the head of the user's post-list
 	db.lpush(username + APPEND_KEY_POSTS, post_id)
+	## Add post id to the sset of timedate-user-posts
+	_insert_post_user_date_ss(post_id, timedatenow, username)
 	debug("POST CREATED")
 	return get_post(post_id)
 
@@ -413,7 +423,7 @@ def _insert_tags_global(tag_name):
 	if tag_name != None and len(tag_name) > 0:
 		_insert_tag_names_letter(tag_name)
 
-def _insert_tag_names_letter(tag_name):
+def _insert_tag_names_letter(tag_name): #OK
 	""" 
 	Insert the tag in the sorted-set of tags by first-letter score.
 	The first-letter-tag sorted set is useful when retrieving all the tags given
@@ -425,7 +435,7 @@ def _raw_paginate(some_array, page):
 	""" Performs a raw pagination on an array. """
 	return some_array[(page - 1) * API_PAGINATION : page * API_PAGINATION]
 
-def search_tag_names_letter(letter, page=0):
+def search_tag_names_letter(letter, page=0): #OK
 	"""
 	Gets the tags starting by the given letter.
 	By default retrieves all the matching elements.
@@ -449,11 +459,43 @@ def search_tag_names_letter(letter, page=0):
 		# Bad request, we are searching by a single letter.
 		return None
 
-def search_tag_autocomplete(word, max):
+def search_tag_autocomplete(word, max): # TODO!
 	"""
 	Provides autocomplete for searching tags.
 	# ZRANGEBYLEX myzset [ab [axxf
 	"""
 	pass
+
+def _insert_post_user_date_ss(post_id, timedate, username):
+	""" Inserts a post in a user's sorted set of post-ids by date. """
+	db.zadd(username + APPEND_SEARCH_POST_TIMEDATE,
+			timedate.strftime(FORMAT_TIME_SEARCH), post_id)
+	debug("INSERT sset user_timedate_post_id")
+
+def search_posts_user_date(username, date_ini, date_end, page=0):
+	"""
+	Returns a list of posts wrote by the user at the given date interval.
+	All dates must be provided in 'YYYYMMDD' format.
+	- Pagination is enabled givin a positive 'page' value.
+	  Pagination works with yil-pil's pagination configuration.
+	"""
+	if _is_user_created(username) \
+	and len(str(date_ini)) == 8 and len(str(date_end)) == 8 \
+	and int(date_end) >= int(date_ini) \
+	and username != None and len(username) > 0:
+
+		post_ids = db.zrangebyscore(username + APPEND_SEARCH_POST_TIMEDATE,
+			date_ini, date_end)
+		# Slice the array if pagination is requested
+		if page > 0:
+			post_ids = _raw_paginate(post_ids, page)
+		results = []
+		for post_id in post_ids:
+			results.append(get_post(post_id))
+		debug("SEARCH POSTS_USER_DATE returning: " + str(len(results)))
+		return results
+	else:
+		# Bad request
+		return None
 
 ### End of search stuff ###
