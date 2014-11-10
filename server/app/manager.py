@@ -125,9 +125,11 @@ def insert_user(username, password, email): #OK
 	"""
 	debug("CREATE USER :" + username + ",pass:" + password + ",email:" + email)
 	if not _is_user_created(username):
-		db.hset(username + APPEND_KEY_USER, KEY_USER, username)
-		db.hset(username + APPEND_KEY_USER, KEY_PASSWORD, password)
-		db.hset(username + APPEND_KEY_USER, KEY_EMAIL, email)
+		pipe = db.pipeline()
+		pipe.hset(username + APPEND_KEY_USER, KEY_USER, username)
+		pipe.hset(username + APPEND_KEY_USER, KEY_PASSWORD, password)
+		pipe.hset(username + APPEND_KEY_USER, KEY_EMAIL, email)
+		pipe.execute()
 		debug("\tUser successfully created")
 		return get_user(username)
 	else:
@@ -390,13 +392,15 @@ def _vote(post_id, voting_user, positive): #OK
 				str(db.get(db.hget(post_id + APPEND_KEY_POSTS, KEY_VOTES) + APPEND_KEY_VOTE)))
 			vote_id = db.hget(post_id + APPEND_KEY_POSTS, KEY_VOTES)
 			debug("\t vote_id: " + str(vote_id))
+			pipe = db.pipeline()
 			if positive:
-				db.incr(vote_id + APPEND_KEY_VOTE)
+				pipe.incr(vote_id + APPEND_KEY_VOTE)
 			else:
-				db.decr(vote_id + APPEND_KEY_VOTE)
+				pipe.decr(vote_id + APPEND_KEY_VOTE)
+			pipe.sadd(voting_user + APPEND_KEY_HAS_VOTED, post_id)
+			pipe.execute()
 			debug("CURRENT POST-VOTE-VALUE: " + \
 				str(db.get(db.hget(post_id + APPEND_KEY_POSTS, KEY_VOTES) + APPEND_KEY_VOTE)))
-			db.sadd(voting_user + APPEND_KEY_HAS_VOTED, post_id)
 			return True
 		else:
 			return False
@@ -488,7 +492,6 @@ def search_posts_user_date(username, date_ini, date_end, page=0):
 	and len(str(date_ini)) == 8 and len(str(date_end)) == 8 \
 	and int(date_end) >= int(date_ini) \
 	and username != None and len(username) > 0:
-
 		post_ids = db.zrangebyscore(username + APPEND_SEARCH_POST_TIMEDATE,
 			date_ini, date_end)
 		# Slice the array if pagination is requested
