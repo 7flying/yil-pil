@@ -311,6 +311,28 @@ class SearchPostsDateAPI(Resource):
 api.add_resource(SearchPostsDateAPI, '/yilpil/search/posts/date', endpoint='date')
 
 
+class GetLastUpdates(Resource):
+	""" Returns the last updates of resources. """
+	def __init__(self):
+		self.reqparse = reqparse.RequestParser()
+		self.reqparse.add_argument('resource', type=str, location='form',
+			required=True)
+		super(GetLastUpdates, self).__init__()
+
+	def get(self):
+		""" Gets the last updates of the requested resource. """
+		args = self.reqparse.parse_args()
+		if args['resource'] != None and len(args['resource']) > 0:
+			# Get the last post updates
+			if args['resource'] == 'posts':
+				result = manager.get_last_post_updates()
+				return jsonify(posts=result)
+		else:
+			abort(400)		
+
+api.add_resource(GetLastUpdates, '/yilpil/updates', endpoint='updates')		
+
+
 if __name__ == '__main__':
 	# Populate database with test data
 	manager.populate_test2()

@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 from __init__ import db
 from datetime import datetime
-from config import API_PAGINATION
+from config import API_PAGINATION, API_MAX_UPDATES
 
 # Datetime format in posts
 FORMAT_TIME = "%d-%m-%Y %H:%M"
@@ -33,6 +33,9 @@ APPEND_KEY_HAS_VOTED = '-has-voted'
 POST_ID = 'next-key-post-id'
 TAG_ID = 'next-tag-id'
 VOTE_ID = 'next-vote-id'
+## -- Global structures -- ##
+# Capped list of last updates
+GLOBAL_POST_UPDATE_ID = 'global-post-update'
 ## -- Search related stuff -- ##
 # Tags:
 # Id for the sorted set of tag name + score.
@@ -73,7 +76,7 @@ def populate_test2():
 		 sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.",
 		KEY_TAGS: ["lorem", "ipsum"]
 	}
-	for i in range(13):
+	for i in range(130):
 		post_tem[KEY_TITLE] = "Post Num " + str(i)
 		post_tem[KEY_TAGS].append("Tag number " + str(i))
 		insert_post(post_tem, 'seven')
@@ -320,6 +323,8 @@ def insert_post(post, username): # OK
 	db.lpush(username + APPEND_KEY_POSTS, post_id)
 	## Add post id to the sset of timedate-user-posts
 	_insert_post_user_date_ss(post_id, timedatenow, username)
+	## Add post id to the capped list of last post updates
+	_insert_post_last_updates(post_id)
 	debug("POST CREATED")
 	return get_post(post_id)
 
@@ -499,3 +504,22 @@ def search_posts_user_date(username, date_ini, date_end, page=0):
 		return None
 
 ### End of search stuff ###
+
+### Global things ###
+
+def _insert_post_last_updates(post_id):
+	""" Insert post to the  global capped list of last updated posts. """
+	pipe = db.pipeline()
+	pipe.lpush(GLOBAL_POST_UPDATE_ID, post_id)
+	pipe.ltrim(GLOBAL_POST_UPDATE_ID, 0, API_MAX_UPDATES -1)
+	pipe.execute()
+
+def get_last_post_updates():
+	""" Gets the last post updates. """
+	post_ids = db.lrange(GLOBAL_POST_UPDATE_ID, 0 , -1)
+	ret = []
+	for id in post_ids:
+		ret.append(get_post(id))
+	return ret
+
+### End of global things###
