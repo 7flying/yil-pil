@@ -1,17 +1,7 @@
 docs/
 server/tmp/
-# client stuff
-
 quick/
 re.txt
-client/node_modules/
-client/test/
-client/src/bowe_modules/
-client/package.json
-client/karma.conf.js
-client/gulpfile.js
-client/bower.json
-
 # Python
 
 # Byte-compiled / optimized / DLL files
