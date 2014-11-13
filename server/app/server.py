@@ -315,13 +315,13 @@ class GetLastUpdates(Resource):
 	""" Returns the last updates of resources. """
 	def __init__(self):
 		self.reqparse = reqparse.RequestParser()
-		self.reqparse.add_argument('resource', type=str, location='form',
-			required=True)
+		self.reqparse.add_argument('resource', type=str, required=True)
 		super(GetLastUpdates, self).__init__()
 
 	def get(self):
 		""" Gets the last updates of the requested resource. """
 		args = self.reqparse.parse_args()
+		print args
 		if args['resource'] != None and len(args['resource']) > 0:
 			# Get the last post updates
 			if args['resource'] == 'posts':
