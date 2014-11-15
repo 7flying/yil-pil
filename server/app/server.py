@@ -8,6 +8,7 @@ from flask import Flask, abort, jsonify, make_response, request
 from flask.ext.restful import Api, Resource, reqparse, fields, marshal, \
 	 marshal_with
 from flask.ext.httpauth import HTTPBasicAuth
+from flask_sslify import SSLify
 
 # Flask general
 app = Flask(__name__)
@@ -21,6 +22,8 @@ db = redis.StrictRedis(host=REDIS_HOST, port=REDIS_PORT, db=REDIS_DB)
 # Authentication
 auth = HTTPBasicAuth()
 
+# SSL
+sslify = SSLify(app, subdomains=True)
 
 _DEBUG_ = True
 
