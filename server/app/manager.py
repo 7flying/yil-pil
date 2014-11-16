@@ -76,7 +76,7 @@ def populate_test2():
 		 sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.",
 		KEY_TAGS: ["lorem", "ipsum"]
 	}
-	for i in range(13):
+	for i in range(3):
 		post_tem[KEY_TITLE] = "Post Num " + str(i)
 		post_tem[KEY_TAGS].append("Tag number " + str(i))
 		insert_post(post_tem, 'seven')

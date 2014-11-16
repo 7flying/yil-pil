@@ -35,7 +35,6 @@ def debug(to_print):
 def get_password(username):
 	return manager.get_password(username)
 
-
 class UsersAPI(Resource):
 	""" Class for the User resource."""
 	user_field = {
@@ -56,9 +55,9 @@ class UsersAPI(Resource):
 		password = self.reqparse.parse_args()['password']
 		email = self.reqparse.parse_args()['email']
 		user = {'name': username, 'password': password, 'email' : email}
-		debug("POST USER: ", username, password)
+		debug("POST USER: " + username + ":" + password)
 		if manager.insert_user(username, password, email):
-			return {'user': marshal(user, UserAPI.user_field)}
+			return {'user': marshal(user, UsersAPI.user_field)}
 		else:
 			abort(400) # Should be "User already created" or something.
 
@@ -71,7 +70,7 @@ class UsersAPI(Resource):
 			user = {}
 			user['name'] = username
 			user['password'] = password
-			return {'user': marshal(user, UserAPI.user_field)} # Igual mejor un 200
+			return {'user': marshal(user, UsersAPI.user_field)} # Igual mejor un 200
 		
 
 	@auth.login_required
