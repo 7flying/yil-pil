@@ -9,6 +9,7 @@ from flask.ext.restful import Api, Resource, reqparse, fields, marshal, \
 	 marshal_with
 from flask.ext.httpauth import HTTPBasicAuth
 from flask_sslify import SSLify
+from werkzeug.security import generate_password_hash, check_password_hash
 
 # Flask general
 app = Flask(__name__)
@@ -31,16 +32,16 @@ def debug(to_print):
 	if _DEBUG_:
 		print "[ SERVER ] ", to_print
 
-@auth.get_password
-def get_password(username):
-	return manager.get_password(username)
+@auth.verify_password
+def verify_password(username, password):
+	db_pass = manager.get_password(username)
+	return check_password_hash(db_pass, password)
 
 class UsersAPI(Resource):
 	""" Class for the User resource."""
 	user_field = {
 		'name' : fields.String,
-		'email' : fields.String,
-		'password' : fields.String
+		'email' : fields.String
 	}
 
 	def __init__(self):
@@ -65,11 +66,8 @@ class UsersAPI(Resource):
 	def put(self, username): #OK
 		""" Handles PUT requests to update existing users."""
 		password = self.reqparse.parse_args()['password']
-		#password = str(request.form['newpassword'])
 		if manager.change_password(username, password):
-			user = {}
-			user['name'] = username
-			user['password'] = password
+			user = manager.get_user(username)
 			return {'user': marshal(user, UsersAPI.user_field)} # Igual mejor un 200
 		
 

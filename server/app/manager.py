@@ -2,6 +2,7 @@
 from __init__ import db
 from datetime import datetime
 from config import API_PAGINATION, API_MAX_UPDATES
+from werkzeug.security import generate_password_hash
 
 # Datetime format in posts
 FORMAT_TIME = "%d-%m-%Y %H:%M"
@@ -111,9 +112,10 @@ def change_password(username, new_pass): #OK
 	"""
 	 Changes the user's password. Returns False if the db hasn't that user.
 	"""
-	debug("CHANGE " + username + "'s password")
+	debug("CHANGE " + username + "'s password to " + new_pass)
 	if _is_user_created(username):
-		db.hset(username + APPEND_KEY_USER, KEY_PASSWORD, new_pass)
+		db.hset(username + APPEND_KEY_USER, KEY_PASSWORD,
+			generate_password_hash(new_pass))
 		return True
 	else:
 		return False
@@ -125,9 +127,10 @@ def insert_user(username, password, email): #OK
 	"""
 	debug("CREATE USER :" + username + ",pass:" + password + ",email:" + email)
 	if not _is_user_created(username):
+		hashpass= generate_password_hash(password)
 		pipe = db.pipeline()
 		pipe.hset(username + APPEND_KEY_USER, KEY_USER, username)
-		pipe.hset(username + APPEND_KEY_USER, KEY_PASSWORD, password)
+		pipe.hset(username + APPEND_KEY_USER, KEY_PASSWORD, hashpass)
 		pipe.hset(username + APPEND_KEY_USER, KEY_EMAIL, email)
 		pipe.execute()
 		debug("\tUser successfully created")
