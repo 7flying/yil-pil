@@ -2,6 +2,7 @@
 
 import os
 import redis
+import urlparse
 import manager
 from config import REDIS_HOST, REDIS_PORT, REDIS_DB
 from flask import Flask, abort, jsonify, make_response, request
@@ -18,7 +19,12 @@ app = Flask(__name__)
 api = Api(app)
 
 # Redis
-db = redis.StrictRedis(host=REDIS_HOST, port=REDIS_PORT, db=REDIS_DB)
+if os.getenv('REDIS_URL'):
+	url = urlparse.urlparse(os.getenv('REDIS_URL'))
+	db = redis.StrictRedis(host=url.hostname, port=url.port,
+	 password=url.password)
+else:
+	db = redis.StrictRedis(host=REDIS_HOST, port=REDIS_PORT, db=REDIS_DB)
 
 # Authentication
 auth = HTTPBasicAuth()
@@ -26,7 +32,7 @@ auth = HTTPBasicAuth()
 # SSL
 sslify = SSLify(app, subdomains=True)
 
-_DEBUG_ = True
+_DEBUG_ = False
 
 def debug(to_print):
 	if _DEBUG_:
@@ -68,7 +74,7 @@ class UsersAPI(Resource):
 		password = self.reqparse.parse_args()['password']
 		if manager.change_password(username, password):
 			user = manager.get_user(username)
-			return {'user': marshal(user, UsersAPI.user_field)} # Igual mejor un 200
+			return {'user': marshal(user, UsersAPI.user_field)}
 		
 
 	@auth.login_required
@@ -321,7 +327,6 @@ class GetLastUpdates(Resource):
 	def get(self):
 		""" Gets the last updates of the requested resource. """
 		args = self.reqparse.parse_args()
-		print args
 		if args['resource'] != None and len(args['resource']) > 0:
 			# Get the last post updates
 			if args['resource'] == 'posts':
@@ -336,4 +341,5 @@ api.add_resource(GetLastUpdates, '/yilpil/updates', endpoint='updates')
 if __name__ == '__main__':
 	# Populate database with test data
 	manager.populate_test2()
-	app.run(debug = True)
+	port = os.environ.get("PORT", 5000)
+	app.run(host='0.0.0.0', port=port)

@@ -48,7 +48,7 @@ SEARCH_TAGS_LETTER = 'search-tags-letter'
 # The score is the time date concatenated ej: 20141109
 APPEND_SEARCH_POST_TIMEDATE = '-search-post-user-timedate'
 
-_DEBUG_ = True
+_DEBUG_ = False
 
 def debug(to_print):
 	if _DEBUG_:
@@ -66,21 +66,10 @@ def populate_test2():
 	
 	post2 = { 
 		KEY_TITLE : "On eating doughnuts",
-		KEY_CONTENTS: "You shouldn't eat those. They have oxygenated fat.",
+		KEY_CONTENTS: "You shouldn't eat those. They are unhealthy.",
 		KEY_TAGS: ["food", "health"]
 	}
 	insert_post(post2, 'seven')
-
-	post_tem = {
-		KEY_TITLE : "",
-		KEY_CONTENTS: "Lorem ipsum dolor sit amet, consectetur adipiscing elit,\
-		 sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.",
-		KEY_TAGS: ["lorem", "ipsum"]
-	}
-	for i in range(3):
-		post_tem[KEY_TITLE] = "Post Num " + str(i)
-		post_tem[KEY_TAGS].append("Tag number " + str(i))
-		insert_post(post_tem, 'seven')
 	
 
 ### User related stuff ###

@@ -7,7 +7,7 @@ API_PAGINATION = 5 #
 # Max number of last updates
 API_MAX_UPDATES = 30
 
-# Database stuff
+# Database stuff in localhost
 REDIS_HOST = 'localhost'
 REDIS_PORT = '6379'
 REDIS_DB = 0

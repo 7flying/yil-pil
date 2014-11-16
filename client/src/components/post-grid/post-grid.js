@@ -4,8 +4,9 @@ define(['knockout', 'text!./post-grid.html'], function(ko, templateMarkup) {
   	// Expose a 'posts' property to the view
   	this.posts = ko.observableArray();
   	//this.posts = [ {'title': "yo", 'author': "another"}, {title: "yo", author: "another"}]
-    //$.getJSON('http://localhost:5000/yilpil/updates?resource=posts', this.posts);
-    var params = {'resource' : 'posts'};
+    $.getJSON('http://localhost:5000/yilpil/updates?resource=posts', this.posts);
+    alert(this.posts);
+    /*
     $.ajax({
         url: 'http://localhost:5000/yilpil/updates',
         type: 'GET',
@@ -16,10 +17,12 @@ define(['knockout', 'text!./post-grid.html'], function(ko, templateMarkup) {
           window.alert(data);
           //this.channels = data.posts;
         },
+
         error: function(xhr, ajaxOptions, thrownError) {
           window.alert("some error");
         }
       });
+    */
     /*
     this.posts = [{
       title: "Post Num 12", author: "seven",
