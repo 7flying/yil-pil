@@ -4,7 +4,8 @@ import os
 import redis
 import manager
 from config import REDIS_HOST, REDIS_PORT, REDIS_DB
-from flask import Flask, abort, jsonify, make_response, request
+from flask import Flask, abort, jsonify, make_response, request, \
+	render_template, make_response
 from flask.ext.restful import Api, Resource, reqparse, fields, marshal, \
 	 marshal_with
 from flask.ext.httpauth import HTTPBasicAuth
@@ -332,6 +333,10 @@ class GetLastUpdates(Resource):
 
 api.add_resource(GetLastUpdates, '/yilpil/updates', endpoint='updates')		
 
+
+@app.route('/')
+def index():
+	return render_template('/index.html')
 
 if __name__ == '__main__':
 	# Populate database with test data
