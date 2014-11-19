@@ -1,0 +1,5 @@
+bower_components/
+node_modules/
+static/bower_modules/
+bower.json
+package.json
