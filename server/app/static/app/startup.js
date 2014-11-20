@@ -9,7 +9,7 @@ define(['jquery', 'knockout', './router', 'bootstrap', 'knockout-projections'], 
     template: { require: 'text!components/about-page/about.html' }
   });
 
-  ko.components.register('post-grid', { require: 'components/post-grid/post-grid' });
+  ko.components.register('post-list', { require: 'components/post-list/post-list' });
 
   // [Scaffolded component registrations will be inserted here. To retain this feature, don't remove this comment.]
 
