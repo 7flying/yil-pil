@@ -1,17 +1,17 @@
 <h3>Post list component </h3>
 <p data-bind='text: message'></p>
 
-<ul data-bind="foreach: posts">
+<ul data-bind='foreach: posts'>
 	<li>
-		<h6 data-bind="text: title"></h3>		
-		<p data-bind="text: author"></p>
-		<p data-bind="text: contents"></p>
-		<p data-bind="text: date"></p>
-		<p data-bind="text: id"></p>
-		<ul data-bind="foreach: tags">
+		<h3 data-bind='text: title'></h3>
+		<p data-bind='text: author'></p>
+		<p data-bind='text: contents'></p>
+		<p data-bind='text: date'></p>
+		<p data-bind='text: id'></p>
+		<ul data-bind='foreach: tags'>
 			<li> Some tag </li>
 		</ul>
-		<p data-bind="text: votes"></p>
+		<p data-bind='text: votes'></p>
 	</li>
 </ul>
 
