@@ -1,18 +1,22 @@
-ko.components.register('post-list', {
-	viewModel: function(params) {
-		this.posts = ko.onservableArray();
-		this.posts = [ {'title': "yo", 'author': "another"}, {title: "yo", author: "another"}];
-	},
-	template:
-		'<ul data-bind="foreach: posts">
-			<li>
-				<h3 data-bind="text: title"></h3>
-				<p data-bind="text: author"></p>
-				<p data-bind="text: contents"></p>
-				<p data-bind="text: date"></p>
-				<p data-bind="text: id"></p>
-				<p data-bind="text: votes"></p>
-			</li>
-		</ul>'
+define(['knockout', 'text!./post-list.html'], function(ko, template) {
+
+	function PostListViewModel(params) {
+		this.message = ko.observable('Hello from the component!');
+		/* Static data to know if it it's working */
+		this.posts = [{ title: "Post Num 12", author: "seven",
+     				 	contents: "Lorem ipsum dolor sit amet", 
+     				 	date: "13-11-2014 11:26", 
+    				 	id: "15",
+    				 	tags: ["hello", "again"], 
+    				 	votes: "0"},
+      				  { title: "Post Num 12", author: "seven", 
+      					contents: "Lorem ipsum dolor sit", 
+      					date: "13-11-2014 11:26", 
+      					id: "15",
+      					tags: ["hello", "again"], 
+      					votes: "0"
+    				}];
+	}
+
+	return { viewModel: PostListViewModel, template: template };
 });
-ko.applyBindings();
