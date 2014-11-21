@@ -18,12 +18,14 @@ define(['knockout', 'text!./post-list.html'], function(ko, template) {
 					}];
 		*/
 		this.posts = ko.observableArray();
-		$.getJSON('/yilpil/updates?resource=posts', function(data) {
-			console.log(data.posts);
-			for (var post in data.pots)
-				this.posts.push(post);
-		});
-
+		var getUpdates = function(toStore) {
+			$.getJSON('/yilpil/updates?resource=posts', function(data) {
+				while(data.posts.length > 0)
+					toStore.push(data.posts.pop());
+			});	
+		}
+		/* Get the actual data. */
+		getUpdates(this.posts);
 	}
 	return { viewModel: PostListViewModel, template: template };
 });

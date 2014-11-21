@@ -1,6 +1,4 @@
-<h3>Post list component </h3>
-<p data-bind='text: message'></p>
-
+<!--
 <ul data-bind='foreach: posts'>
 	<li>
 		<h3 data-bind='text: title'></h3>
@@ -9,11 +7,27 @@
 		<p data-bind='text: date'></p>
 		<p data-bind='text: id'></p>
 		<ul data-bind='foreach: tags'>
-			<li> Some tag </li>
+			<li data-bind='text: $data'></li>
 		</ul>
 		<p data-bind='text: votes'></p>
 	</li>
 </ul>
-
+-->
 <p data-bind='text: message'></p>
 
+<div id='posts' data-bind='foreach: posts'>
+	<div class="panel panel-default">
+		<div class="panel-heading"><span data-bind='text: title'></span></div>
+		<div class="panel-body" data-bind='text: contents'>
+			
+		</div>
+		<div class="panel-footer">
+			<button type="button" class="btn btn-default" aria-label="Left Align">
+				<span class="glyphicon glyphicon-heart" aria-hidden="true"> Like</span>
+			</button>
+			<span data-bind='foreach: tags'>
+				<span class="label label-success" data-bind='text: $data'></span>
+			</span>
+		</div>
+	</div>
+</div>
