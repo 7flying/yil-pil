@@ -466,6 +466,7 @@ def search_tag_names_letter(letter, page=0): #OK
 				ord(str(letter).upper()), ord(str(letter).upper())), page)
 		else:
 			# Bad request
+
 			return None
 	else:
 		# Bad request, we are searching by a single letter.

@@ -181,7 +181,7 @@ class PostsAPI(Resource):
 
 	def __init__(self):
 		self.reqparse = reqparse.RequestParser()
-		self.reqparse.add_argument('page', type=int, location='form', 
+		self.reqparse.add_argument('page', type=str, location='form', 
 			required=True)
 		super(PostsAPI, self).__init__()
 
@@ -251,8 +251,8 @@ class SearchTagsAPI(Resource):
 
 	def __init__(self):
 		self.reqparse = reqparse.RequestParser()
-		self.reqparse.add_argument('page', type=int, location='form')
-		self.reqparse.add_argument('letter', type=str, location='form')
+		self.reqparse.add_argument('page', type=int)
+		self.reqparse.add_argument('letter', type=str)
 		super(SearchTagsAPI, self).__init__()
 
 	def get(self):
@@ -269,6 +269,8 @@ class SearchTagsAPI(Resource):
 			else:
 				result = manager.search_tag_names_letter(args['letter'])
 			return jsonify(tags=result)
+		else:
+			abort(400)
 
 api.add_resource(SearchTagsAPI, '/yilpil/search/tag', endpoint='tag')
 
