@@ -1,8 +1,11 @@
-<h2>Home</h2>
 
-<p data-bind='text: message'></p>
-
-<button data-bind='click: doSomething'>Click ne</button>
-
-<post-list></post-list>
-<tag-list></tag-list>
+<div class="container" id="main-container">
+	<div class="col-xs-12 col-sm-9">
+		<h2>Latest Updates</h2>
+		<post-list></post-list>
+	</div>
+	<div class="col-xs-6 col-sm-3 sidebar-offcanvas">
+		<h2>Popular Tags</h2>
+		<tag-list></tag-list>
+	</div>
+</div>
