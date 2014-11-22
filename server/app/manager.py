@@ -540,7 +540,9 @@ def get_last_post_updates():
 	post_ids = db.lrange(GLOBAL_POST_UPDATE_ID, 0 , -1)
 	ret = []
 	for id in post_ids:
-		ret.append(get_post(id))
+		post = get_post(id)
+		if post != None:
+			ret.append(post)
 	return ret
 
 ### End of global things ###
