@@ -328,7 +328,6 @@ class GetLastUpdates(Resource):
 	def get(self):
 		""" Gets the last updates of the requested resource. """
 		args = self.reqparse.parse_args()
-		print args
 		if args['resource'] != None and len(args['resource']) > 0:
 			# Get the last post updates
 			if args['resource'] == 'posts':
@@ -338,6 +337,29 @@ class GetLastUpdates(Resource):
 			abort(400)		
 
 api.add_resource(GetLastUpdates, '/yilpil/updates', endpoint='updates')		
+
+
+class GetPopular(Resource):
+	""" Returns the most popular resources. """
+
+	def __init__(self):
+		self.reqparse = reqparse.RequestParser()
+		self.reqparse.add_argument('resource', type=str, required=True)
+		super(GetPopular, self).__init__()
+
+	def get(self):
+		""" Gets the most popular items of a certain resource. """
+		args = self.reqparse.parse_args()
+		if args['resource'] != None and len(args['resource']) > 0:
+			# Check resource type
+			if args['resource'] == 'tags':
+				result = manager.get_popular_tags()
+				print result
+				return jsonify(tags=result)
+		else:
+			abort(400)
+
+api.add_resource(GetLastUpdates, '/yilpil/ranking', endpoint='ranking')		
 
 
 if __name__ == '__main__':

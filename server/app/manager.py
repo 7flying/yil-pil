@@ -42,6 +42,11 @@ GLOBAL_POST_UPDATE_ID = 'global-post-update'
 # Id for the sorted set of tag name + score.
 # The score is the upper case ASCII value of the character
 SEARCH_TAGS_LETTER = 'search-tags-letter'
+## -- Popular/Rankings -- ##
+# Most popular tags:
+# Id for the sorted set of tag name + score
+# The score is the number of times that tag was used
+POPULAR_TAGS = 'popular-tags-ranking'
 # tags-autocomplete : TODO!
 # Posts-user:
 # Id for the sorted set of post-id + score.
@@ -209,6 +214,8 @@ def insert_tag_post_tags(post_id, tag):
 		db.sadd(get_post(post_id)[KEY_TAGS], tag)
 		# Add to global tags
 		_insert_tags_global(tag)
+		# Add to popular
+		_inc_dec_tag(tag, True)
 
 def delete_tag_from_post(post_id, tag):
 	"""
@@ -217,6 +224,8 @@ def delete_tag_from_post(post_id, tag):
 	debug("DELETE TAG from post. tag:" + tag + ", post #:" + str(post_id))
 	if _is_post_created(post_id):
 		db.srem(get_post(post_id)[KEY_TAGS] + APPEND_KEY_TAG, tag)
+		# Decrement the score
+		_inc_dec_tag(tag, False)
 
 def _is_post_created(post_id):
 	"""
@@ -529,4 +538,27 @@ def get_last_post_updates():
 		ret.append(get_post(id))
 	return ret
 
-### End of global things###
+### End of global things ###
+
+### Ranking/Popular stuff ###
+
+def _inc_dec_tag(tag_name, add=True):
+	""" Increments or decrements the counter of a tag. """
+	if tag_name != None and len(tag_name) > 0:	
+		if add:
+			db.zincrby(POPULAR_TAGS, 1, tag_name)
+		else:
+			db.zincrby(POPULAR_TAGS, -1, tag_name)
+	else:
+		print "hey"
+
+def get_popular_tags():
+	""" Returns the most popular tags."""
+	pipe = db.pipeline()
+	max_num = db.zcard(POPULAR_TAGS)
+	result = db.zrangebyscore(POPULAR_TAGS, 1, "+inf", max_num - API_MAX_UPDATES,
+		  API_MAX_UPDATES, withscores=True)
+	pipe.execute()
+	return result
+
+### End of Rankin/Popular stuff ### 
