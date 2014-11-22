@@ -86,7 +86,7 @@ def populate_test2():
 		post_tem[KEY_TITLE] = "Post Num " + str(i)
 		post_tem[KEY_TAGS].append("Tag number " + str(i))
 		insert_post(post_tem, 'seven')
-	
+	debug("Database created with testing data")
 
 ### User related stuff ###
 
@@ -223,7 +223,7 @@ def delete_tag_from_post(post_id, tag):
 	"""
 	debug("DELETE TAG from post. tag:" + tag + ", post #:" + str(post_id))
 	if _is_post_created(post_id):
-		db.srem(get_post(post_id)[KEY_TAGS] + APPEND_KEY_TAG, tag)
+		db.srem(db.hget(post_id + APPEND_KEY_POSTS, KEY_TAGS) + APPEND_KEY_TAG, tag)
 		# Decrement the score
 		_inc_dec_tag(tag, False)
 
@@ -331,6 +331,8 @@ def insert_post(post, username): # OK
 		insert_tag_user_tags(username, tag)
 		## Add tag to the global tags
 		_insert_tags_global(tag)
+		# Add to popular
+		_inc_dec_tag(tag, True)
 
 	db.hset(db_post_id, KEY_TAGS, tag_id)
 	# Add post id to the head of the user's post-list
@@ -370,9 +372,9 @@ def delete_post(post_id, username):
 	debug("DELETE POST. username:" + username + ",post:" + str(post_id))
 	post_id = str(post_id)
 	if _is_post_created(post_id):
-		db.hdel(post_id + APPEND_KEY_POSTS, KEY_TITLE)
-		db.hdel(post_id + APPEND_KEY_POSTS, KEY_DATE)
-		db.hdel(post_id + APPEND_KEY_POSTS, KEY_CONTENTS)
+		# Delete each of the tags (to decrement the score in the ranking)
+		for t in get_post_tags(post_id):
+			delete_tag_from_post(post_id, t)
 		# Delete the set of tags that the post has
 		tags_id = db.hget(post_id + APPEND_KEY_POSTS, KEY_TAGS)
 		db.delete(tags_id + APPEND_KEY_TAG)
@@ -385,6 +387,9 @@ def delete_post(post_id, username):
 		db.lrem(username + APPEND_KEY_POSTS, 1, post_id)
 		# Delete the post
 		db.hdel(post_id  + APPEND_KEY_POSTS, KEY_TAGS)
+		db.hdel(post_id + APPEND_KEY_POSTS, KEY_TITLE)
+		db.hdel(post_id + APPEND_KEY_POSTS, KEY_DATE)
+		db.hdel(post_id + APPEND_KEY_POSTS, KEY_CONTENTS)
 		return True
 	else:
 		return False
@@ -546,19 +551,26 @@ def _inc_dec_tag(tag_name, add=True):
 	""" Increments or decrements the counter of a tag. """
 	if tag_name != None and len(tag_name) > 0:	
 		if add:
-			db.zincrby(POPULAR_TAGS, 1, tag_name)
+			debug("INC TAG USAGE: "+ tag_name)
+			db.zincrby(POPULAR_TAGS, tag_name, 1)
 		else:
-			db.zincrby(POPULAR_TAGS, -1, tag_name)
-	else:
-		print "hey"
-
+			debug("DEC TAG USAGE: "+ tag_name)
+			db.zincrby(POPULAR_TAGS, tag_name, -1)
+	
 def get_popular_tags():
 	""" Returns the most popular tags."""
 	pipe = db.pipeline()
 	max_num = db.zcard(POPULAR_TAGS)
-	result = db.zrangebyscore(POPULAR_TAGS, 1, "+inf", max_num - API_MAX_UPDATES,
-		  API_MAX_UPDATES, withscores=True)
+	# zrevrangebyscore(name, max, min, start=None, num=None, withscores=False,...
+	result = db.zrevrangebyscore(POPULAR_TAGS, '+inf', 1, start=0,
+		num=API_MAX_UPDATES, withscores=True)
+	good_format = []
+	for tup in result:
+		dic = {}
+		dic['name'] = tup[0]
+		dic['num'] = int(tup[1])
+		good_format.append(dic)
 	pipe.execute()
-	return result
+	return good_format
 
-### End of Rankin/Popular stuff ### 
+### End of Ranking/Popular stuff ### 

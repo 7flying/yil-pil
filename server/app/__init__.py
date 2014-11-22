@@ -162,11 +162,14 @@ class PostAPI(Resource):
 	def delete(self, id): # OK
 		""" Deletes an existing post."""
 		username = self.reqparse.parse_args()['username']
-		debug("DELETE POST id:", str(id),"user", username)
-		if manager.delete_post(id, username):
-			return 200 # Ok. Post deleted
+		if username != None and len(username) > 0:
+			debug("DELETE POST id: " + str(id) + " user: " + username)
+			if manager.delete_post(id, username):
+				return 200 # Ok. Post deleted
+			else:
+				return 404 # Meaning post not found
 		else:
-			return 404 # Meaning post not found
+			abort(400)
 
 # 'add_resource' is used to register the routes with the framework.
 # The endpoint is not necessary since Flask-RESTful generates one. 
@@ -181,8 +184,7 @@ class PostsAPI(Resource):
 
 	def __init__(self):
 		self.reqparse = reqparse.RequestParser()
-		self.reqparse.add_argument('page', type=str, location='form', 
-			required=True)
+		self.reqparse.add_argument('page', type=int, required=True)
 		super(PostsAPI, self).__init__()
 
 	def get(self, username): #OK, but review jsonify again
@@ -333,8 +335,10 @@ class GetLastUpdates(Resource):
 			if args['resource'] == 'posts':
 				result = manager.get_last_post_updates()
 				return jsonify(posts=result)
+			else:
+				abort(404)
 		else:
-			abort(400)		
+			abort(400)
 
 api.add_resource(GetLastUpdates, '/yilpil/updates', endpoint='updates')		
 
@@ -354,12 +358,13 @@ class GetPopular(Resource):
 			# Check resource type
 			if args['resource'] == 'tags':
 				result = manager.get_popular_tags()
-				print result
 				return jsonify(tags=result)
+			else:
+				abort(404)
 		else:
 			abort(400)
 
-api.add_resource(GetLastUpdates, '/yilpil/ranking', endpoint='ranking')		
+api.add_resource(GetPopular, '/yilpil/ranking', endpoint='ranking')		
 
 
 if __name__ == '__main__':

@@ -1,7 +1,6 @@
 define(['knockout', 'text!./post-list.html'], function(ko, template) {
 
 	function PostListViewModel(params) {
-		this.message = ko.observable('Hello from the component!');
 		/* Static data to know if it it's working *//*
 		this.posts = [{ title: "Post Num 12", author: "seven",
 						contents: "Lorem ipsum dolor sit amet",
@@ -21,9 +20,9 @@ define(['knockout', 'text!./post-list.html'], function(ko, template) {
 		var getUpdates = function(toStore) {
 			$.getJSON('/yilpil/updates?resource=posts', function(data) {
 				while(data.posts.length > 0)
-					toStore.push(data.posts.pop());
+					toStore.push(data.posts.shift());
 			});	
-		}
+		};
 		/* Get the actual data. */
 		getUpdates(this.posts);
 	}
