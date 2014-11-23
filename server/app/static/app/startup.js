@@ -1,4 +1,4 @@
-define(['jquery', 'knockout', './router', 'bootstrap', 'knockout-projections'], function($, ko, router) {
+define(['jquery', 'knockout', './router', 'bootstrap', 'knockout-projections', 'knockout-postbox'], function($, ko, router) {
 
   // Components can be packaged as AMD modules, such as the following:
   ko.components.register('nav-bar', { require: 'components/nav-bar/nav-bar' });
@@ -13,6 +13,7 @@ define(['jquery', 'knockout', './router', 'bootstrap', 'knockout-projections'], 
   ko.components.register('tag-list', { require: 'components/tag-list/tag-list' });
   ko.components.register('sign-in-page', { require: 'components/sign-in-page/sign-in' });
   ko.components.register('sign-up-page', { require: 'components/sign-up-page/sign-up' });
+  ko.components.register('post-page', { require: 'components/post-page/post' });
   // [Scaffolded component registrations will be inserted here. To retain this feature, don't remove this comment.]
 
   // Start the application

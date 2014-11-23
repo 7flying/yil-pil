@@ -17,10 +17,23 @@ define(['knockout', 'text!./post-list.html'], function(ko, template) {
 					}];
 		*/
 		this.posts = ko.observableArray();
+		
+		this.sendId = function(post) {
+			ko.postbox.publish("idSender", post.id);
+			return window.location.href = window.location.href.replace('#', '#post/' + post.id);
+		}
+
 		var getUpdates = function(toStore) {
 			$.getJSON('/yilpil/updates?resource=posts', function(data) {
-				while(data.posts.length > 0)
-					toStore.push(data.posts.shift());
+				while (data.posts.length > 0) {
+					var temp = data.posts.shift();
+					// Set preview
+					if (temp.contents.length < 200)
+						temp.contents = temp.contents.substring(0, temp.contents.length);
+					else
+						temp.contents = temp.contents.substring(0, 200) + " [...]";
+					toStore.push(temp);
+				}
 			});	
 		};
 		/* Get the actual data. */
