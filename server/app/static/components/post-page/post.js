@@ -5,14 +5,15 @@ define(['knockout', 'text!./post.html'], function(ko, template) {
 		this.post = ko.observable();
 
 		ko.postbox.subscribe("idSender", function(receivedValue) {
-			console.log("data received from postbox : " + receivedValue);
-			
-		});
+			//console.log("data received from postbox : " + receivedValue);
+			getPost(this.post, receivedValue);
+		}, PostViewModel);
+
 		var getPost = function(toStore, id) {
 			console.log("at get post")
 			$.getJSON('/yilpil/post/' + id, function(data) {
 				toStore = data;
-				console.log("data stored")
+				console.log("data stored " + toStore)
 			});
 		};
 	}
