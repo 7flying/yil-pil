@@ -13,7 +13,7 @@ define(['knockout', 'text!./post.html'], function(ko, template) {
 			console.log("at get post")
 			$.getJSON('/yilpil/post/' + id, function(data) {
 				toStore = data;
-				console.log("data stored " + toStore)
+				console.log("data stored ");
 			});
 		};
 	}

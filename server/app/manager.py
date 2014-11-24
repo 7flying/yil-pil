@@ -42,6 +42,11 @@ GLOBAL_POST_UPDATE_ID = 'global-post-update'
 # Id for the sorted set of tag name + score.
 # The score is the upper case ASCII value of the character
 SEARCH_TAGS_LETTER = 'search-tags-letter'
+# Posts by title
+# Id for the sorted set of post-titles all with the same score (force Zrangebylex)
+SEARCH_POSTS_TITLE = 'search-posts-title'
+# This hash makes a relationship between a title and the posts with that title
+APPEND_SEARH_POSTS_TITLE_GET_IDS = '-search-posts-title-ids'
 ## -- Popular/Rankings -- ##
 # Most popular tags:
 # Id for the sorted set of tag name + score
@@ -341,6 +346,8 @@ def insert_post(post, username): # OK
 	_insert_post_user_date_ss(post_id, timedatenow, username)
 	## Add post id to the capped list of last post updates
 	_insert_post_last_updates(post_id)
+	## Add post's title to the title search sorted set
+	_insert_title_ss(post[KEY_TITLE], post_id)
 	debug("POST CREATED")
 	return get_post(post_id)
 
@@ -523,6 +530,49 @@ def search_posts_user_date(username, date_ini, date_end, page=0):
 	else:
 		# Bad request
 		return None
+
+def _insert_title_ss(title, post_id):
+	"""
+	Inserts a title to the sorted set of titles (later on used to find all the
+	posts with the given title), and associates the title with the post id.
+	"""
+	title = title.upper()
+	# pipe = db.pipeline()
+	keys = db.hkeys(title + APPEND_SEARH_POSTS_TITLE_GET_IDS)
+	# We simulate a list of post-ids: the fields of the hash are incremented 
+	# by one with each post_id.
+	if keys == None or len(keys) == 0:
+		db.hset(title + APPEND_SEARH_POSTS_TITLE_GET_IDS,
+		"0", str(post_id))
+	else:
+		db.hset(title + APPEND_SEARH_POSTS_TITLE_GET_IDS, max(keys) + 1,
+			str(post_id))
+	db.zadd(SEARCH_POSTS_TITLE, 0, title)
+	# db.execute()
+
+def _get_posts_by_title(title):
+	ret = []
+	temp_ids = []
+	for val in db.hvals(title + APPEND_SEARH_POSTS_TITLE_GET_IDS):
+		if val not in temp_ids:
+			temp_ids.append(val)
+			post = get_post(val)
+			if post != None:
+				ret.append(get_post(val))
+	return ret
+
+
+def search_posts_title(partial_title, page=0):
+	""" """
+	titles = db.zrangebylex(SEARCH_POSTS_TITLE, "[" + partial_title,
+		"[" + partial_title + "xff")
+	posts = []
+	for title in titles:
+		temp = _get_posts_by_title(title)
+		if len(temp) > 0:
+			for x in temp:
+				posts.add(x)
+	return posts
 
 ### End of search stuff ###
 

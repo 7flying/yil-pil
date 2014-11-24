@@ -282,12 +282,10 @@ class SearchPostsDateAPI(Resource):
 
 	def __init__(self):
 		self.reqparse = reqparse.RequestParser()
-		self.reqparse.add_argument('page', type=int, location='form')
-		self.reqparse.add_argument('user', type=str, location='form',
-			required=True)
-		self.reqparse.add_argument('dateini', type=int, location='form',
-			required=True)
-		self.reqparse.add_argument('dateend', type=int, location='form')
+		self.reqparse.add_argument('page', type=int)
+		self.reqparse.add_argument('user', type=str, required=True)
+		self.reqparse.add_argument('dateini', type=int, required=True)
+		self.reqparse.add_argument('dateend', type=int)
 		super(SearchPostsDateAPI, self).__init__()
 
 	def get(self):
@@ -318,6 +316,22 @@ class SearchPostsDateAPI(Resource):
 			return jsonify(posts=result)
 
 api.add_resource(SearchPostsDateAPI, '/yilpil/search/posts/date', endpoint='date')
+
+
+class SearchPostsTitleAPI(Resource):
+	""" Provides search of pots given a title. """
+
+	def __init__(self):
+		self.reqparse = reqparse.RequestParser()
+		self.reqparse.add_argument('title', type=str, required=True)
+		super(SearchPostsTitleAPI, self).__init__()
+
+	def get(self):
+		""" Search withing the posts given the title query. """
+		args = self.reqparse.parse_args()
+		return manager.search_posts_title(args['title'])
+
+api.add_resource(SearchPostsTitleAPI, '/yilpil/search/posts/title', endpoint='title')
 
 
 class GetLastUpdates(Resource):
