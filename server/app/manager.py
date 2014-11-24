@@ -564,14 +564,14 @@ def _get_posts_by_title(title):
 
 def search_posts_title(partial_title, page=0):
 	""" """
-	titles = db.zrangebylex(SEARCH_POSTS_TITLE, "[" + partial_title,
-		"[" + partial_title + "xff")
+	titles = db.zrangebylex(SEARCH_POSTS_TITLE, "[" + partial_title.upper(),
+		"[" + partial_title.upper() + "xff")
 	posts = []
 	for title in titles:
 		temp = _get_posts_by_title(title)
 		if len(temp) > 0:
 			for x in temp:
-				posts.add(x)
+				posts.append(x)
 	return posts
 
 ### End of search stuff ###
