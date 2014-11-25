@@ -4,23 +4,27 @@ define(['knockout', 'text!./post.html'], function(ko, template) {
 
 		this.post = ko.observable();
 		this.title = ko.observable();
-		this.potId = ko.observable(window.location.href.charAt(window.location.href.length));
+		this.author = ko.observable();
+		this.potId = ko.observable();
+		this.contents = ko.observable();
+		this.votes = ko.observable();
+
 		ko.postbox.subscribe("idSender", function(receivedValue) {
-			//console.log("data received from postbox : " + receivedValue);
-			this.postId = receivedValue;
-			//getPost(this.post, receivedValue);
+			getPost(receivedValue, this.title, this.author, this.contents, this.votes);
 		}, PostViewModel);
 
-		var getPost = function(toStore, id, sel) {
+		var getPost = function(id, title, author, contents, votes) {
 			console.log("at get post")
 			$.getJSON('/yilpil/post/' + id, function(data) {
-				toStore = data;
-				sel = toStore['title'];
-				console.log(sel);
+				title = data.post.title;
+				author = data.post.author;
+				contents = data.post.contents;
+				votes = data.post.votes;
+				// tags.push("hello");
 			});
 		};
 
-		getPost(this.post, this.potId, this.title);
+		//getPost(this.post, this.potId, this.title);
 		
 	}
 	return { viewModel: PostViewModel, template: template };
