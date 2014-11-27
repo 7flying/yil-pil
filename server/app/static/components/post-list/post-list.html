@@ -13,6 +13,10 @@
 	</li>
 </ul>
 -->
+<div data-bind='visible: showPost'>
+	<h3> \O/ </h3>
+	<!--post-page params='post: selectedPost'--><post-page></post-page>
+</div>
 <div id='posts' data-bind='foreach: posts'>
 	<div class="panel panel-default">
 		<div class="panel-heading" >
@@ -43,3 +47,4 @@
 		</div>
 	</div>
 </div>
+

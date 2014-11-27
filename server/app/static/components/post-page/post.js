@@ -1,7 +1,8 @@
 define(['knockout', 'text!./post.html'], function(ko, template) {
 
 	function PostViewModel(params) {
-
+		//this.id = params.post;
+	/*
 		var post;
 		var self = this;
 		self.post = {}
@@ -31,6 +32,7 @@ define(['knockout', 'text!./post.html'], function(ko, template) {
 		self.post.votes = ko.observable(data.votes);
 
 		getPost(3,self.post);
+		*/
 		/* 
 		this.post = ko.observable();
 		this.post_tit = ko.observable();
@@ -53,7 +55,7 @@ define(['knockout', 'text!./post.html'], function(ko, template) {
 				// tags.push("hello");
 			});
 		};
-		*/
+	*/
 		
 	}
 	return { viewModel: PostViewModel, template: template };
