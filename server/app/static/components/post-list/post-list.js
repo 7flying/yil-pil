@@ -20,7 +20,10 @@ define(['knockout', 'text!./post-list.html'], function(ko, template) {
 		this.posts = ko.observableArray();
 
 		var getUpdates = function(toStore) {
-			$.getJSON('/yilpil/updates?resource=posts', function(data) {
+			var url = (params.user == undefined)
+				? '/yilpil/updates?resource=posts'
+				: '/yilpil/posts/' + params.user + '?page=1';
+			$.getJSON(url, function(data) {
 				while (data.posts.length > 0) {
 					var temp = data.posts.shift();
 					// Set preview

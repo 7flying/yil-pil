@@ -1,4 +1,4 @@
-define(['knockout', 'text!./post.html', 'app/router'], function(ko, template, router) {
+define(['knockout', 'text!./post.html'], function(ko, template) {
 
 	function PostViewModel(params) {
 		
@@ -16,7 +16,6 @@ define(['knockout', 'text!./post.html', 'app/router'], function(ko, template, ro
 
 		var getPost = function(toStore) {
 			$.getJSON('/yilpil/post/' + params.postId, function(data){
-				console.log(data.post);
 				var post = {};
 				post.title = data.post.title;
 				post.author = data.post.author;

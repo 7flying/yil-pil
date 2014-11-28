@@ -3,12 +3,21 @@
 		<div class="thumbnail">
     		<img src="http://www.gravatar.com/avatar/58a69f2a55aa8c3fe4c67c7880e64306" alt="...">
     	    <div class="caption">
-    		    <h3>Username</h3>
-        		<p>...</p>
+    		    <h3 data-bind='text: user'></h3>
       		</div>
+    	</div>
+    	<div class="panel panel-default">
+    			<ul class="nav nav-pills"data-bind='foreach: tags'>
+					<li class="label label-success presentation" data-bind='text: $data'></li>
+				</ul>
+    		<!--
+    		<div class="well well-sm">
+    			<span class="label label-success" data-bind='text: $data'></span>
+    		</div>
+    		-->
     	</div>
 	</div>
 	<div class="col-xs-12 col-sm-9">
-		<post-list params='userPosts: "true"'></post-list>
+		<post-list params='user: "seven"'></post-list>
 	</div>
 </div>
