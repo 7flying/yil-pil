@@ -13,16 +13,15 @@
 	</li>
 </ul>
 -->
-<div data-bind='visible: showPost'>
+<!--div data-bind='visible: showPost'>
 	<h3> \O/ </h3>
-	<!--post-page params='post: selectedPost'--><post-page></post-page>
-</div>
+	<post-page params='post: selectedPost'--><!--post-page></post-page>
+</div -->
 <div id='posts' data-bind='foreach: posts'>
 	<div class="panel panel-default">
 		<div class="panel-heading" >
 			<h3>
-				<a data-bind='html: title, attr: {href: id},
-							  templateOptions: {id: id}, click: $parent.sendId'>
+				<a data-bind='html: title, attr: {href: "#post/" + id}'>
 				</a>
 			</h3>
 			<span> by </span>

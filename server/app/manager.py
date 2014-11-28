@@ -410,10 +410,12 @@ def _vote(post_id, voting_user, positive): #OK
 	if _is_post_created(post_id):
 		debug("\t CURRENT VOTES of USER.")
 		debug("\t\t-user: " + voting_user)
-		debug("\t\t-voted to: " + str(db.smembers(voting_user + APPEND_KEY_HAS_VOTED)))
+		debug("\t\t-voted to: " + str(db.smembers(voting_user /
+			 + APPEND_KEY_HAS_VOTED)))
 		if db.sismember(voting_user + APPEND_KEY_HAS_VOTED, post_id) == 0:
-			debug("PREVIOUS POST-VOTE-VALUE: " + \
-				str(db.get(db.hget(post_id + APPEND_KEY_POSTS, KEY_VOTES) + APPEND_KEY_VOTE)))
+			debug("PREVIOUS POST-VOTE-VALUE: " / 
+				+ str(db.get(db.hget(post_id + APPEND_KEY_POSTS, KEY_VOTES) /
+				+ APPEND_KEY_VOTE)))
 			vote_id = db.hget(post_id + APPEND_KEY_POSTS, KEY_VOTES)
 			debug("\t vote_id: " + str(vote_id))
 			pipe = db.pipeline()
@@ -423,8 +425,9 @@ def _vote(post_id, voting_user, positive): #OK
 				pipe.decr(vote_id + APPEND_KEY_VOTE)
 			pipe.sadd(voting_user + APPEND_KEY_HAS_VOTED, post_id)
 			pipe.execute()
-			debug("CURRENT POST-VOTE-VALUE: " + \
-				str(db.get(db.hget(post_id + APPEND_KEY_POSTS, KEY_VOTES) + APPEND_KEY_VOTE)))
+			debug("CURRENT POST-VOTE-VALUE: " /
+				+ str(db.get(db.hget(post_id + APPEND_KEY_POSTS, KEY_VOTES) /
+				+ APPEND_KEY_VOTE)))
 			return True
 		else:
 			return False

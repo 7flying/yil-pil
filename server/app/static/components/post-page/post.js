@@ -1,62 +1,37 @@
-define(['knockout', 'text!./post.html'], function(ko, template) {
+define(['knockout', 'text!./post.html', 'app/router'], function(ko, template, router) {
 
 	function PostViewModel(params) {
-		//this.id = params.post;
-	/*
-		var post;
+		
+		/* Little working example \o/ 
 		var self = this;
-		self.post = {}
-
-		ko.postbox.subscribe("idSender", function(receivedValue) {
-			getPost(receivedValue);
-		}, PostViewModel);
-
-		var getPost = function(id, store) {
-			console.log("at get post: " + id);
-			$.getJSON('/yilpil/post/' + id, function(data) {
-				//setValues(data);
-				store = data;
-			});
+		self.id = ko.observable(params.postId); // Or without initialization.
+		
+		var getId = function() {
+			self.id = params.postId;
 		};
-
-		var setValues = function(data) {
-			self.post.tit = ko.observable(data.tit);
-			self.post.author = ko.observable(data.author);
-			self.post.contents = ko.observable(data.contents);
-			self.post.votes = ko.observable(data.votes);
-		};
-
-		self.post.tit = ko.observable(data.tit);
-		self.post.author = ko.observable(data.author);
-		self.post.contents = ko.observable(data.contents);
-		self.post.votes = ko.observable(data.votes);
-
-		getPost(3,self.post);
+		getId();
 		*/
-		/* 
-		this.post = ko.observable();
-		this.post_tit = ko.observable();
-		this.author = ko.observable();
-		this.potId = ko.observable();
-		this.contents = ko.observable();
-		this.votes = ko.observable();
 
-		ko.postbox.subscribe("idSender", function(receivedValue) {
-			getPost(receivedValue, this.post_tit, this.author, this.contents, this.votes);
-		}, PostViewModel);
-
-		var getPost = function(id, post_tit, author, contents, votes) {
-			console.log("at get post: " + id);
-			$.getJSON('/yilpil/post/' + id, function(data) {
-				post_tit = data.post.post_tit;
-				author = data.post.author;
-				contents = data.post.contents;
-				votes = data.post.votes;
-				// tags.push("hello");
+		this.posts = ko.observableArray(); // Arrays are dynamically updated
+		
+		var getPost = function(toStore) {
+			$.getJSON('/yilpil/post/' + params.postId, function(data){
+				console.log(data.post);
+				var post = {};
+				post.title = data.post.title;
+				post.author = data.post.author;
+				post.contents = data.post.contents;
+				post.votes = data.post.votes;
+				post.tags = [];
+				while (data.post.tags.length > 0)
+					post.tags.push(data.post.tags.shift());
+				toStore.push(post);
 			});
 		};
-	*/
+		
+		getPost(this.posts);
 		
 	}
+	
 	return { viewModel: PostViewModel, template: template };
 });

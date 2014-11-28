@@ -44,6 +44,7 @@ define(['knockout', 'text!./post-list.html'], function(ko, template) {
 					else
 						temp.contents = temp.contents.substring(0, 200) + " [...]";
 					toStore.push(temp);
+					self.selectedPost = temp.id;
 				}
 			});	
 		};
