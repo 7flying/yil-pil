@@ -18,21 +18,6 @@ define(['knockout', 'text!./post-list.html'], function(ko, template) {
 		*/
 		var self = this;
 		this.posts = ko.observableArray();
-		this.showPost = ko.observable(false);
-		this.selectedPost = ko.observable();
-
-		self.setPostVisible = function(isVisible) {
-			console.log("changing post-compotent to :" + isVisible)
-			self.showPost(isVisible);
-		}
-
-		self.sendId = function(post) {
-			console.log("click on post: " + post.id)
-			//ko.postbox.publish("idSender", post.id);
-			//return window.location.href = window.location.href.replace('#', '#post/' + post.id);
-			self.selectedPost = post.id;
-			self.setPostVisible(true);
-		}
 
 		var getUpdates = function(toStore) {
 			$.getJSON('/yilpil/updates?resource=posts', function(data) {
@@ -44,7 +29,6 @@ define(['knockout', 'text!./post-list.html'], function(ko, template) {
 					else
 						temp.contents = temp.contents.substring(0, 200) + " [...]";
 					toStore.push(temp);
-					self.selectedPost = temp.id;
 				}
 			});	
 		};
