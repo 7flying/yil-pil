@@ -324,12 +324,14 @@ class SearchPostsTitleAPI(Resource):
 	def __init__(self):
 		self.reqparse = reqparse.RequestParser()
 		self.reqparse.add_argument('title', type=str, required=True)
+		self.reqparse.add_argument('page', type=int)
 		super(SearchPostsTitleAPI, self).__init__()
 
 	def get(self):
 		""" Search withing the posts given the title query. """
 		args = self.reqparse.parse_args()
-		return manager.search_posts_title(args['title'])
+		page = args['page'] if args['page'] != None else 0
+		return manager.search_posts_title(args['title'], page)
 
 api.add_resource(SearchPostsTitleAPI, '/yilpil/search/posts/title', endpoint='title')
 

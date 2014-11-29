@@ -559,6 +559,10 @@ def _insert_title_ss(title, post_id):
 	# db.execute()
 
 def _get_posts_by_title(title):
+	"""
+	Gets the ids of the titles that match the given title and gets the posts for 
+	those post ids.
+	"""
 	ret = []
 	temp_ids = []
 	for val in db.hvals(title + APPEND_SEARH_POSTS_TITLE_GET_IDS):
@@ -571,7 +575,9 @@ def _get_posts_by_title(title):
 
 
 def search_posts_title(partial_title, page=0):
-	""" """
+	"""
+	Searches within the posts given a partial title. Pagination may be provided.
+	"""
 	titles = db.zrangebylex(SEARCH_POSTS_TITLE, "[" + partial_title.upper(),
 		"[" + partial_title.upper() + "xff")
 	posts = []
@@ -580,6 +586,8 @@ def search_posts_title(partial_title, page=0):
 		if len(temp) > 0:
 			for x in temp:
 				posts.append(x)
+	if page > 0 and len(posts) > 0:
+		posts = _raw_paginate(posts, page)
 	return posts
 
 ### End of search stuff ###
