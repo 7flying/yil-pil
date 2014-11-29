@@ -67,12 +67,14 @@ def debug(to_print):
 def populate_test2():
 	db.flushdb()
 	insert_user('seven', '123', 'seven@server.com')
+	insert_user('troll', '123', 'troll@server.com')
 	post = { 
 		KEY_TITLE : "How to install Node.js",
 		KEY_CONTENTS: "Download files and sudo make, sudo make intall",
 		KEY_TAGS: ["node.js", "How-to"]
 	}
 	insert_post(post, 'seven')
+	insert_post(post, 'troll')
 	
 	post2 = { 
 		KEY_TITLE : "On eating doughnuts",
@@ -80,6 +82,7 @@ def populate_test2():
 		KEY_TAGS: ["food", "health"]
 	}
 	insert_post(post2, 'seven')
+	insert_post(post2, 'troll')
 
 	post_tem = {
 		KEY_TITLE : "",
@@ -91,6 +94,8 @@ def populate_test2():
 		post_tem[KEY_TITLE] = "Post Num " + str(i)
 		post_tem[KEY_TAGS].append("Tag number " + str(i))
 		insert_post(post_tem, 'seven')
+		insert_post(post_tem, 'troll')
+		
 	debug("Database created with testing data")
 
 ### User related stuff ###
@@ -548,7 +553,7 @@ def _insert_title_ss(title, post_id):
 		db.hset(title + APPEND_SEARH_POSTS_TITLE_GET_IDS,
 		"0", str(post_id))
 	else:
-		db.hset(title + APPEND_SEARH_POSTS_TITLE_GET_IDS, max(keys) + 1,
+		db.hset(title + APPEND_SEARH_POSTS_TITLE_GET_IDS, int(max(keys)) + 1,
 			str(post_id))
 	db.zadd(SEARCH_POSTS_TITLE, 0, title)
 	# db.execute()

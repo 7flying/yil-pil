@@ -1,0 +1,31 @@
+<div data-bind='foreach: posts'>
+	<div class="panel panel-default">
+		<div class="panel-heading" >
+			<h3>
+				<a data-bind='html: title, attr: {href: "#post/" + id}'>
+				</a>
+			</h3>
+			<span> by </span>
+			<span data-bind='text: author'></span>
+			<span> • Posted on </span>
+			<span data-bind='text: date'></span>
+		</div>
+		<div class="panel-body" data-bind='text: contents'></div>
+		<div class="panel-footer">
+			<button type="button" class="btn btn-default" aria-label="Left Align">
+				<span class=" glyphicon glyphicon-chevron-up" aria-hiden="true"></span>
+			</button>
+			<span class="badge" data-bind='text: votes'></span>
+			<button type="button" class="btn btn-default" aria-label="Left Align">
+				<span class=" glyphicon glyphicon-chevron-down" aria-hiden="true"></span>
+			</button>
+			
+			<button type="button" class="btn btn-default" aria-label="Left Align">
+				<span class="glyphicon glyphicon-heart" aria-hidden="true"> Like</span>
+			</button>
+			<span data-bind='foreach: tags'>
+				<span class="label label-success" data-bind='text: $data'></span>
+			</span>
+		</div>
+	</div>
+</div>

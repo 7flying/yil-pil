@@ -18,6 +18,8 @@
     	</div>
 	</div>
 	<div class="col-xs-12 col-sm-9">
-		<post-list params='user: "seven"'></post-list>
+		<!-- ko if: userPosts -->
+		<user-posts params='posts: userPosts'></user-posts>
+		<!-- /ko -->
 	</div>
 </div>
