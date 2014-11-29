@@ -49,7 +49,8 @@ define(["knockout", "crossroads", "hasher"], function(ko, crossroads, hasher) {
             login:          route('login', { page: 'sign-in-page' }),
             join:           route('join', { page: 'sign-up-page' }),
             post:           route('post/{postId}', { page: 'post-page' }),
-            user:           route('user/{name}', { page: 'user-page'})
+            user:           route('user/{name}', { page: 'user-page' }),
+            search:         route('search/{query}', { page: 'search-page' })
         }
     };
 

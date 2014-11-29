@@ -1,13 +1,32 @@
 define(['knockout', 'text!./nav-bar.html'], function(ko, template) {
 
-  function NavBarViewModel(params) {
+	ko.bindingHandlers.executeOnEnter = {
+		init: function (element, valueAccessor, allBindingsAccessor, viewModel) {
+			var allBindings = allBindingsAccessor();
+			$(element).keypress(function (event) {
+				var keyCode = (event.which ? event.which : event.keyCode);
+				if (keyCode === 13) {
+					allBindings.executeOnEnter.call(viewModel);
+					return false;
+				}
+				return true;
+			});
+		}
+	};
 
-    // This viewmodel doesn't do anything except pass through the 'route' parameter to the view.
-    // You could remove this viewmodel entirely, and define 'nav-bar' as a template-only component.
-    // But in most apps, you'll want some viewmodel logic to determine what navigation options appear.
+	function NavBarViewModel(params) {
 
-    this.route = params.route;
-  }
+		var self = this;
+		this.route = params.route;
 
-  return { viewModel: NavBarViewModel, template: template };
+		self.query = ko.observable();
+		self.sendQuery = function () {
+			if (self.query() != undefined) {
+				return window.location.href = '#search/'
+				 + encodeURIComponent(self.query());
+			}
+		};
+	}
+
+	return { viewModel: NavBarViewModel, template: template };
 });
