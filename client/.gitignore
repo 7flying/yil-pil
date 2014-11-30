@@ -1,7 +1,0 @@
-node_modules/
-test/
-src/bower_modules/
-package.json
-karma.conf.js
-gulpfile.js
-bower.json
