@@ -1,25 +1,51 @@
 <div class="container" id="main-container">
 	<div class="col-xs-6 col-sm-3 sidebar-offcanvas">
 		<div class="thumbnail">
-    		<img src="http://www.gravatar.com/avatar/58a69f2a55aa8c3fe4c67c7880e64306" alt="...">
-    	    <div class="caption">
-    		    <h3 data-bind='text: user'></h3>
-      		</div>
-    	</div>
-    	<p>Tags used: </p>
-    	<div class="panel panel-default">
-
-    			<ul class="nav nav-pills"data-bind='foreach: tags'>
-					<li class="label label-success presentation" data-bind='text: $data'></li>
-				</ul>
-    	</div>
+			<img src="http://www.gravatar.com/avatar/58a69f2a55aa8c3fe4c67c7880e64306" alt="...">
+			<div class="caption">
+				<h3 data-bind='text: user'></h3>
+			</div>
+		</div>
+		<h4>Filter posts</h4>
+		<h5>Start date:</h5>
+		<div class="form-group">
+			<div class='input-group date' id='date-from'>
+				<input id='text-from' input type='text' class="form-control" data-date-format="DD/MM/YYYY"/>
+				<span class="input-group-addon">
+					<span class="glyphicon glyphicon-calendar"></span>
+				</span>
+			</div>
+		</div>
+		<h5>End date:</h5>
+		<div class="form-group">
+			<div class='input-group date' id='date-to'>
+				<input id='text-to' type='text' class="form-control" data-date-format="DD/MM/YYYY"/>
+				<span class="input-group-addon">
+					<span class="glyphicon glyphicon-calendar"></span>
+				</span>
+			</div>
+		</div>
+		<button data-bind="click: filterPosts"
+			type="button" class="btn btn-default" aria-label="Left Align">
+			<span class="glyphicon glyphicon-filter" aria-hidden="true"></span>
+			Filter
+		</button>
+		<h4>Tags used: </h4>
+		<div class="panel panel-default">
+			<ul class="list-group" data-bind='foreach: tags'>
+					<li class="list-group-item" data-bind='text: $data'></li>
+			</ul>
+		</div>
 	</div>
 	<div class="col-xs-12 col-sm-9">
 		<!-- ko if: userPosts -->
+		<h3 data-bind='text: displayTitle'></h3>
 		<user-posts params='posts: userPosts'></user-posts>
 		<!-- /ko -->
 		<!-- ko ifnot: userPosts -->
-		<h2> It seems that <span data-bind='text: user'></span> hasn't post anything yet.</h2>
+		<div class="alert alert-info" role="alert">
+			It seems that <span data-bind='text: user'></span> hasn't post anything yet.
+		</div>
 		<!-- /ko -->
 	</div>
 </div>
