@@ -42,19 +42,28 @@ def verify_password(username, password):
 	db_pass = manager.get_password(username)
 	return check_password_hash(db_pass, password)
 
-class UsersAPI(Resource):
+class UserAPI(Resource):
 	""" Class for the User resource."""
 	user_field = {
 		'name' : fields.String,
-		'email' : fields.String
+		'hash' : fields.String
 	}
 
 	def __init__(self):
 		self.reqparse = reqparse.RequestParser()
-		self.reqparse.add_argument('username', type=str, location='form')
-		self.reqparse.add_argument('email', type=str, location='form')
-		self.reqparse.add_argument('password', type=str, location='form')
-		super(UsersAPI, self).__init__()
+		self.reqparse.add_argument('username', type=str)
+		self.reqparse.add_argument('email', type=str)
+		self.reqparse.add_argument('password', type=str)
+		super(UserAPI, self).__init__()
+
+	def get(self, username):
+		""" Returns the user's public details (name, link to gravatar). """
+		user = manager.get_user(username)
+		if user:
+			return { 'user': marshal(user, UserAPI.user_field) }
+		else:
+			return  jsonify(message="User not found.", code=404)
+
 
 	def post(self, username): #OK
 		""" Handles POST requests to create new users."""
@@ -62,30 +71,40 @@ class UsersAPI(Resource):
 		email = self.reqparse.parse_args()['email']
 		user = {'name': username, 'password': password, 'email' : email}
 		debug("POST USER: " + username + ":" + password)
-		if manager.insert_user(username, password, email):
-			return {'user': marshal(user, UsersAPI.user_field)}
+		if manager.insert_user(user):
+			return  jsonify(message="User created.", code=201)
 		else:
-			abort(400) # Should be "User already created" or something.
-
+			return jsonify(error=500, message='Username taken.')
+ 	
 	@auth.login_required
 	def put(self, username): #OK
 		""" Handles PUT requests to update existing users."""
-		password = self.reqparse.parse_args()['password']
-		if manager.change_password(username, password):
-			user = manager.get_user(username)
-			return {'user': marshal(user, UsersAPI.user_field)} # Igual mejor un 200
-		
-
+		args = self.reqparse.parse_args()
+		ret = True
+		if args['password'] != None:
+			if manager.change_password(username, password):
+				user = manager.get_user(username)
+			else:
+				return jsonify(error=500,
+					message='Database error changing pass.')
+		if args['email'] != None:
+			if manager.change_email(username, email):
+				user = manager.get_user(username)
+			else:
+				return jsonify(error=500,
+					message='Database error changing email.')
+		return jsonify(message="User details updated.", code=201)
+				
 	@auth.login_required
 	def delete(self, username): #OK
 		""" Hanldes DELETE requests to delete an existing user."""
 		debug("DELETE USER:", username)
 		if manager.delete_user(username):
-			return 200 # Change "Ok, created"
+			return jsonify(message="User deleted.", code=200)
 		else:
-			abort(400) # Change
+			return jsonify(message="User not found.", code=404)
 
-api.add_resource(UsersAPI, '/yilpil/users/<string:username>', endpoint='users')
+api.add_resource(UserAPI, '/yilpil/users/<string:username>', endpoint='users')
 
 
 class PostAPI(Resource):

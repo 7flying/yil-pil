@@ -10,6 +10,7 @@ define(['knockout', 'text!./user.html', 'module', 'app/router', 'bootstrap-datet
 		this.userPosts = ko.observableArray();
 		this.user = ko.observable(params.name);
 		this.tags = ko.observableArray();
+		this.gravatar = ko.observable();
 		this.displayTitle = ko.observable('Latest posts: ');
 		this.alertTitle = ko.observable("It seems that " + params.name
 			+ " hasn't post anything yet.");
@@ -86,8 +87,16 @@ define(['knockout', 'text!./user.html', 'module', 'app/router', 'bootstrap-datet
 			});	
 		};
 
+		var getAvatar = function(toStore) {
+			var url = '/yilpil/users/' + params.name;
+			$.getJSON(url, function(data) {
+				toStore('http://www.gravatar.com/avatar/' + data.user.hash);
+			});
+		};
+
 		getUserPosts(this.userPosts);
 		getUserTags(this.tags);
+		getAvatar(this.gravatar);
 
 	}
 	return { viewModel: UserViewModel, template: template };

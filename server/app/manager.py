@@ -1,8 +1,9 @@
 # -*- coding: utf-8 -*-
 from __init__ import db
 from datetime import datetime
-from config import API_PAGINATION, API_MAX_UPDATES
+import hashlib
 from werkzeug.security import generate_password_hash
+from config import API_PAGINATION, API_MAX_UPDATES
 
 # Datetime format in posts
 FORMAT_TIME = "%d-%m-%Y %H:%M"
@@ -12,6 +13,7 @@ FORMAT_TIME_SEARCH = "%Y%m%d"
 KEY_PASSWORD = 'password'
 KEY_EMAIL = 'email'
 KEY_USER = 'name'
+KEY_HASH = 'hash'
 # In post-hash map
 KEY_TITLE = 'title'
 KEY_CONTENTS = 'contents'
@@ -66,15 +68,18 @@ def debug(to_print):
 
 def populate_test2():
 	db.flushdb()
-	insert_user('seven', '123', 'seven@server.com')
-	insert_user('troll', '123', 'troll@server.com')
+	user = {KEY_USER: 'seven', KEY_PASSWORD: '123', KEY_EMAIL: 'seven@gmail.com'}
+	insert_user(user)
+	user[KEY_EMAIL] = 'panfrosio@gmail.com'
+	user[KEY_USER] = 'panfrosio'
+	insert_user(user)
 	post = { 
 		KEY_TITLE : "How to install Node.js",
 		KEY_CONTENTS: "Download files and sudo make, sudo make intall",
 		KEY_TAGS: ["node.js", "How-to"]
 	}
 	insert_post(post, 'seven')
-	insert_post(post, 'troll')
+	insert_post(post, 'panfrosio')
 	
 	post2 = { 
 		KEY_TITLE : "On eating doughnuts",
@@ -82,7 +87,7 @@ def populate_test2():
 		KEY_TAGS: ["food", "health"]
 	}
 	insert_post(post2, 'seven')
-	insert_post(post2, 'troll')
+	insert_post(post2, 'panfrosio')
 
 	post_tem = {
 		KEY_TITLE : "",
@@ -94,7 +99,7 @@ def populate_test2():
 		post_tem[KEY_TITLE] = "Post Num " + str(i)
 		post_tem[KEY_TAGS].append("Tag number " + str(i))
 		insert_post(post_tem, 'seven')
-		insert_post(post_tem, 'troll')
+		insert_post(post_tem, 'panfrosio')
 		
 	debug("Database created with testing data")
 
@@ -135,18 +140,31 @@ def change_password(username, new_pass): #OK
 	else:
 		return False
 
-def insert_user(username, password, email): #OK
+def change_email(username, new_email):
+	""" Changes the user's email. Returns False if the user is not created. """
+	if _is_user_created(username):
+		db.hset(username + APPEND_KEY_USER, KEY_EMAIL, new_email)
+		# Generate the md5 also.
+		db.hset(username + APPEND_KEY_USER, KEY_HASH,
+			hashlib.md5(new_email.encode('utf-8')).hexdigest())
+	else:
+		return False
+
+def insert_user(user): #OK
 	"""
 	Inserts a user in the db. Returns False if there is already a user in the
 	db with that username.
 	"""
-	debug("CREATE USER :" + username + ",pass:" + password + ",email:" + email)
+	debug("CREATE USER :" + user[KEY_USER])
+	username = user[KEY_USER]
 	if not _is_user_created(username):
-		hashpass= generate_password_hash(password)
+		hashpass= generate_password_hash(user[KEY_PASSWORD])
 		pipe = db.pipeline()
-		pipe.hset(username + APPEND_KEY_USER, KEY_USER, username)
+		pipe.hset(username + APPEND_KEY_USER, KEY_USER, user[KEY_USER])
 		pipe.hset(username + APPEND_KEY_USER, KEY_PASSWORD, hashpass)
-		pipe.hset(username + APPEND_KEY_USER, KEY_EMAIL, email)
+		pipe.hset(username + APPEND_KEY_USER, KEY_EMAIL, user[KEY_EMAIL])
+		pipe.hset(username + APPEND_KEY_USER, KEY_HASH,
+			hashlib.md5(user[KEY_EMAIL].encode('utf-8')).hexdigest())
 		pipe.execute()
 		debug("\tUser successfully created")
 		return get_user(username)
@@ -154,7 +172,7 @@ def insert_user(username, password, email): #OK
 		debug("\tUser creation failed")
 		return False
 
-def delete_user(username): #OK
+def delete_user(username): #OK -> DELETE ALL HIS/HER POSTS and stuff
 	if _is_user_created(username):
 		return db.delete(username + APPEND_KEY_USER) > 0
 	return False
@@ -165,7 +183,7 @@ def get_user(username):
 	if _is_user_created(username):
 		user = {}
 		user[KEY_USER] = db.hget(username + APPEND_KEY_USER, KEY_USER)
-		user[KEY_EMAIL] = db.hget(username + APPEND_KEY_USER, KEY_EMAIL)
+		user[KEY_HASH] = db.hget(username + APPEND_KEY_USER, KEY_HASH)
 		return user
 	else:
 		return None
