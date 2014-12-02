@@ -3,8 +3,9 @@ var require = {
     baseUrl: "./",
     paths: {
         "bootstrap":            "bower_modules/components-bootstrap/js/bootstrap.min",
-        "bootstrap-datetimepicker":
-                                "bower_modules/bootstrap-datetimepicker/src/js/bootstrap-datetimepicker",
+        "bootstrapvalidator":   "bower_modules/bootstrapvalidator/src/js/bootstrapValidator",
+        "eonasdan-bootstrap-datetimepicker":
+                                "bower_modules/eonasdan-bootstrap-datetimepicker/src/js/bootstrap-datetimepicker",
         "crossroads":           "bower_modules/crossroads/dist/crossroads.min",
         "hasher":               "bower_modules/hasher/dist/js/hasher.min",
         "jquery":               "bower_modules/jquery/dist/jquery",
