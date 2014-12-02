@@ -4,9 +4,9 @@ var require = {
     paths: {
         "bootstrap":            "bower_modules/components-bootstrap/js/bootstrap.min",
         "bootstrapvalidator":   "bower_modules/bootstrapvalidator/src/js/bootstrapValidator",
+        "crossroads":           "bower_modules/crossroads/dist/crossroads.min",
         "eonasdan-bootstrap-datetimepicker":
                                 "bower_modules/eonasdan-bootstrap-datetimepicker/src/js/bootstrap-datetimepicker",
-        "crossroads":           "bower_modules/crossroads/dist/crossroads.min",
         "hasher":               "bower_modules/hasher/dist/js/hasher.min",
         "jquery":               "bower_modules/jquery/dist/jquery",
         "knockout":             "bower_modules/knockout/dist/knockout",

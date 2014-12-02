@@ -8,6 +8,9 @@ define(['jquery', 'knockout', './router', 'bootstrap', 'knockout-projections', '
   ko.components.register('about-page', {
     template: { require: 'text!components/about-page/about.html' }
   });
+  ko.components.register('footer-credits', {
+    template: { require: 'text!components/footer-credits/footer.html' }
+  });
 
   ko.components.register('post-list', { require: 'components/post-list/post-list' });
   ko.components.register('tag-list', { require: 'components/tag-list/tag-list' });
@@ -16,6 +19,7 @@ define(['jquery', 'knockout', './router', 'bootstrap', 'knockout-projections', '
   ko.components.register('post-page', { require: 'components/post-page/post' });
   ko.components.register('user-page', { require: 'components/user-page/user' });
   ko.components.register('search-page', { require: 'components/search-page/search' });
+  
   // [Scaffolded component registrations will be inserted here. To retain this feature, don't remove this comment.]
 
   // Start the application

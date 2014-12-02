@@ -9,6 +9,7 @@
       <link href="bower_modules/components-bootstrap/css/bootstrap.min.css" rel="stylesheet">
       <link href="bower_modules/eonasdan-bootstrap-datetimepicker/build/css/bootstrap-datetimepicker.min.css" rel="stylesheet">
       <link href="bower_modules/bootstrapvalidator/src/css/bootstrapValidator.css" rel="stylesheet">
+      <link href="bower_modules/fontawesome/css/font-awesome.min.css" rel="stylesheet">
       <link href="css/styles.css" rel="stylesheet">
     <!-- endbuild -->
     <!-- build:js -->
@@ -19,5 +20,6 @@
   <body>
     <nav-bar params="route: route"></nav-bar>
     <div id="page" class="container" data-bind="component: { name: route().page, params: route }"></div>
+    <footer-credits></footer-credits>
   </body>
 </html>
