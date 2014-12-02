@@ -9,38 +9,6 @@ define(["knockout", "crossroads", "hasher"], function(ko, crossroads, hasher) {
     // Knockout that requires or even knows about this technique. It's just one of
     // many possible ways of setting up client-side routes.
 
-/*
-    return new Router({
-        routes: [
-            { url: '',          params: { page: 'home-page' } },
-            { url: 'about',     params: { page: 'about-page' } },
-            { url: 'login',     params: { page: 'sign-in-page' } },
-            { url: 'join',      params: { page: 'sign-up-page' } },
-            { url: 'post/{postId}', params: { page: 'post-page' } }
-        ]
-    });
-
-    function Router(config) {
-        var currentRoute = this.currentRoute = ko.observable({});
-
-        ko.utils.arrayForEach(config.routes, function(route) {
-            crossroads.addRoute(route.url, function(requestParams) {
-                currentRoute(ko.utils.extend(requestParams, route.params));
-            });
-        });
-
-        activateCrossroads();
-    }
-
-    function activateCrossroads() {
-        function parseHash(newHash, oldHash) { crossroads.parse(newHash); }
-        crossroads.normalizeFn = crossroads.NORM_AS_OBJECT;
-        hasher.initialized.add(parseHash);
-        hasher.changed.add(parseHash);
-        hasher.init();
-    }
-});
-*/
     var router = {
         currentRoute: ko.observable({}),
         routes: {

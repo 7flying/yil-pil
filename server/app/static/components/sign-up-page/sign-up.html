@@ -1,36 +1,41 @@
-<div class="row">
-	<div class="col-xs-6 col-sm-4">
+<div class="container">
+	<div class="col-sm-4">
 		<div class="page-header">
 			<h1>Join Yil-Pil</h1>
 		</div>
-		<form role="form">
+		<form role="form" id="signUpForm">
 			<div class="form-group">
-				<label for="exampleInputEmail1">Username</label>
-				<input type="text" class="form-control" id="exampleInputEmail1" placeholder="Username">
+				<label>Username</label>
+				<input type="text" class="form-control" placeholder="Username" 
+				data-bind='value: username'>
 				<p class="help-block">
 					This username will be displayed in your posts.
 				</p>
 			</div>
 			<div class="form-group">
-				<label for="exampleInputEmail1">Email address</label>
-				<input type="email" class="form-control" id="exampleInputEmail1" placeholder="Enter email">
+				<label for="inputEmail">Email address</label>
+				<input type="text" class="form-control" placeholder="Enter email"
+				 data-bind='value: email'>
 				<p class="help-block">
 					Your avatar is linked to this email.
 					We'll use this to confirm your account and send occasional emails.
 				</p>
 			</div>
 			<div class="form-group">
-				<label for="exampleInputPassword1">Password</label>
-				<input type="password" class="form-control" id="exampleInputPassword1" placeholder="Password">
+				<label for="inputPass">Password</label>
+				<input type="password" class="form-control" placeholder="Password"
+				 data-bind='value: password'>
 				<p class="help-block">Be tricky!</p>
 			</div>
 			<div class="form-group">
-				<label for="exampleInputPassword1">Confirm your password</label>
-				<input type="password" class="form-control" id="exampleInputPassword1" placeholder="Password again">
+				<label>Confirm your password</label>
+				<input type="password" class="form-control" placeholder="Password again"
+				 data-bind='value: passAgain'>
 			</div>
-			<button type="submit" class="btn btn-default">Submit</button>
+			<div class="form-group">
+				<button class="btn btn-default" data-bind='click: submit'>Submit</button>	
+			</div>
 		</form>
 	</div>
-	<div class="col-xs-6 col-sm-4"></div>
 </div>
-<footer></footer>
+<br>

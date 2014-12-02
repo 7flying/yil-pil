@@ -1,4 +1,5 @@
-define(['knockout', 'text!./user.html', 'module', 'app/router', 'bootstrap-datetimepicker'], function(ko, template, module, router, datetimepicker) {
+define(['knockout', 'text!./user.html', 'module', 'app/router', 'bootstrap-datetimepicker'],
+ function(ko, template, module, router, datetimepicker) {
 
 	// Register the user-posts component
 	ko.components.register('user-posts', {
