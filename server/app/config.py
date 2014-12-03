@@ -1,3 +1,5 @@
+import os
+
 DEBUG = True
 WTF_CSRF_ENABLED = False
 
@@ -11,3 +13,6 @@ API_MAX_UPDATES = 30
 REDIS_HOST = 'localhost'
 REDIS_PORT = '6379'
 REDIS_DB = 0
+
+# Sec
+SECRET_KEY = os.environ.get('SECRET_KEY') or 'super hard to guess secret string'

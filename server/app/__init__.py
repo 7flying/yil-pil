@@ -10,7 +10,7 @@ from app.routes import index
 import os
 import redis
 import manager
-from config import REDIS_HOST, REDIS_PORT, REDIS_DB
+from config import REDIS_HOST, REDIS_PORT, REDIS_DB, SECRET_KEY
 from flask import abort, jsonify, make_response, request, \
 	render_template, make_response
 from flask.ext.restful import Api, Resource, reqparse, fields, marshal, \
@@ -18,6 +18,7 @@ from flask.ext.restful import Api, Resource, reqparse, fields, marshal, \
 from flask.ext.httpauth import HTTPBasicAuth
 from flask_sslify import SSLify
 from werkzeug.security import generate_password_hash, check_password_hash
+from itsdangerous import TimedJSONWebSignatureSerializer as Serializer
 
 # Restful api
 api = Api(app)
@@ -41,6 +42,20 @@ def debug(to_print):
 def verify_password(username, password):
 	db_pass = manager.get_password(username)
 	return check_password_hash(db_pass, password)
+
+# Token-Based Authentication
+def generate_auth_token(username, expiration):
+	ser = Serializer(SECRET_KEY, expires_in=expiration)
+	return ser.dumps({ 'id': username })
+
+def verify_auth_token(token):
+	ser = Serializer(SECRET_KEY)
+	try:
+		data = ser.loads(token)
+	except:
+		return None
+	return data['id']
+
 
 class UserAPI(Resource):
 	""" Class for the User resource."""
