@@ -31,7 +31,7 @@ define(['knockout', 'text!./sign-up.html', 'knockout.validation'], function(ko, 
 		this.password = ko.observable().extend({
 			required: true,
 			minLength: 8
-		})
+		});
 		this.passAgain = ko.observable().extend({
 			required: true,
 			validation: {
