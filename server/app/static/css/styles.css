@@ -62,3 +62,8 @@
 .doc-footer .btn:hover {
     color: #fff;
 }
+
+/* --- Post editor --- */
+.post-editor textarea {
+    resize: vertical;
+}

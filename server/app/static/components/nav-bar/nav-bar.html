@@ -31,14 +31,18 @@
         <li data-bind="css: { active: route().page === 'home-page' }">
           <a href="#">Home</a>
         </li>
-        <li data-bind="css: { active: route().page === 'about-page' }">
-          <a href="#about">About</a>
+        <li data-bind="css: { active: route().page === 'editor-page' }">
+          <a href="#editor">New post!</a>
         </li>
+        
         <li data-bind="css: { active: route().page === 'sign-in-page' }">
           <a href="#login">Sign In</a>
         </li>
         <li data-bind="css: { active: route().page === 'sign-up-page' }">
           <a href="#join">Sign Up</a>
+        </li>
+        <li data-bind="css: { active: route().page === 'about-page' }">
+          <a href="#about">About</a>
         </li>
       </ul>
     </div>
