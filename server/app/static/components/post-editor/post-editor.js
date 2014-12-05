@@ -28,6 +28,13 @@ define(['knockout', 'text!./post-editor.html', 'marked', 'highlight'],
 		smartypants: false
 	});
 
+	Array.prototype.contains = function(element) {
+		for (var i in this)
+			if (this[i] == element)
+				return true;
+		return false;
+	};
+
 	function PostEditorViewModel(params) {
 		$(function() {
 			hljs.initHighlightingOnLoad();
@@ -35,6 +42,7 @@ define(['knockout', 'text!./post-editor.html', 'marked', 'highlight'],
 		var self = this;
 		this.mdTitle = ko.observable();
 		this.mdContents = ko.observable();
+		this.mdTags = ko.observableArray();
 		this.title = ko.observable();
 		this.contents = ko.observable();
 		this.tags = ko.observableArray();
@@ -54,7 +62,16 @@ define(['knockout', 'text!./post-editor.html', 'marked', 'highlight'],
 		});
 
 		this.addTag = function() {
-			self.tags.push(self.tag());
+			// If the tag is repeated ignore it.
+			if (!self.mdTags().contains(self.tag())) {
+				self.mdTags.push(self.tag());
+				self.tags.push(self.tag());	
+			}
+		};
+
+		this.removeTag = function(tag) {
+			self.tags.remove(tag);
+			self.mdTags.remove(tag);
 		};
 	}
 

@@ -11,8 +11,18 @@
 				 data-bind='textInput: mdContents'></textarea>
 			</div>
 			<div class="panel-footer">
-				<input type="text" class="form-control" placeholder="Add tag"
-				 data-bind="value: tag, valueUpdate: 'input', executeOnEnter: addTag">
+				<div>
+					<input type="text" class="form-control" placeholder="Add tag" 
+					data-bind="value: tag, valueUpdate: 'input', executeOnEnter: addTag">
+				</div>
+				<div>
+					<span data-bind='foreach: mdTags'>
+						<span class="label label-default">
+							<span class="glyphicon glyphicon-remove" aria-hidden="true"></span>
+							<span data-bind='text: $data, click: $parent.removeTag'></span>
+						</span>
+					</span>
+				</div>
 			</div>
 		</div>
 	</div>
