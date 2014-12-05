@@ -7,10 +7,18 @@ define(['knockout', 'text!./post-editor.html', 'marked'], function(ko, template,
 		this.title = ko.observable();
 		this.contents = ko.observable();
 
-		this.generate = function() {
-			console.log(marked(self.mdContents()));
-			self.contents(marked(self.mdContents()));
+		this.mdTitle.subscribe(function(newValue) {
+			self.title(newValue);
+		});
+
+		var generateHTML = function(text) {
+			$('#preview-contents').empty();
+			$('#preview-contents').append(marked(text));
 		}
+
+		this.mdContents.subscribe(function(newValue) {
+			generateHTML(newValue);
+		});
 	}
 
 	return { viewModel: PostEditorViewModel, template: template };
