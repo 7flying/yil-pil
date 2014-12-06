@@ -49,6 +49,12 @@
 		<!-- ko if: userPosts -->
 		<h3 data-bind='text: displayTitle'></h3>
 		<user-posts params='posts: userPosts'></user-posts>
+		<nav>
+			<ul class="pager">
+				<li class="previous"><a data-bind="click: previous">&larr;Older</a></li>
+				<li class="next"><a data-bind="click: next">Newer&rarr;</a></li>
+			</ul>
+		</nav>
 		<!-- /ko -->
 		<!-- ko ifnot: userPosts -->
 		<div class="alert alert-info" role="alert">

@@ -16,6 +16,7 @@ define(['knockout', 'text!./user.html', 'module', 'app/router', 'bootstrap-datet
 		this.displayTitle = ko.observable('Latest posts');
 		this.alertTitle = ko.observable("It seems that " + params.name
 			+ " hasn't post anything yet.");
+		this.page = ko.observable(1);
 
 		// Filters the posts given two dates
 		this.filterPosts = function() {
@@ -67,6 +68,20 @@ define(['knockout', 'text!./user.html', 'module', 'app/router', 'bootstrap-datet
 			}
 		};
 
+		this.next = function() {
+			self.page(self.page() + 1);
+			self.userPosts.removeAll();
+			getUserPosts(self.userPosts);
+		};
+
+		this.previous = function() {
+			if( self.page() != 0) {
+				self.userPosts.removeAll()
+				self.page(self.page() - 1);
+				getUserPosts(self.userPosts);
+			}
+		};
+
 		// Initialises the date picker
 		$(function () {
 			$('#date-from').datetimepicker({
@@ -89,7 +104,7 @@ define(['knockout', 'text!./user.html', 'module', 'app/router', 'bootstrap-datet
 		};
 
 		var getUserPosts = function(toStore) {
-			var url = '/yilpil/posts?username=' + params.name + '&page=1';
+			var url = '/yilpil/posts?username=' + params.name + '&page=' + self.page();
 			$.getJSON(url, function(data) {
 				while (data.posts.length > 0) {
 					var temp = data.posts.shift();
