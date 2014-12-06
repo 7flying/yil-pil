@@ -6,7 +6,7 @@
 				</a>
 			</h3>
 			<span> by </span>
-			<span data-bind='text: author'></span>
+			<a data-bind='html: author, attr: {href: "#user/" + author}'></a>
 			<span> • Posted on </span>
 			<span data-bind='text: date'></span>
 		</div>

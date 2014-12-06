@@ -12,10 +12,12 @@ define(['knockout', 'text!./user.html', 'module', 'app/router', 'bootstrap-datet
 		this.user = ko.observable(params.name);
 		this.tags = ko.observableArray();
 		this.gravatar = ko.observable();
-		this.displayTitle = ko.observable('Latest posts: ');
+		this.favCount = ko.observable(0);
+		this.displayTitle = ko.observable('Latest posts');
 		this.alertTitle = ko.observable("It seems that " + params.name
 			+ " hasn't post anything yet.");
 
+		// Filters the posts given two dates
 		this.filterPosts = function() {
 			var from = $('#text-from').val().match(/\d/g);
 			from = from.join("");
@@ -35,10 +37,10 @@ define(['knockout', 'text!./user.html', 'module', 'app/router', 'bootstrap-datet
 				$.getJSON(url, function(data) {
 					if (data.posts.length == 0) {
 						self.userPosts(null);
-						self.displayTitle("There aren't posts in that period.");
+						self.alertTitle("There aren't posts in that period.");
 					} else {
 						self.userPosts.removeAll();
-						self.displayTitle(data.posts.length + " posts found:");
+						self.displayTitle(data.posts.length + " posts found");
 					}
 					while (data.posts.length > 0) {
 						var temp = data.posts.shift();
@@ -53,6 +55,19 @@ define(['knockout', 'text!./user.html', 'module', 'app/router', 'bootstrap-datet
 			}
 		};
 
+		// Shows the favourites
+		this.showFavs = function() {
+			if (self.favCount() == 0) {
+				self.userPosts(null);
+				self.alertTitle(params.name + " hasn't liked anything yet.");
+			} else {
+				self.userPosts.removeAll();
+				self.displayTitle("Liked posts");
+				getFavourites(self.userPosts);
+			}
+		};
+
+		// Initialises the date picker
 		$(function () {
 			$('#date-from').datetimepicker({
 				pickTime: false
@@ -95,9 +110,33 @@ define(['knockout', 'text!./user.html', 'module', 'app/router', 'bootstrap-datet
 			});
 		};
 
+		var getFavourites = function(toStore) {
+			var url = '/yilpil/favs/' + params.name;
+			$.getJSON(url, function(data) {
+				self.favCount(data.posts.length);
+				while (data.posts.length > 0) {
+					var temp = data.posts.shift();
+					// Set preview
+					if (temp.contents.length < 200)
+						temp.contents = temp.contents.substring(0, temp.contents.length);
+					else
+						temp.contents = temp.contents.substring(0, 200) + " [...]";
+					self.userPosts.push(temp);
+				}
+			});
+		};
+
+		var getFavCount = function() {
+			var url = '/yilpil/favs/' + params.name + '?count=true';
+			$.getJSON(url, function(data){
+				self.favCount(data.count);
+			});
+		};
+
 		getUserPosts(this.userPosts);
 		getUserTags(this.tags);
 		getAvatar(this.gravatar);
+		getFavCount();
 
 	}
 	return { viewModel: UserViewModel, template: template };

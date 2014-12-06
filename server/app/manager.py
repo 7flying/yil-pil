@@ -271,19 +271,29 @@ def delete_favourite(username, post_id):
 
 def get_favourites(username):
 	""" Returns a list of posts favourited by the given user. """
-	ret = []
-	to_delete = []
-	for post_id in db.smembers(username + APPEND_KEY_FAVS):
-		post = get_post(post_id)
-		if post == None:
-			# Delete from the favourite set
-			to_delete.append(post_id)
-		else:
-			ret.append(post)
-	if len(to_delete) > 0:
-		for item in to_delete:
-			db.srem(username + APPEND_KEY_FAVS, item)
-	return ret
+	if _is_user_created(username):
+		ret = []
+		to_delete = []
+		for post_id in db.smembers(username + APPEND_KEY_FAVS):
+			post = get_post(post_id)
+			if post == None:
+				# Delete from the favourite set
+				to_delete.append(post_id)
+			else:
+				ret.append(post)
+		if len(to_delete) > 0:
+			for item in to_delete:
+				db.srem(username + APPEND_KEY_FAVS, item)
+		return ret
+	else:
+		return None
+
+def get_favourite_count(username):
+	""" Returns the number of favourited posts by a user. """
+	if _is_user_created(username):
+		return db.scard(username + APPEND_KEY_FAVS)
+	else:
+		return -1
 
 ### End of user-related stuff ###
 

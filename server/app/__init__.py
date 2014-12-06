@@ -288,11 +288,24 @@ class FavouritesAPI(Resource):
 	def __init__(self):
 		self.reqparse = reqparse.RequestParser()
 		self.reqparse.add_argument('id', type=int)
+		self.reqparse.add_argument('count', type=str)
 		super(FavouritesAPI, self).__init__()
 
 	def get(self, user):
 		""" Returns the favourites of a user."""
-		return jsonify(posts=manager.get_favourites(user))
+		args = self.reqparse.parse_args()
+		if args.get('count') != None:
+			count = manager.get_favourite_count(user)
+			if count != -1:
+				return jsonify(count=count)
+			else:
+				return "User not found.", 404
+		else:
+			posts = manager.get_favourites(user)
+			if posts != None:
+				return jsonify(posts=posts)
+			else:
+				return "User not found.", 404
 
 	@auth.login_required
 	def delete(self, user):

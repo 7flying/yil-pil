@@ -4,6 +4,14 @@
 			<img class="img-circle" width="80px" height="80px" data-bind="attr: {src: gravatar}">
 			<div class="caption">
 				<h3 data-bind='text: user'></h3>
+				<div>
+					<button class="btn btn-default" data-bind="click: showFavs">
+						<span>Has <span class="glyphicon glyphicon-heart" aria-hidden="true">
+							<span data-bind='text: favCount'></span>
+							</span>
+						</span>
+					</button>					
+				</div>
 			</div>
 		</div>
 		<h4>Filter posts</h4>
