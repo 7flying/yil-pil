@@ -1,9 +1,33 @@
-<!-- ko if: searchPosts -->
-<h3 data-bind='text: results'></h3>
-<list-posts params='posts: searchPosts'></list-posts>
-<!-- /ko -->
-<!-- ko ifnot: results -->
-<div class="alert alert-info" role="alert">
-We couldn't find anything matching that.
+<div class="container" id="main-container">
+	<div class="col-xs-12 col-sm-9">
+		<!-- ko if: searchPosts -->
+		<h3 data-bind='text: results'></h3>
+		<list-posts params='posts: searchPosts'></list-posts>
+		<!-- /ko -->
+		<!-- ko ifnot: results -->
+		<div class="alert alert-info" role="alert">
+			We couldn't find posts with that title.
+		</div>
+		<!-- /ko -->
+		</div>
+	<div class="col-xs-6 col-sm-3 sidebar-offcanvas">
+		<h2>Popular Tags</h2>
+		<tag-list></tag-list>
+		<h2>Related Tags</h2>
+		<!-- ko ifnot: similarTagsResults -->
+		<div class="alert alert-info" role="alert">
+			We couldn't find related tags.
+		</div>
+		<!-- /ko -->
+		<!-- ko if: similarTags -->
+		<div class="panel panel-default">
+			<ul class="list-group" data-bind='foreach: similarTags'>
+				<li class="list-group-item">
+					<a data-bind='html: $data, attr: {href: "#tag/" + $data}'>
+					</a>
+				</li>
+			</ul>
+		</div>
+		<!-- /ko -->
+	</div>
 </div>
-<!-- /ko -->

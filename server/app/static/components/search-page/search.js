@@ -12,16 +12,18 @@ define(['knockout', 'text!./search.html','module', 'app/router'], function(ko, t
 		this.query = ko.observable(params.query);
 		this.searchPosts = ko.observableArray();
 		this.results = ko.observable(null);
-
+		this.similarTags = ko.observableArray();
+		this.similarTagsResults = ko.observable(null);
+		
 		var getPosts = function(toStore) {
 			var url = '/yilpil/search/posts/title?title=' + self.query();
 			$.getJSON(url, function(data) {
-				if (data.length ==  0)
+				if (data.posts.length ==  0)
 					self.results(null);
 				else
-					self.results(data.length + " posts matched:");
-				while (data.length > 0) {
-					var temp = data.shift();
+					self.results(data.posts.length + " posts matched:");
+				while (data.posts.length > 0) {
+					var temp = data.posts.shift();
 					// Set preview
 					if (temp.contents.length < 200)
 						temp.contents = temp.contents.substring(0, temp.contents.length);
@@ -31,7 +33,22 @@ define(['knockout', 'text!./search.html','module', 'app/router'], function(ko, t
 				}
 			});	
 		};
+
+		var getSimilarTags = function(toStore) {
+			var url = 'yilpil/search/tag?letter=' + self.query()[0];
+			$.getJSON(url, function(data) {
+				if (data.tags.length ==  0)
+					self.similarTagsResults(null);
+				else
+					self.similarTagsResults(true);
+				while (data.tags.length > 0) {
+					toStore.push(data.tags.shift());
+				}
+			});
+		};
+
 		getPosts(this.searchPosts);
+		getSimilarTags(this.similarTags);
 	}
 	return { viewModel: SearchViewModel, template: template };
 });

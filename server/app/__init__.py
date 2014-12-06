@@ -421,7 +421,8 @@ class SearchPostsTitleAPI(Resource):
 		""" Search withing the posts given the title query. """
 		args = self.reqparse.parse_args()
 		page = args['page'] if args['page'] != None else 0
-		return manager.search_posts_title(args['title'], page)
+		posts = manager.search_posts_title(args['title'], page)
+		return jsonify(posts=posts)
 
 api.add_resource(SearchPostsTitleAPI, '/yilpil/search/posts/title', endpoint='title')
 

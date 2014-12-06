@@ -1,10 +1,12 @@
 define(['knockout', 'text!./user.html', 'module', 'app/router', 'bootstrap-datetimepicker'],
  function(ko, template, module, router, datetimepicker) {
 
-	// Register the user-posts component
-	ko.components.register('user-posts', {
-		template: { require: 'text!components/user-page/user-posts.html'}
-	});
+	// Register the list-posts recycled component
+	if (! ko.components.isRegistered('list-posts')) {
+		ko.components.register('list-posts', {
+			template: { require: 'text!components/recycled/list-posts.html'}
+		});
+	}
 
 	function UserViewModel(params) {
 		var self = this;

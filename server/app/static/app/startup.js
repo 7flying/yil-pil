@@ -12,7 +12,6 @@ define(['jquery', 'knockout', './router', 'bootstrap', 'knockout-projections'], 
     template: { require: 'text!components/footer-credits/footer.html' }
   });
 
-  ko.components.register('post-list', { require: 'components/post-list/post-list' });
   ko.components.register('tag-list', { require: 'components/tag-list/tag-list' });
   ko.components.register('sign-in-page', { require: 'components/sign-in-page/sign-in' });
   ko.components.register('sign-up-page', { require: 'components/sign-up-page/sign-up' });

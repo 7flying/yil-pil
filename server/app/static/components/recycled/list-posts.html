@@ -24,7 +24,10 @@
 				<span class="glyphicon glyphicon-heart" aria-hidden="true"> Like</span>
 			</button>
 			<span data-bind='foreach: tags'>
-				<span class="label label-success" data-bind='text: $data'></span>
+				<a data-bind='attr: {href: "#tag/" + $data}'>
+					<span class="label label-success" data-bind='html: $data'>
+					</span>
+				</a>
 			</span>
 		</div>
 	</div>
