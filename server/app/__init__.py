@@ -218,20 +218,28 @@ class PostsAPI(Resource):
 
 	def __init__(self):
 		self.reqparse = reqparse.RequestParser()
-		self.reqparse.add_argument('page', type=int, required=True)
+		self.reqparse.add_argument('page', type=int)
+		self.reqparse.add_argument('username', type=str)
+		self.reqparse.add_argument('tag', type=str)
 		super(PostsAPI, self).__init__()
 
-	def get(self, username): #OK, but review jsonify again
-		""" Get posts given a username. """
+	def get(self): #OK, but review jsonify again
+		""" Get post."""
 		debug("GET POSTS")
 		args = self.reqparse.parse_args()
 		if args['page'] == 0:
 			abort(404)
-		posts = manager.get_posts(username, args['page'])
-		
-		return jsonify(posts=posts)
+		else:
+			if args.get('username') != None and args.get('tag') == None:
+				posts = manager.get_posts(args['username'], args['page'])
+				return jsonify(posts=posts)
+			elif args.get('tag') != None and args.get('username') == None:
+				posts = manager.get_posts_with_tag(args['tag'])
+				return jsonify(posts=posts)
+			else:
+				abort(400)
 
-api.add_resource(PostsAPI, '/yilpil/posts/<string:username>', endpoint = 'posts')
+api.add_resource(PostsAPI, '/yilpil/posts', endpoint = 'posts')
 
 
 class TagsAPI(Resource):

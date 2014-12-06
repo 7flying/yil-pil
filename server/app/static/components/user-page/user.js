@@ -89,7 +89,7 @@ define(['knockout', 'text!./user.html', 'module', 'app/router', 'bootstrap-datet
 		};
 
 		var getUserPosts = function(toStore) {
-			var url = '/yilpil/posts/' + params.name + '?page=1';
+			var url = '/yilpil/posts?username=' + params.name + '&page=1';
 			$.getJSON(url, function(data) {
 				while (data.posts.length > 0) {
 					var temp = data.posts.shift();

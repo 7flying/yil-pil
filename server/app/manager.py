@@ -41,6 +41,8 @@ VOTE_ID = 'next-vote-id'
 ## -- Global structures -- ##
 # Capped list of last updates
 GLOBAL_POST_UPDATE_ID = 'global-post-update'
+# Set of tag-name, post-ids with that tag.
+APPEND_TAG_NAME_POSTS = ':post-list'
 ## -- Search related stuff -- ##
 # Tags:
 # Id for the sorted set of tag name + score.
@@ -311,6 +313,8 @@ def insert_tag_post_tags(post_id, tag):
 		_insert_tags_global(tag)
 		# Add to popular
 		_inc_dec_tag(tag, True)
+		# Add to the sorted set of tag-name -- post-ids
+		_insert_post_tag_name(post_id, tag)
 
 def delete_tag_from_post(post_id, tag):
 	"""
@@ -321,6 +325,8 @@ def delete_tag_from_post(post_id, tag):
 		db.srem(db.hget(post_id + APPEND_KEY_POSTS, KEY_TAGS) + APPEND_KEY_TAG, tag)
 		# Decrement the score
 		_inc_dec_tag(tag, False)
+		# Delete from the sorted set of tag-name -- post-ids
+		_remove_post_tag_name(post_id, tag_name)
 
 def _is_post_created(post_id):
 	"""
@@ -428,6 +434,8 @@ def insert_post(post, username): # OK
 		_insert_tags_global(tag)
 		# Add to popular
 		_inc_dec_tag(tag, True)
+		# Add to the sorted set of tag-name -- post-ids
+		_insert_post_tag_name(post_id, tag)
 
 	db.hset(db_post_id, KEY_TAGS, tag_id)
 	# Add post id to the head of the user's post-list
@@ -459,7 +467,7 @@ def update_post(post, post_id, username): #OK
 		tag_id = db.hget(post_id + APPEND_KEY_POSTS, KEY_TAGS)
 		# Add new tags (if any)
 		for tag in post[KEY_TAGS]:
-			db.sadd(tag_id + APPEND_KEY_TAG, tag)
+			insert_tag_post_tags(post_id, tag)
 	return get_post(post_id)
 
 def delete_post(post_id, username):
@@ -496,6 +504,27 @@ def delete_post(post_id, username):
 		return True
 	else:
 		return False
+
+def _insert_post_tag_name(post_id, tag_name):
+	""" Inserts a post id to the set of tag-name -- post-ids. """
+	db.sadd(tag_name + APPEND_TAG_NAME_POSTS, str(post_id))
+
+def _remove_post_tag_name(post_id, tag_name):
+	""" Removes a post-id form the set of tag-name -- post-ids. """
+	db.srem(tag_name + APPEND_TAG_NAME_POSTS, str(post_id))
+	if db.scard(tag_name + APPEND_TAG_NAME_POSTS) == 0:
+		sb.delte(tag_name + APPEND_TAG_NAME_POSTS)
+
+def get_posts_with_tag(tag_name):
+	"""
+	Returns all the posts with the provided tag name.
+	Pagination is used.
+	"""
+	posts = []
+	if tag_name != None and len(tag_name) > 0:
+		for post_id in db.smembers(tag_name + APPEND_TAG_NAME_POSTS):
+			posts.append(get_post(post_id))
+	return posts
 
 ### Voting related stuff ###
 
@@ -664,7 +693,6 @@ def _get_posts_by_title(title):
 				ret.append(get_post(val))
 	return ret
 
-
 def search_posts_title(partial_title, page=0):
 	"""
 	Searches within the posts given a partial title. Pagination may be provided.
@@ -722,7 +750,6 @@ def _inc_dec_tag(tag_name, add=True):
 			# Delete the tag from the list if it has a score of 0
 			if db.zrank(POPULAR_TAGS, tag_name) == 0:
 				db.zrem(POPULAR_TAGS, tag_name)
-
 	
 def get_popular_tags():
 	""" Returns the most popular tags."""
