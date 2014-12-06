@@ -9,12 +9,12 @@ from config import API_PAGINATION, API_MAX_UPDATES
 FORMAT_TIME = "%d-%m-%Y %H:%M"
 # Datetime format in score for timedate stuff
 FORMAT_TIME_SEARCH = "%Y%m%d"
-# In user-hashmap
+# In user-hashmap, user-fields
 KEY_PASSWORD = 'password'
 KEY_EMAIL = 'email'
 KEY_USER = 'name'
 KEY_HASH = 'hash'
-# In post-hash map
+# In post-hash map, post-fields
 KEY_TITLE = 'title'
 KEY_CONTENTS = 'contents'
 KEY_DATE = 'date'
@@ -23,15 +23,17 @@ KEY_AUTHOR = 'author'
 KEY_ID = 'id'
 KEY_VOTES = 'votes'
 # User-tag, post-tag set key
-APPEND_KEY_TAG = '-tags'
+APPEND_KEY_TAG = ':tags'
 # User-posts key
-APPEND_KEY_POSTS = '-posts'
+APPEND_KEY_POSTS = ':posts'
 # User tag
-APPEND_KEY_USER = '-user'
+APPEND_KEY_USER = ':user'
 # Vote-post
-APPEND_KEY_VOTE = '-vote'
+APPEND_KEY_VOTE = ':vote'
 # Votes made by a user
-APPEND_KEY_HAS_VOTED = '-has-voted'
+APPEND_KEY_HAS_VOTED = ':has-voted'
+# Set of favourite posts of a user
+APPEND_KEY_FAVS = ':favs'
 # Identifiers. This ids are used to reference the tags and the posts.
 POST_ID = 'next-key-post-id'
 TAG_ID = 'next-tag-id'
@@ -48,7 +50,7 @@ SEARCH_TAGS_LETTER = 'search-tags-letter'
 # Id for the sorted set of post-titles all with the same score (force Zrangebylex)
 SEARCH_POSTS_TITLE = 'search-posts-title'
 # This hash makes a relationship between a title and the posts with that title
-APPEND_SEARH_POSTS_TITLE_GET_IDS = '-search-posts-title-ids'
+APPEND_SEARH_POSTS_TITLE_GET_IDS = ':search-posts-title-ids'
 ## -- Popular/Rankings -- ##
 # Most popular tags:
 # Id for the sorted set of tag name + score
@@ -58,9 +60,13 @@ POPULAR_TAGS = 'popular-tags-ranking'
 # Posts-user:
 # Id for the sorted set of post-id + score.
 # The score is the time date concatenated ej: 20141109
-APPEND_SEARCH_POST_TIMEDATE = '-search-post-user-timedate'
+APPEND_SEARCH_POST_TIMEDATE = ':search-post-user-timedate'
 
 _DEBUG_ = True
+
+## Notes:
+# - Change the hash of :search-posts-title-ids, we cannot remove posts since
+# we do not know the key. Make a set for every title.
 
 def debug(to_print):
 	if _DEBUG_:
@@ -174,6 +180,18 @@ def insert_user(user): #OK
 
 def delete_user(username): #OK -> DELETE ALL HIS/HER POSTS and stuff
 	if _is_user_created(username):
+		# Delete tags
+		user_tags = get_user_tags(username)
+		for tag in user_tags:
+			delete_tag_user_tags(username, tags)
+		# Delete voting records
+		db.delete(username + APPEND_KEY_HAS_VOTED)
+		# Delete favourites
+		db.delete(username + APPEND_KEY_FAVS)
+		# Delete posts
+		user_posts = get_posts(username)
+		for post in user_posts:
+			delete_post(post_id, username)
 		return db.delete(username + APPEND_KEY_USER) > 0
 	return False
 
@@ -187,6 +205,8 @@ def get_user(username):
 		return user
 	else:
 		return None
+
+# User's tags
 
 def get_user_tags(username):
 	""" Gets the tags of a user. """
@@ -227,6 +247,43 @@ def _delete_tag_from_all_user_posts(username, tag):
 	debug("DELETE TAG FROM USER POSTS. tag:" + tag + ", user:" + username )
 	for post_id in db.smembers(username + APPEND_KEY_POSTS):
 		delete_tag_from_post(post_id)
+
+# User's favs
+
+def add_favourite(username, post_id):
+	""" Adds the specified post to the user's set of favourites. """
+	if _is_user_created(username):
+		post_id = str(post_id)
+		# If the id is already present the insertion is ignored
+		db.sadd(username + APPEND_KEY_FAVS, str(post_id))
+		return True
+	else:
+		return False
+
+def delete_favourite(username, post_id):
+	""" Removes the specified post from the user's set of favourites. """
+	if _is_user_created(username):
+		post_id = str(post_id)
+		db.srem(username + APPEND_KEY_FAVS, str(post_id))
+		return True
+	else:
+		return False
+
+def get_favourites(username):
+	""" Returns a list of posts favourited by the given user. """
+	ret = []
+	to_delete = []
+	for post_id in db.smembers(username + APPEND_KEY_FAVS):
+		post = get_post(post_id)
+		if post == None:
+			# Delete from the favourite set
+			to_delete.append(post_id)
+		else:
+			ret.append(post)
+	if len(to_delete) > 0:
+		for item in to_delete:
+			db.srem(username + APPEND_KEY_FAVS, item)
+	return ret
 
 ### End of user-related stuff ###
 
@@ -411,15 +468,21 @@ def delete_post(post_id, username):
 		# Delete the counter of votes that the post has
 		votes_id = db.hget(post_id + APPEND_KEY_POSTS, KEY_VOTES)
 		db.delete(votes_id + APPEND_KEY_VOTE)
-		# First, delete the reference to the post to ensure that is not retrieved
+		# Delete the post from the sorted set of posts by date
+		db.zrem(username + APPEND_SEARCH_POST_TIMEDATE, post_id)
 		# Delete the post id from the user's post list
 		# (1 is the number of items to be removed)
 		db.lrem(username + APPEND_KEY_POSTS, 1, post_id)
-		# Delete the post
+		# Delete the post from the last updates
+		_delete_post_last_updates(post_id)
+		# Delete the hash of the post
+		db.delete(post_id + APPEND_KEY_POSTS)
+		"""
 		db.hdel(post_id  + APPEND_KEY_POSTS, KEY_TAGS)
 		db.hdel(post_id + APPEND_KEY_POSTS, KEY_TITLE)
 		db.hdel(post_id + APPEND_KEY_POSTS, KEY_DATE)
 		db.hdel(post_id + APPEND_KEY_POSTS, KEY_CONTENTS)
+		"""
 		return True
 	else:
 		return False
@@ -629,6 +692,10 @@ def get_last_post_updates():
 			ret.append(post)
 	return ret
 
+def _delete_post_last_updates(posd_id):
+	""" Removes the post from the capped list of last updates if present. """
+	db.lrem(GLOBAL_POST_UPDATE_ID, 1, post_id)
+
 ### End of global things ###
 
 ### Ranking/Popular stuff ###
@@ -642,6 +709,10 @@ def _inc_dec_tag(tag_name, add=True):
 		else:
 			debug("DEC TAG USAGE: "+ tag_name)
 			db.zincrby(POPULAR_TAGS, tag_name, -1)
+			# Delete the tag from the list if it has a score of 0
+			if db.zrank(POPULAR_TAGS, tag_name) == 0:
+				db.zrem(POPULAR_TAGS, tag_name)
+
 	
 def get_popular_tags():
 	""" Returns the most popular tags."""

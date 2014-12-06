@@ -282,6 +282,41 @@ class VotingAPI(Resource): #Ok
 api.add_resource(VotingAPI, '/yilpil/voting/<int:post_id>', endpoint='voting')	
 
 
+class FavouritesAPI(Resource):
+	""" Manages the favourites of a user."""
+
+	def __init__(self):
+		self.reqparse = reqparse.RequestParser()
+		self.reqparse.add_argument('id', type=int)
+		super(FavouritesAPI, self).__init__()
+
+	def get(self, user):
+		""" Returns the favourites of a user."""
+		return jsonify(posts=manager.get_favourites(user))
+
+	@auth.login_required
+	def delete(self, user):
+		""" Deletes a post from the user's favourite list."""
+		args = self.reqparse.parse_args()
+		if args['id'] != None:
+			if manager.delete_favourite(user, args['id']):
+				return "Favourite deleted.", 200
+			else:
+				return "User not found.", 404
+
+	@auth.login_required
+	def post(self, user):
+		""" Adds a post to the user's list of favourites."""
+		args = self.reqparse.parse_args()
+		if args['id'] != None:
+			if manager.add_favourite(user, args['id']):
+				return "Favourite added.", 201
+			else:
+				return "User not found.", 404
+
+api.add_resource(FavouritesAPI, '/yilpil/favs/<string:user>', endpoint='favs')	
+
+
 class SearchTagsAPI(Resource):
 	""" Provides search in all the tags. """
 
