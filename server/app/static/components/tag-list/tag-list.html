@@ -1,7 +1,9 @@
 <div id="tag-list">
 	<ul class="list-group" data-bind='foreach :tags'>
 		<li class="list-group-item">
-			<a href="#"><span data-bind='text: name'></span></a>
+			<a data-bind='attr: {href: "#tag/" + name}'>
+				<span data-bind='text: name'></span>
+			</a>
 			<span class="badge" data-bind='text: num'></span>
 		</li>
 	</ul>

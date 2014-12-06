@@ -21,6 +21,7 @@ define(['jquery', 'knockout', './router', 'bootstrap', 'knockout-projections'], 
   ko.components.register('search-page', { require: 'components/search-page/search' });
   ko.components.register('editor-page', { require: 'components/editor-page/editor' });
   ko.components.register('post-editor', { require: 'components/post-editor/post-editor' });
+  ko.components.register('tags-page', { require: 'components/tags-page/tags-page'});
   // [Scaffolded component registrations will be inserted here. To retain this feature, don't remove this comment.]
 
   // Start the application
