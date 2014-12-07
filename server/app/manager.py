@@ -614,9 +614,9 @@ def _vote_post_categories(post_id, positive):
 	""" Propagates the voting to every category in with the post is."""
 	for tag in get_post_tags(str(post_id)):
 		if positive:
-			db.zincrby(tag + APPEND_POPULAR_POSTS_CATEGORY, post_id, 1)
+			db.zincrby(tag.upper() + APPEND_POPULAR_POSTS_CATEGORY, post_id, 1)
 		else:
-			db.zincrby(tag + APPEND_POPULAR_POSTS_CATEGORY, post_id, -1)
+			db.zincrby(tag.upper() + APPEND_POPULAR_POSTS_CATEGORY, post_id, -1)
 
 ### End of Voting related stuff ###
 
@@ -813,6 +813,7 @@ def get_popular_posts(category, page=0):
 	Returns the most popular posts in a category.
 	Pagination may be used, if it isn't, by default returns the first page.
 	"""
+	category = category.upper()
 	result = db.zrevrangebyscore(
 		str(category) + APPEND_POPULAR_POSTS_CATEGORY,
 		'+inf', 1, start=page * API_MAX_UPDATES, num=API_MAX_UPDATES,
@@ -829,6 +830,7 @@ def get_top_posts(page=0):
 	"""
 	result = db.zrevrangebyscore(POPULAR_TOP_POSTS, '+inf', 1,
 		start=page * API_MAX_UPDATES, num=API_MAX_UPDATES, withscores=False)
+	ret = []
 	for post_id in result:
 		ret.append(get_post(post_id))
 	return ret

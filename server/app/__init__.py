@@ -223,8 +223,8 @@ class PostsAPI(Resource):
 		self.reqparse.add_argument('tag', type=str)
 		super(PostsAPI, self).__init__()
 
-	def get(self): #OK, but review jsonify again
-		""" Get post."""
+	def get(self): #OK
+		""" Gets the posts by a user, gets the posts with a certain tag."""
 		debug("GET POSTS")
 		args = self.reqparse.parse_args()
 		if args['page'] == 0:
@@ -456,6 +456,8 @@ class GetPopular(Resource):
 	def __init__(self):
 		self.reqparse = reqparse.RequestParser()
 		self.reqparse.add_argument('resource', type=str, required=True)
+		self.reqparse.add_argument('category', type=str)
+		self.reqparse.add_argument('page', type=int)
 		super(GetPopular, self).__init__()
 
 	def get(self):
@@ -466,6 +468,17 @@ class GetPopular(Resource):
 			if args['resource'] == 'tags':
 				result = manager.get_popular_tags()
 				return jsonify(tags=result)
+			elif args['resource'] == 'posts':
+				# Check pagination
+				page = 0 if args.get('page') == None else args['page']
+				page = 0 if page < 0 else page 
+				# Check if a category is provided
+				if args.get('category') != None and len(args.get('category')) > 0:
+					result = manager.get_popular_posts(args['category'], page)
+					return jsonify(posts=result)
+				else:
+					result = manager.get_top_posts(page)
+					return jsonify(posts=result)
 			else:
 				abort(404)
 		else:
