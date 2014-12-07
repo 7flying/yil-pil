@@ -39,14 +39,20 @@ def debug(to_print):
 		print "[ SERVER ] ", to_print
 
 @auth.verify_password
-def verify_password(username, password):
-	db_pass = manager.get_password(username)
-	return check_password_hash(db_pass, password)
+def verify_password(username_or_token, password):
+	if password == None:
+		# token authentication
+		user = verify_auth_token(username_or_token)
+		return user is not None
+	else:
+		# username/password authentication
+		db_pass = manager.get_password(username_or_token)
+		return check_password_hash(db_pass, password)
 
 # Token-Based Authentication
-def generate_auth_token(username, expiration):
+def generate_auth_token(username, expiration=3600):
 	ser = Serializer(SECRET_KEY, expires_in=expiration)
-	return ser.dumps({ 'id': username })
+	return ser.dumps({ 'id': username }).decode('utf-8')
 
 def verify_auth_token(token):
 	ser = Serializer(SECRET_KEY)
@@ -54,7 +60,21 @@ def verify_auth_token(token):
 		data = ser.loads(token)
 	except:
 		return None
-	return data['id']
+	return manager.get_user(data['id'])
+
+
+class AuthAPI(Resource):
+	""" Generates authentication tokens. """
+	decorators = [auth.login_required]
+
+	def __init__(self):
+		super(AuthAPI, self).__init__()
+
+	def get(self, username):
+		""" Generates a token."""
+		return jsonify(token=generate_auth_token(username))
+
+api.add_resource(AuthAPI, '/yilpil/auth/token/<string:username>', endpoint='token')
 
 
 class UserAPI(Resource):
