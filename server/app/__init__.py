@@ -495,12 +495,12 @@ class IndexAPI(Resource):
 		self.reqparse.add_argument('symbol')
 		super(IndexAPI, self).__init__()
 
-	def get(query):
+	def get(self):
 		""" Returns the index of tags given the query."""
 		args = self.reqparse.parse_args()
 		if args.get('symbol') == None:
 			# global index requested
-			ret = manager.get_index_letter_tag():
+			ret = manager.get_index_letter_tag()
 			return jsonify(index=ret)
 		elif len(args['symbol']) == 1:
 			# tags of a symbol

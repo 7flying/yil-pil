@@ -453,6 +453,10 @@ def insert_post(post, username): # OK
 		_inc_dec_tag(tag, True)
 		# Add to the sorted set of tag-name -- post-ids
 		_insert_post_tag_name(post_id, tag)
+		# Insert to the index of tags
+		_insert_symbol_index(tag[0])
+		# Insert to the specific index of tag[0] -- tags
+		_insert_tag_index_letter_tags(tag)
 
 	db.hset(db_post_id, KEY_TAGS, tag_id)
 	# Add post id to the head of the user's post-list
@@ -802,11 +806,11 @@ def _delete_symbol_index(symbol):
 
 def get_index_letter_tag():
 	""" Returns the contents of the index of letter-tags. """
-	return db.smembers(GLOBAL_INDEX_LETTER_TAG)
+	return list(db.smembers(GLOBAL_INDEX_LETTER_TAG))
 
 def _insert_tag_index_letter_tags(tag):
 	""" Inserts a tag to the index of tag[0] -- tags."""
-	db.zadd(tag[0].upper() + APPEND_KEY_INDEX_LETTER_TAG, tag)
+	db.zadd(tag[0].upper() + APPEND_KEY_INDEX_LETTER_TAG, 0, tag)
 
 def _delete_tag_index_letter_tags(tag):
 	""" Deletes a tag from the index of tag[0] -- tags."""
@@ -815,7 +819,7 @@ def _delete_tag_index_letter_tags(tag):
 def get_tags_by_index_letter(letter):
 	""" Gets the tags by the provided index letter. Ex 'a': 'angular', 'amazon' """
 	if len(letter) == 1:
-		return db.zrange(letter + APPEND_KEY_INDEX_LETTER_TAG, 0 -1)
+		return db.zrange(letter + APPEND_KEY_INDEX_LETTER_TAG, 0, -1)
 
 ### End of global things ###
 
