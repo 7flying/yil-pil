@@ -270,7 +270,7 @@ class VotingAPI(Resource): #Ok
 	def put(self, post_id): #Ok
 		""" PUT request. Updates the value of the post by a vote up or down. """
 		args = self.reqparse.parse_args()
-		debug("(PUT) Vote to post ", str(post_id), ". Vote up? ", str(args['up']))
+		debug("(PUT) Vote to post " + str(post_id) + ". Vote up? " + str(args['up']))
 		res = None
 		if str(args['up']) == 'true':
 			# vote up

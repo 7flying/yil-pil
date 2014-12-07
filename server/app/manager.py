@@ -58,6 +58,11 @@ APPEND_SEARH_POSTS_TITLE_GET_IDS = ':search-posts-title-ids'
 # Id for the sorted set of tag name + score
 # The score is the number of times that tag was used
 POPULAR_TAGS = 'popular-tags-ranking'
+# Top Posts
+POPULAR_TOP_POSTS = 'popular-top-posts'
+# Most popular posts by category
+# Sorted set of posts-ids -- score. The category is the tag.
+APPEND_POPULAR_POSTS_CATEGORY = ':popular-category'
 # tags-autocomplete : TODO!
 # Posts-user:
 # Id for the sorted set of post-id + score.
@@ -456,18 +461,32 @@ def update_post(post, post_id, username): #OK
 	post_id = str(post_id)
 	debug("UPDATE POST. username:" + username + ",post:" + post_id + \
 		 "\n\t values:" + str(post))
-	if post[KEY_TITLE] is not None:
-		debug("\t-UPDATE title")
+	# The title has changed.
+	if post[KEY_TITLE] is not None: #-------------------------------------------------------------------------
+		debug("\t-UPDATE title")	# The title has changed, so CHANGE in the structure of search-title
 		db.hset(post_id + APPEND_KEY_POSTS, KEY_TITLE, post[KEY_TITLE])
+	# The content has changed
 	if post[KEY_CONTENTS] is not None:
 		debug("\t-UPDATE contents")
 		db.hset(post_id + APPEND_KEY_POSTS, KEY_CONTENTS, post[KEY_CONTENTS])
+	# The tags have changed.
 	if post[KEY_TAGS] is not None:
 		debug("\t-UPDATE tags")
 		tag_id = db.hget(post_id + APPEND_KEY_POSTS, KEY_TAGS)
-		# Add new tags (if any)
+		# Get the olg set of tags from the post
+		tags_used = dict([(i, False) for i in get_post_tags(post_id)])
+		# Check the ones that are used and insert the new ones.
 		for tag in post[KEY_TAGS]:
-			insert_tag_post_tags(post_id, tag)
+			# The tag does not exist
+			if tags_used.get(tag) == None:
+				insert_tag_post_tags(post_id, tag)
+			else:
+				tags_used[tag] = True
+		# If an old tag is not used it has been deleted.
+		for tag in tags_used.keys():
+			if not tags_used[tag]:
+				delete_tag_from_post(post_id, tag)
+
 	return get_post(post_id)
 
 def delete_post(post_id, username):
@@ -493,6 +512,8 @@ def delete_post(post_id, username):
 		db.lrem(username + APPEND_KEY_POSTS, 1, post_id)
 		# Delete the post from the last updates
 		_delete_post_last_updates(post_id)
+		# Delete the post from the global ranking
+		db.zrem(POPULAR_TOP_POSTS, post_id)
 		# Delete the hash of the post
 		db.delete(post_id + APPEND_KEY_POSTS)
 		"""
@@ -535,12 +556,9 @@ def _vote(post_id, voting_user, positive): #OK
 	if _is_post_created(post_id):
 		debug("\t CURRENT VOTES of USER.")
 		debug("\t\t-user: " + voting_user)
-		debug("\t\t-voted to: " + str(db.smembers(voting_user /
-			 + APPEND_KEY_HAS_VOTED)))
+		debug("\t\t-voted to: " + str(db.smembers(voting_user + APPEND_KEY_HAS_VOTED)))
+		# Check if the user can vote
 		if db.sismember(voting_user + APPEND_KEY_HAS_VOTED, post_id) == 0:
-			debug("PREVIOUS POST-VOTE-VALUE: " / 
-				+ str(db.get(db.hget(post_id + APPEND_KEY_POSTS, KEY_VOTES) /
-				+ APPEND_KEY_VOTE)))
 			vote_id = db.hget(post_id + APPEND_KEY_POSTS, KEY_VOTES)
 			debug("\t vote_id: " + str(vote_id))
 			pipe = db.pipeline()
@@ -550,9 +568,6 @@ def _vote(post_id, voting_user, positive): #OK
 				pipe.decr(vote_id + APPEND_KEY_VOTE)
 			pipe.sadd(voting_user + APPEND_KEY_HAS_VOTED, post_id)
 			pipe.execute()
-			debug("CURRENT POST-VOTE-VALUE: " /
-				+ str(db.get(db.hget(post_id + APPEND_KEY_POSTS, KEY_VOTES) /
-				+ APPEND_KEY_VOTE)))
 			return True
 		else:
 			return False
@@ -564,16 +579,44 @@ def vote_positive(post_id, voting_user): # OK
 		Returns True if the vote was made; False if the user had already voted
 		and so, he/she cannot vote again and None if no post for that id was
 		found.
+		Propagates to the global ranking of posts.
+		Propagates the voting to each category that the post has.
 	"""
-	return _vote(post_id, voting_user, True)
+	if _vote(post_id, voting_user, True):
+		_vote_global(post_id, True)
+		_vote_post_categories(post_id, True)
+		return True
+	else:
+		return False
 
 def vote_negative(post_id, voting_user): # OK
 	""" Votes -1 to a post.
 		Returns True if the vote was made; False if the user had already voted
 		and so, he/she cannot vote again and None if no post for that id was
 		found.
+		Propagates the voting to each category that the post has.
 	"""
-	return _vote(post_id, voting_user, False)
+	if _vote(post_id, voting_user, False):
+		_vote_global(post_id, False)
+		_vote_post_categories(post_id, False)
+		return True
+	else:
+		return False
+
+def _vote_global(post_id, positive):
+	""" Propagates the voting to the global ranking of posts. """
+	if positive:
+		db.zincrby(POPULAR_TOP_POSTS, post_id, 1)
+	else:
+		db.zincrby(POPULAR_TOP_POSTS, post_id, -1)
+
+def _vote_post_categories(post_id, positive):
+	""" Propagates the voting to every category in with the post is."""
+	for tag in get_post_tags(str(post_id)):
+		if positive:
+			db.zincrby(tag + APPEND_POPULAR_POSTS_CATEGORY, post_id, 1)
+		else:
+			db.zincrby(tag + APPEND_POPULAR_POSTS_CATEGORY, post_id, -1)
 
 ### End of Voting related stuff ###
 
@@ -589,6 +632,7 @@ def _insert_tag_names_letter(tag_name): #OK
 	Insert the tag in the sorted-set of tags by first-letter score.
 	The first-letter-tag sorted set is useful when retrieving all the tags given
 	a letter. Like an index.
+	Safe to duplicates because we set always the same score.
 	"""
 	db.zadd(SEARCH_TAGS_LETTER, ord(tag_name[0].upper()), tag_name)
 
@@ -659,7 +703,7 @@ def search_posts_user_date(username, date_ini, date_end, page=0):
 		# Bad request
 		return None
 
-def _insert_title_ss(title, post_id):
+def _insert_title_ss(title, post_id): # CHANGE - see post UPDATE
 	"""
 	Inserts a title to the sorted set of titles (later on used to find all the
 	posts with the given title), and associates the title with the post id.
@@ -753,8 +797,6 @@ def _inc_dec_tag(tag_name, add=True):
 	
 def get_popular_tags():
 	""" Returns the most popular tags."""
-	pipe = db.pipeline()
-	max_num = db.zcard(POPULAR_TAGS)
 	# zrevrangebyscore(name, max, min, start=None, num=None, withscores=False,...
 	result = db.zrevrangebyscore(POPULAR_TAGS, '+inf', 1, start=0,
 		num=API_MAX_UPDATES, withscores=True)
@@ -764,7 +806,31 @@ def get_popular_tags():
 		dic['name'] = tup[0]
 		dic['num'] = int(tup[1])
 		good_format.append(dic)
-	pipe.execute()
 	return good_format
+
+def get_popular_posts(category, page=0):
+	"""
+	Returns the most popular posts in a category.
+	Pagination may be used, if it isn't, by default returns the first page.
+	"""
+	result = db.zrevrangebyscore(
+		str(category) + APPEND_POPULAR_POSTS_CATEGORY,
+		'+inf', 1, start=page * API_MAX_UPDATES, num=API_MAX_UPDATES,
+		withscores=False)
+	ret = []
+	for post_id in result:
+		ret.append(get_post(post_id))
+	return ret
+
+def get_top_posts(page=0):
+	"""
+	Returns the top posts.
+	Pagination may be used, if it isn't, by default returns the first page.
+	"""
+	result = db.zrevrangebyscore(POPULAR_TOP_POSTS, '+inf', 1,
+		start=page * API_MAX_UPDATES, num=API_MAX_UPDATES, withscores=False)
+	for post_id in result:
+		ret.append(get_post(post_id))
+	return ret
 
 ### End of Ranking/Popular stuff ### 
