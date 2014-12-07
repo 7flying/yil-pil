@@ -427,12 +427,12 @@ class SearchPostsTitleAPI(Resource):
 api.add_resource(SearchPostsTitleAPI, '/yilpil/search/posts/title', endpoint='title')
 
 
-class GetLastUpdates(Resource):
+class LastUpdatesAPI(Resource):
 	""" Returns the last updates of resources. """
 	def __init__(self):
 		self.reqparse = reqparse.RequestParser()
 		self.reqparse.add_argument('resource', type=str, required=True)
-		super(GetLastUpdates, self).__init__()
+		super(LastUpdatesAPI, self).__init__()
 
 	def get(self):
 		""" Gets the last updates of the requested resource. """
@@ -447,10 +447,10 @@ class GetLastUpdates(Resource):
 		else:
 			abort(400)
 
-api.add_resource(GetLastUpdates, '/yilpil/updates', endpoint='updates')		
+api.add_resource(LastUpdatesAPI, '/yilpil/updates', endpoint='updates')		
 
 
-class GetPopular(Resource):
+class RankingsAPI(Resource):
 	""" Returns the most popular resources. """
 
 	def __init__(self):
@@ -458,7 +458,7 @@ class GetPopular(Resource):
 		self.reqparse.add_argument('resource', type=str, required=True)
 		self.reqparse.add_argument('category', type=str)
 		self.reqparse.add_argument('page', type=int)
-		super(GetPopular, self).__init__()
+		super(RankingsAPI, self).__init__()
 
 	def get(self):
 		""" Gets the most popular items of a certain resource. """
@@ -484,8 +484,32 @@ class GetPopular(Resource):
 		else:
 			abort(400)
 
-api.add_resource(GetPopular, '/yilpil/ranking', endpoint='ranking')		
+api.add_resource(RankingsAPI, '/yilpil/ranking', endpoint='ranking')		
 
+
+class IndexAPI(Resource):
+	""" Returns the index of tags."""
+
+	def __init__(self):
+		self.reqparse = reqparse.RequestParser()
+		self.reqparse.add_argument('symbol')
+		super(IndexAPI, self).__init__()
+
+	def get(query):
+		""" Returns the index of tags given the query."""
+		args = self.reqparse.parse_args()
+		if args.get('symbol') == None:
+			# global index requested
+			ret = manager.get_index_letter_tag():
+			return jsonify(index=ret)
+		elif len(args['symbol']) == 1:
+			# tags of a symbol
+			ret = manager.get_tags_by_index_letter(args['symbol'])
+			return jsonify(tags=ret)
+		else:
+			abort(400)
+
+api.add_resource(IndexAPI, '/yilpil/index', endpoint='index')
 
 if __name__ == '__main__':
 	# Populate database with test data

@@ -43,6 +43,10 @@ VOTE_ID = 'next-vote-id'
 GLOBAL_POST_UPDATE_ID = 'global-post-update'
 # Set of tag-name, post-ids with that tag.
 APPEND_TAG_NAME_POSTS = ':post-list'
+# Append key for the sorted set of tags starting by the given letter
+APPEND_KEY_INDEX_LETTER_TAG = ':letter-tags'
+# Index for all the letter-tags
+GLOBAL_INDEX_LETTER_TAG = 'index-letter-tag'
 ## -- Search related stuff -- ##
 # Tags:
 # Id for the sorted set of tag name + score.
@@ -320,6 +324,10 @@ def insert_tag_post_tags(post_id, tag):
 		_inc_dec_tag(tag, True)
 		# Add to the sorted set of tag-name -- post-ids
 		_insert_post_tag_name(post_id, tag)
+		# Insert to the index of tags
+		_insert_symbol_index(tag[0])
+		# Insert to the specific index of tag[0] -- tags
+		_insert_tag_index_letter_tags(tag)
 
 def delete_tag_from_post(post_id, tag):
 	"""
@@ -332,6 +340,10 @@ def delete_tag_from_post(post_id, tag):
 		_inc_dec_tag(tag, False)
 		# Delete from the sorted set of tag-name -- post-ids
 		_remove_post_tag_name(post_id, tag_name)
+		# Delete from the index of tags
+		_delete_symbol_index(tag[0])
+		# Delete from the specifig index of tag[0] -- tags
+		_delete_tag_index_letter_tags(tag)
 
 def _is_post_created(post_id):
 	"""
@@ -777,6 +789,33 @@ def get_last_post_updates():
 def _delete_post_last_updates(posd_id):
 	""" Removes the post from the capped list of last updates if present. """
 	db.lrem(GLOBAL_POST_UPDATE_ID, 1, post_id)
+
+def _insert_symbol_index(symbol):
+	""" Ads a symbol to the index. """
+	if len(symbol) == 1:
+		db.sadd(GLOBAL_INDEX_LETTER_TAG, symbol.upper())
+
+def _delete_symbol_index(symbol):
+	""" Removes a symbol from the index. """
+	if len(symbol) == 1:
+		db.srem(GLOBAL_INDEX_LETTER_TAG, symbol.upper())
+
+def get_index_letter_tag():
+	""" Returns the contents of the index of letter-tags. """
+	return db.smembers(GLOBAL_INDEX_LETTER_TAG)
+
+def _insert_tag_index_letter_tags(tag):
+	""" Inserts a tag to the index of tag[0] -- tags."""
+	db.zadd(tag[0].upper() + APPEND_KEY_INDEX_LETTER_TAG, tag)
+
+def _delete_tag_index_letter_tags(tag):
+	""" Deletes a tag from the index of tag[0] -- tags."""
+	db.zrem(tag[0].upper() + APPEND_KEY_INDEX_LETTER_TAG, tag)
+
+def get_tags_by_index_letter(letter):
+	""" Gets the tags by the provided index letter. Ex 'a': 'angular', 'amazon' """
+	if len(letter) == 1:
+		return db.zrange(letter + APPEND_KEY_INDEX_LETTER_TAG, 0 -1)
 
 ### End of global things ###
 
