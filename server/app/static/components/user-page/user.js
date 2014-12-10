@@ -1,5 +1,6 @@
-define(['knockout', 'text!./user.html', 'module', 'app/router', 'bootstrap-datetimepicker'],
- function(ko, template, module, router, datetimepicker) {
+define(['knockout', 'text!./user.html', 'module', 'app/router', 'app/mediator',
+	'bootstrap-datetimepicker'],
+ function(ko, template, module, router, mediator, datetimepicker) {
 
 	// Register the list-posts recycled component
 	if (! ko.components.isRegistered('list-posts')) {
@@ -45,15 +46,7 @@ define(['knockout', 'text!./user.html', 'module', 'app/router', 'bootstrap-datet
 						self.userPosts.removeAll();
 						self.displayTitle(data.posts.length + " posts found");
 					}
-					while (data.posts.length > 0) {
-						var temp = data.posts.shift();
-						// Set preview
-						if (temp.contents.length < 200)
-							temp.contents = temp.contents.substring(0, temp.contents.length);
-						else
-							temp.contents = temp.contents.substring(0, 200) + " [...]";
-						self.userPosts.push(temp);
-					}
+					mediator.summarizePosts(data, self.userPosts);
 				});
 			}
 		};
@@ -108,52 +101,22 @@ define(['knockout', 'text!./user.html', 'module', 'app/router', 'bootstrap-datet
 		var getUserPosts = function(toStore) {
 			var url = '/yilpil/posts?username=' + params.name + '&page=' + self.page();
 			$.getJSON(url, function(data) {
-				while (data.posts.length > 0) {
-					var temp = data.posts.shift();
-					// Set preview
-					if (temp.contents.length < 200)
-						temp.contents = temp.contents.substring(0, temp.contents.length);
-					else
-						temp.contents = temp.contents.substring(0, 200) + " [...]";
-					toStore.push(temp);
-				}
+				mediator.summarizePosts(data, toStore);
 			});	
-		};
-
-		var getAvatar = function(toStore) {
-			var url = '/yilpil/users/' + params.name;
-			$.getJSON(url, function(data) {
-				toStore('http://www.gravatar.com/avatar/' + data.user.hash);
-			});
 		};
 
 		var getFavourites = function(toStore) {
 			var url = '/yilpil/favs/' + params.name;
 			$.getJSON(url, function(data) {
 				self.favCount(data.posts.length);
-				while (data.posts.length > 0) {
-					var temp = data.posts.shift();
-					// Set preview
-					if (temp.contents.length < 200)
-						temp.contents = temp.contents.substring(0, temp.contents.length);
-					else
-						temp.contents = temp.contents.substring(0, 200) + " [...]";
-					self.userPosts.push(temp);
-				}
-			});
-		};
-
-		var getFavCount = function() {
-			var url = '/yilpil/favs/' + params.name + '?count=true';
-			$.getJSON(url, function(data){
-				self.favCount(data.count);
+				mediator.summarizePosts(data, self.userPosts);
 			});
 		};
 
 		getUserPosts(this.userPosts);
 		getUserTags(this.tags);
-		getAvatar(this.gravatar);
-		getFavCount();
+		mediator.getAvatar(this.gravatar, params.name);
+		mediator.getFavCount(self.favCount, params.name);
 
 	}
 	return { viewModel: UserViewModel, template: template };

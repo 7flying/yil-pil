@@ -1,4 +1,5 @@
-define(['knockout', 'text!./search.html','module', 'app/router'], function(ko, template, module, router) {
+define(['knockout', 'text!./search.html','module', 'app/router', 'app/mediator'],
+ function(ko, template, module, router, mediator) {
 
 	// Register the list-posts recycled component
 	if (! ko.components.isRegistered('list-posts')) {
@@ -22,15 +23,7 @@ define(['knockout', 'text!./search.html','module', 'app/router'], function(ko, t
 					self.results(null);
 				else
 					self.results(data.posts.length + " posts matched:");
-				while (data.posts.length > 0) {
-					var temp = data.posts.shift();
-					// Set preview
-					if (temp.contents.length < 200)
-						temp.contents = temp.contents.substring(0, temp.contents.length);
-					else
-						temp.contents = temp.contents.substring(0, 200) + " [...]";
-					toStore.push(temp);
-				}
+				mediator.summarizePosts(data, toStore);
 			});	
 		};
 

@@ -1,4 +1,5 @@
-define(['knockout', 'text!./rankings-page.html','module', 'app/router'], function(ko, template, module, router) {
+define(['knockout', 'text!./rankings-page.html', 'module', 'app/router',
+ 'app/mediator'], function(ko, template, module, router, mediator) {
 
 	// Register the list-posts recycled component
 	if (! ko.components.isRegistered('list-posts')) {
@@ -33,15 +34,7 @@ define(['knockout', 'text!./rankings-page.html','module', 'app/router'], functio
 			var url = 'yilpil/ranking?resource=posts';
 			$.getJSON(url, function(data) {
 				self.results(data.posts.length > 0 ? true : null);
-				while (data.posts.length > 0) {
-					var temp = data.posts.shift();
-					// Set preview
-					if (temp.contents.length < 200)
-						temp.contents = temp.contents.substring(0, temp.contents.length);
-					else
-						temp.contents = temp.contents.substring(0, 200) + " [...]";
-					self.rankingPosts.push(temp);
-				}
+				mediator.summarizePosts(data, self.rankingPosts);
 			});
 		};
 		// Gets the category/tag specific ranking
@@ -51,15 +44,7 @@ define(['knockout', 'text!./rankings-page.html','module', 'app/router'], functio
 			var url = 'yilpil/ranking?resource=posts&category=' + category;
 			$.getJSON(url, function(data) {
 				self.results(data.posts.length > 0 ? true : null);
-				while (data.posts.length > 0) {
-					var temp = data.posts.shift();
-					// Set preview
-					if (temp.contents.length < 200)
-						temp.contents = temp.contents.substring(0, temp.contents.length);
-					else
-						temp.contents = temp.contents.substring(0, 200) + " [...]";
-					self.rankingPosts.push(temp);
-				}
+				mediator.summarizePosts(data, self.rankingPosts);
 			});
 		};
 

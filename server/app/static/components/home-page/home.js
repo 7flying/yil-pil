@@ -1,4 +1,5 @@
-define(["knockout", "text!./home.html"], function(ko, homeTemplate) {
+define(["knockout", "text!./home.html", "app/mediator"],
+ function(ko, homeTemplate, mediator) {
 
 	// Register the list-posts recycled component
 	if (! ko.components.isRegistered('list-posts')) {
@@ -20,15 +21,7 @@ define(["knockout", "text!./home.html"], function(ko, homeTemplate) {
 					self.results(true);
 				else
 					self.results(null);
-				while (data.posts.length > 0) {
-					var temp = data.posts.shift();
-					// Set preview
-					if (temp.contents.length < 200)
-						temp.contents = temp.contents.substring(0, temp.contents.length);
-					else
-						temp.contents = temp.contents.substring(0, 200) + " [...]";
-					toStore.push(temp);
-				}
+				mediator.summarizePosts(data, toStore);
 			});	
 		};
 		/* Get the actual data. */
