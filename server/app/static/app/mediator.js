@@ -1,6 +1,7 @@
 define(["knockout"], function(ko) {
 	return {
-			/* Gets the posts from the given url and applies a preview. */
+		
+		/* Gets the posts from the given url and applies a preview. */
 		summarizePosts: function(data, toStore) {
 			while (data.posts.length > 0) {
 				var temp = data.posts.shift();
@@ -36,6 +37,22 @@ define(["knockout"], function(ko) {
 				while (data.tags.length > 0)
 						toStore.push(data.tags.shift());
 			});
+		},
+		/* Get authentication token */
+		getToken: function(username, password, success, error) {
+			var url = '/yilpil/auth/token/' + username;
+				$.ajax({
+					type: "GET",
+					url: url,
+					dataType: 'json',
+					beforeSend: function(xhr) {
+						xhr.setRequestHeader("Authorization", "Basic " + 
+							btoa(username + ":" + password));
+					},
+					async: false,
+					success: success,
+					error: error
+				});
 		}
 	}
 	

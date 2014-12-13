@@ -1,5 +1,5 @@
-define(['knockout', 'text!./sign-in.html', 'knockout.validation'],
- function(ko, template, validation) {
+define(['knockout', 'text!./sign-in.html', 'knockout.validation', 'app/mediator'],
+ function(ko, template, validation, mediator) {
 
 	ko.validation.rules.pattern.message = 'Invalid.';
 
@@ -21,10 +21,19 @@ define(['knockout', 'text!./sign-in.html', 'knockout.validation'],
 			required: true
 		});
 		this.errors = validation.group(self);
+		this.setWarning = ko.observable(null);
+
+		var success = function(data) {
+			document.cookie="token=" + data.token;
+			self.setWarning(null);
+		};
+		var errors = function(jqXHR, textStatus, errorThrown) {
+			self.setWarning(true);
+		};
 
 		this.submit = function() {
 			if (self.errors().length == 0) {
-				console.log("Login successful");
+				mediator.getToken(self.username(), self.password(), success, errors);
 			} else {
 				self.errors.showAllMessages();
 				console.log("Invalid");
