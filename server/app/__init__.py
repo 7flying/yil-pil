@@ -40,14 +40,14 @@ def debug(to_print):
 
 @auth.verify_password
 def verify_password(username_or_token, password):
-	if password == None:
-		# token authentication
-		user = verify_auth_token(username_or_token)
-		return user is not None
-	else:
+	user = verify_auth_token(username_or_token)
+	if not user:
 		# username/password authentication
 		db_pass = manager.get_password(username_or_token)
+		if not db_pass:
+			return False
 		return check_password_hash(db_pass, password)
+	return True
 
 # Token-Based Authentication
 def generate_auth_token(username, expiration=3600):
@@ -58,9 +58,12 @@ def verify_auth_token(token):
 	ser = Serializer(SECRET_KEY)
 	try:
 		data = ser.loads(token)
+		print data
 	except:
 		return None
-	return manager.get_user(data['id'])
+	user = manager.get_user(data['id'])
+	print user
+	return user
 
 
 class AuthAPI(Resource):
