@@ -38,7 +38,7 @@ define(["knockout"], function(ko) {
 						toStore.push(data.tags.shift());
 			});
 		},
-		/* Get authentication token */
+		/* Get authentication token. */
 		getToken: function(username, password, success, error) {
 			var url = '/yilpil/auth/token/' + username;
 				$.ajax({
@@ -53,6 +53,19 @@ define(["knockout"], function(ko) {
 					success: success,
 					error: error
 				});
+		},
+		/* Gets a cookie given its name. */
+		getCookie: function(cookieName) {
+			var name = cookieName + "=";
+			var ca = document.cookie.split(';');
+			for(var i=0; i<ca.length; i++) {
+				var c = ca[i];
+				while (c.charAt(0)==' ')
+					c = c.substring(1);
+				if (c.indexOf(name) != -1)
+					return c.substring(name.length,c.length);
+    		}
+    		return null;
 		}
 	}
 	

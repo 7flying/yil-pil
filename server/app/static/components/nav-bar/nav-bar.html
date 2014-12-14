@@ -37,16 +37,32 @@
         <li data-bind="css: { active: route().page === 'editor-page' }">
           <a href="#editor">New post!</a>
         </li>
-        
+        <!-- ko ifnot: user -->
         <li data-bind="css: { active: route().page === 'sign-in-page' }">
           <a href="#login">Sign In</a>
         </li>
         <li data-bind="css: { active: route().page === 'sign-up-page' }">
           <a href="#join">Sign Up</a>
         </li>
+        <!-- /ko -->
         <li data-bind="css: { active: route().page === 'about-page' }">
           <a href="#about">About</a>
         </li>
+        <!-- ko if: user -->
+        <li class="dropdown">
+          <a href="#" class="dropdown-toggle" data-toggle="dropdown">
+            <span class="glyphicon glyphicon-user"></span> 
+              <strong data-bind='text: user'></strong>
+              <span class="glyphicon glyphicon-chevron-down"></span>
+          </a>
+          <ul class="dropdown-menu" role="menu">
+            <li><a data-bind='attr: {href: "#user/" + user()}'>Profile</a></li>
+            <li><a href="#">Settings</a></li>
+            <li class="divider"></li>
+            <li data-bind='click: logout'><a href="#">Logout</a></li>
+          </ul>
+        </li>
+        <!-- /ko -->
       </ul>
     </div>
   </div>

@@ -24,8 +24,10 @@ define(['knockout', 'text!./sign-in.html', 'knockout.validation', 'app/mediator'
 		this.setWarning = ko.observable(null);
 
 		var success = function(data) {
-			document.cookie="token=" + data.token;
+			document.cookie = "yt-token=" + data.token;
+			document.cookie = "yt-username=" + self.username();
 			self.setWarning(null);
+			return window.location.href = "#user/" + self.username();
 		};
 		var errors = function(jqXHR, textStatus, errorThrown) {
 			self.setWarning(true);
