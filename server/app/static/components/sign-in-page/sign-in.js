@@ -27,7 +27,7 @@ define(['knockout', 'text!./sign-in.html', 'knockout.validation', 'app/mediator'
 			document.cookie = "yt-token=" + data.token;
 			document.cookie = "yt-username=" + self.username();
 			self.setWarning(null);
-			return window.location.href = "#user/" + self.username();
+			return window.location.href = "#editor";
 		};
 		var errors = function(jqXHR, textStatus, errorThrown) {
 			self.setWarning(true);

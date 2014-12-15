@@ -1,16 +1,6 @@
 define(['knockout', 'text!./post.html'], function(ko, template) {
 
 	function PostViewModel(params) {
-		
-		/* Little working example \o/ 
-		var self = this;
-		self.id = ko.observable(params.postId); // Or without initialization.
-		
-		var getId = function() {
-			self.id = params.postId;
-		};
-		getId();
-		*/
 
 		this.posts = ko.observableArray(); // Arrays are dynamically updated
 

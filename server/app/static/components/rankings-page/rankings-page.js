@@ -1,13 +1,6 @@
 define(['knockout', 'text!./rankings-page.html', 'module', 'app/router',
  'app/mediator'], function(ko, template, module, router, mediator) {
 
-	// Register the list-posts recycled component
-	if (! ko.components.isRegistered('list-posts')) {
-		ko.components.register('list-posts', {
-			template: { require: 'text!components/recycled/list-posts.html'}
-		});
-	}
-
 	function RankingsPageViewModel(params) {
 		var self = this;
 		this.index = ko.observableArray();

@@ -2,7 +2,7 @@
 	<div class="col-xs-12 col-sm-9">
 		<!-- ko if: searchPosts -->
 		<h3 data-bind='text: results'></h3>
-		<list-posts params='posts: searchPosts'></list-posts>
+		<post-list params='posts: searchPosts'></post-list>
 		<!-- /ko -->
 		<!-- ko ifnot: results -->
 		<div class="alert alert-info" role="alert">

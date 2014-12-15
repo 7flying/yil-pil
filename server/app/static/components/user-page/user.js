@@ -2,13 +2,6 @@ define(['knockout', 'text!./user.html', 'module', 'app/router', 'app/mediator',
 	'bootstrap-datetimepicker'],
  function(ko, template, module, router, mediator, datetimepicker) {
 
-	// Register the list-posts recycled component
-	if (! ko.components.isRegistered('list-posts')) {
-		ko.components.register('list-posts', {
-			template: { require: 'text!components/recycled/list-posts.html'}
-		});
-	}
-
 	function UserViewModel(params) {
 		var self = this;
 		this.userPosts = ko.observableArray();

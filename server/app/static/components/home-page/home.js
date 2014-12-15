@@ -1,12 +1,13 @@
 define(["knockout", "text!./home.html", "app/mediator"],
  function(ko, homeTemplate, mediator) {
 
+ 	/*
 	// Register the list-posts recycled component
 	if (! ko.components.isRegistered('list-posts')) {
 		ko.components.register('list-posts', {
 			template: { require: 'text!components/recycled/list-posts.html'}
 		});
-	}
+	}*/
 
   function HomeViewModel(route) {
   	var self = this;

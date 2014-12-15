@@ -1,5 +1,5 @@
-define(['knockout', 'text!./post-editor.html', 'marked', 'highlight'],
- function(ko, template, marked, hljs) {
+define(['knockout', 'text!./post-editor.html', 'marked', 'highlight', 'app/mediator'],
+ function(ko, template, marked, hljs, mediator) {
 
 	ko.bindingHandlers.executeOnEnter = {
 		init: function(element, valueAccessor, allBindingsAccesor, viewModel) {
@@ -40,6 +40,9 @@ define(['knockout', 'text!./post-editor.html', 'marked', 'highlight'],
 			hljs.initHighlightingOnLoad();
 		});
 		var self = this;
+		this.pageTitle = ko.observable();
+		this.setWarning = ko.observable(null);
+		this.session = ko.observable(null);
 		this.mdTitle = ko.observable();
 		this.mdContents = ko.observable();
 		this.mdTags = ko.observableArray();
@@ -51,6 +54,8 @@ define(['knockout', 'text!./post-editor.html', 'marked', 'highlight'],
 		this.mdTitle.subscribe(function(newValue) {
 			self.title(newValue);
 		});
+
+		var titleConcat = "What have you learnt";
 
 		var generateHTML = function(text) {
 			$('#preview-contents').empty();
@@ -73,6 +78,22 @@ define(['knockout', 'text!./post-editor.html', 'marked', 'highlight'],
 			self.tags.remove(tag);
 			self.mdTags.remove(tag);
 		};
+
+		this.submit = function() {
+			
+		};
+
+		var setContent = function() {
+			var cookie = mediator.getCookie("yt-username");
+			if (cookie != null) {
+				self.pageTitle(titleConcat + ", " + cookie + "?");
+				self.session(true);
+			} else {
+				self.pageTitle(titleConcat + "?");
+				self.setWarning(true);
+			}	
+		};
+		setContent();
 	}
 
 	return { viewModel: PostEditorViewModel, template: template };
