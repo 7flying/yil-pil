@@ -39,12 +39,11 @@ define(['knockout', 'text!./nav-bar.html', 'app/mediator'],
 		var getUser = function() {
 			var cookie = mediator.getCookie('yt-username');
 			if (cookie != null) {
-				console.log(cookie);
 				self.user(cookie);
 			} else
 				self.user(null);
 		};
-		setInterval(getUser, 1000);
+		setInterval(getUser, 3000);
 	}
 
 	return { viewModel: NavBarViewModel, template: template };

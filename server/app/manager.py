@@ -598,12 +598,13 @@ def vote_positive(post_id, voting_user): # OK
 		Propagates to the global ranking of posts.
 		Propagates the voting to each category that the post has.
 	"""
-	if _vote(post_id, voting_user, True):
+	temp = _vote(post_id, voting_user, True)
+	if temp:
 		_vote_global(post_id, True)
 		_vote_post_categories(post_id, True)
 		return True
 	else:
-		return False
+		return temp
 
 def vote_negative(post_id, voting_user): # OK
 	""" Votes -1 to a post.
@@ -612,12 +613,13 @@ def vote_negative(post_id, voting_user): # OK
 		found.
 		Propagates the voting to each category that the post has.
 	"""
-	if _vote(post_id, voting_user, False):
+	temp =  _vote(post_id, voting_user, False)
+	if temp:
 		_vote_global(post_id, False)
 		_vote_post_categories(post_id, False)
 		return True
 	else:
-		return False
+		return temp
 
 def _vote_global(post_id, positive):
 	""" Propagates the voting to the global ranking of posts. """

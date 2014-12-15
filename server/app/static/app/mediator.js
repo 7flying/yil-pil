@@ -41,20 +41,22 @@ define(["knockout"], function(ko) {
 		/* Get authentication token. */
 		getToken: function(username, password, success, error) {
 			var url = '/yilpil/auth/token/' + username;
-				$.ajax({
-					type: "GET",
-					url: url,
-					dataType: 'json',
-					beforeSend: function(xhr) {
-						xhr.setRequestHeader("Authorization", "Basic " + 
-							btoa(username + ":" + password));
-					},
-					async: false,
-					success: success,
-					error: error
-				});
+			$.ajax({
+				type: "GET",
+				url: url,
+				dataType: 'json',
+				beforeSend: function(xhr) {
+					xhr.setRequestHeader("Authorization", "Basic " + 
+						btoa(username + ":" + password));
+				},
+				async: false,
+				success: success,
+				error: error
+			});
 		},
-		/* Gets a cookie given its name. */
+		/* Gets a cookie given its name. 
+		 * We store: 'yt-username' and 'yt-token'
+		*/
 		getCookie: function(cookieName) {
 			var name = cookieName + "=";
 			var ca = document.cookie.split(';');
@@ -66,6 +68,35 @@ define(["knockout"], function(ko) {
 					return c.substring(name.length,c.length);
     		}
     		return null;
+		},
+		/* Votes up or down a post. */
+		vote: function(postId, user, up, token) {
+			var url = '/yilpil/voting/' + postId + "?up=" + up.toString()
+				+ "&username=" + user;
+			$.ajax({
+				type: "PUT",
+				url: url,
+				beforeSend: function(xhr) {
+					xhr.setRequestHeader("Authorization", "Basic " + 
+						btoa(token + ":unused"));
+				}
+			});
+		},
+		/* Adds a post to the user list of favourites*/
+		like: function(postId, user, token) {
+			var url = '/yilpil/favs/' + user + "?id=" + postId;
+			$.ajax({
+				type: "POST",
+				url: url,
+				beforeSend: function(xhr) {
+					xhr.setRequestHeader("Authorization", "Basic " +
+						btoa(token + ":unused"));
+				}
+			});
+		},
+		/* Deletes a post from the user list of favourites*/
+		unlike: function(postId, user) {
+
 		}
 	}
 	

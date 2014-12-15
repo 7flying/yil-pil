@@ -1,7 +1,11 @@
 <!-- ko if: setWarning-->
 <div class="alert alert-danger alert-dismissible" role="alert">
- 	<button type="button" class="close" data-dismiss="alert"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
-	You need to be loged in to perform that action. Please <a href="#login">log in</a> or <a href="#join">sign up</a>.
+ 	<button type="button" class="close" data-dismiss="alert">
+ 		<span aria-hidden="true">&times;</span>
+ 			<span class="sr-only">Close</span>
+ 	</button>
+ 	<span>You need to be loged in to perform that action. Please 
+	<a href="#login">log in</a> or <a href="#join">sign up</a>.</span>
 </div>
 <!-- /ko -->
 <div id='posts-list' data-bind='foreach: posts'>
@@ -18,16 +22,23 @@
 		</div>
 		<div class="panel-body" data-bind='text: contents'></div>
 		<div class="panel-footer">
-			<button type="button" class="btn btn-default" aria-label="Left Align">
-				<span class=" glyphicon glyphicon-chevron-up" aria-hiden="true"></span>
+			<button data-bind='click: $parent.voteUp' type="button" 
+			class="btn btn-default" aria-label="Left Align">
+				<span class="glyphicon glyphicon-chevron-up" 
+				aria-hiden="true"></span>
 			</button>
 			<span class="badge" data-bind='text: votes'></span>
-			<button type="button" class="btn btn-default" aria-label="Left Align">
-				<span class=" glyphicon glyphicon-chevron-down" aria-hiden="true"></span>
+			<button data-bind='click: $parent.voteDown' type="button" 
+			class="btn btn-default" aria-label="Left Align">
+				<span class=" glyphicon glyphicon-chevron-down" 
+				aria-hiden="true">
+				</span>
 			</button>
-			
-			<button data-bind='click: $parent.like' type="button" class="btn btn-default" aria-label="Left Align">
-				<span class="glyphicon glyphicon-heart" aria-hidden="true"> Like</span>
+			<button data-bind='click: $parent.like' type="button" 
+			class="btn btn-default" aria-label="Left Align">
+				<span class="glyphicon glyphicon-heart" 
+				aria-hidden="true"> Like
+				</span>
 			</button>
 			<span data-bind='foreach: tags'>
 				<a data-bind='attr: {href: "#tag/" + $data}'>

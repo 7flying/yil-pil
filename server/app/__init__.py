@@ -284,10 +284,8 @@ class VotingAPI(Resource): #Ok
 
 	def __init__(self):
 		self.reqparse = reqparse.RequestParser()
-		self.reqparse.add_argument('up', type=str, location='form',
-			required=True)
-		self.reqparse.add_argument('username', type=str, location='form',
-			required=True)
+		self.reqparse.add_argument('up', type=str, required=True)
+		self.reqparse.add_argument('username', type=str, required=True)
 		super(VotingAPI, self).__init__()
 
 	def put(self, post_id): #Ok
@@ -304,11 +302,11 @@ class VotingAPI(Resource): #Ok
 			debug("voting down")
 			res = manager.vote_negative(post_id, args['username'])
 		if res == None:
-			return "Post-id not found", 404
+			return jsonify(error="Post-id not found", code="404")
 		if res:
-			return "Vote stored", 200
+			return jsonify(message="Vote stored", code="200")
 		else:
-			return "Already voted on that post", 200
+			return jsonify(error="Already voted on that post", code="405")
 
 api.add_resource(VotingAPI, '/yilpil/voting/<int:post_id>', endpoint='voting')	
 
@@ -330,13 +328,13 @@ class FavouritesAPI(Resource):
 			if count != -1:
 				return jsonify(count=count)
 			else:
-				return "User not found.", 404
+				return jsonify(error="User not found.", code="404")
 		else:
 			posts = manager.get_favourites(user)
 			if posts != None:
 				return jsonify(posts=posts)
 			else:
-				return "User not found.", 404
+				return jsonify(error="User not found.", code="404")
 
 	@auth.login_required
 	def delete(self, user):
@@ -344,9 +342,9 @@ class FavouritesAPI(Resource):
 		args = self.reqparse.parse_args()
 		if args['id'] != None:
 			if manager.delete_favourite(user, args['id']):
-				return "Favourite deleted.", 200
+				return jsonify(message="Favourite deleted.", code="200")
 			else:
-				return "User not found.", 404
+				return jsonify(error="User not found.", code="404")
 
 	@auth.login_required
 	def post(self, user):
@@ -354,9 +352,9 @@ class FavouritesAPI(Resource):
 		args = self.reqparse.parse_args()
 		if args['id'] != None:
 			if manager.add_favourite(user, args['id']):
-				return "Favourite added.", 201
+				return jsonify(error="Favourite added.", code="201")
 			else:
-				return "User not found.", 404
+				return jsonify(error="User not found.", code="404")
 
 api.add_resource(FavouritesAPI, '/yilpil/favs/<string:user>', endpoint='favs')	
 
