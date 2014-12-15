@@ -213,7 +213,7 @@ class PostAPI(Resource):
 			post = manager.update_post(post, id, username)
 			return { 'post': marshal(post, PostAPI.post_field) }
 		else:
-			abot(404)
+			abort(404)
 
 	@auth.login_required
 	def delete(self, id): # OK

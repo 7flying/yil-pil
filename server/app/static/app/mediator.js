@@ -97,7 +97,25 @@ define(["knockout"], function(ko) {
 		/* Deletes a post from the user list of favourites*/
 		unlike: function(postId, user) {
 
-		}
+		},
+		/* Creates a new post */
+		createPost: function(post, token) {
+			var url = 'yilpil/post/0';
+			//curl -X POST -u seven:123 -i http://localhost:5000/yilpil/post/2
+			// -d "title=Cool post!" -d "contents=how to jump"
+			// -d "tags=hello, he, some" -d "username=seven"
+			$.ajax({
+				type: "POST",
+				url: url,
+				data: post,
+				beforeSend: function(xhr) {
+					xhr.setRequestHeader("Authorization", "Basic " +
+						btoa(token + ":unused"));
+				},
+				success: function(data, textStatus, jqXHR) {
+					return window.location.href = '#post/' + data.post.id;
+				}
+			});
+		}	
 	}
-	
 });

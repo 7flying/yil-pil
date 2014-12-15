@@ -1,5 +1,5 @@
 define(['knockout', 'text!./post-editor.html', 'marked', 'highlight', 'app/mediator'],
- function(ko, template, marked, hljs, mediator) {
+	function(ko, template, marked, hljs, mediator) {
 
 	ko.bindingHandlers.executeOnEnter = {
 		init: function(element, valueAccessor, allBindingsAccesor, viewModel) {
@@ -43,9 +43,9 @@ define(['knockout', 'text!./post-editor.html', 'marked', 'highlight', 'app/media
 		this.pageTitle = ko.observable();
 		this.setWarning = ko.observable(null);
 		this.session = ko.observable(null);
-		this.mdTitle = ko.observable();
-		this.mdContents = ko.observable();
-		this.mdTags = ko.observableArray();
+		this.mdTitle = ko.observable("");
+		this.mdContents = ko.observable("");
+		this.mdTags = ko.observableArray([]);
 		this.title = ko.observable();
 		this.contents = ko.observable();
 		this.tags = ko.observableArray();
@@ -55,7 +55,7 @@ define(['knockout', 'text!./post-editor.html', 'marked', 'highlight', 'app/media
 			self.title(newValue);
 		});
 
-		var titleConcat = "What have you learnt";
+		var titleConcat = "What have you learnt today";
 
 		var generateHTML = function(text) {
 			$('#preview-contents').empty();
@@ -80,7 +80,12 @@ define(['knockout', 'text!./post-editor.html', 'marked', 'highlight', 'app/media
 		};
 
 		this.submit = function() {
-			
+			var data = {};
+			data['contents'] = self.mdContents();
+			data['title'] = self.mdTitle();
+			data['tags'] = self.mdTags().toString();
+			data['username'] = mediator.getCookie('yt-username');
+			mediator.createPost(data, mediator.getCookie('yt-token'));
 		};
 
 		var setContent = function() {
@@ -91,7 +96,7 @@ define(['knockout', 'text!./post-editor.html', 'marked', 'highlight', 'app/media
 			} else {
 				self.pageTitle(titleConcat + "?");
 				self.setWarning(true);
-			}	
+			}
 		};
 		setContent();
 	}
