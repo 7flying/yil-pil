@@ -23,6 +23,7 @@ define(['knockout', 'text!./user.html', 'module', 'app/router', 'app/mediator',
 
 		// Filters the posts given two dates
 		this.filterPosts = function() {
+			self.userPosts([]);
 			var from = $('#text-from').val().match(/\d/g);
 			from = from.join("");
 			// Change order
@@ -37,7 +38,7 @@ define(['knockout', 'text!./user.html', 'module', 'app/router', 'app/mediator',
 				+ to.substring(0, to.length - 6);
 			if (from.length == 8 && to.length == 8) {
 				var url = '/yilpil/search/posts/date?user=' + self.user()
-				+ "&dateini=" + from + "&dateend=" + to; 
+				+ "&dateini=" + from + "&dateend=" + to;
 				$.getJSON(url, function(data) {
 					if (data.posts.length == 0) {
 						self.userPosts(null);
