@@ -16,6 +16,7 @@ define(['jquery', 'knockout', './router', 'bootstrap', 'knockout-projections'], 
   ko.components.register('sign-up-page', { require: 'components/sign-up-page/sign-up' });
   ko.components.register('post-page', { require: 'components/post-page/post' });
   ko.components.register('user-page', { require: 'components/user-page/user' });
+  ko.components.register('settings-page', { require: 'components/settings-page/settings'});
   ko.components.register('search-page', { require: 'components/search-page/search' });
   ko.components.register('editor-page', { require: 'components/editor-page/editor' });
   ko.components.register('rankings-page', { require: 'components/rankings-page/rankings-page'});

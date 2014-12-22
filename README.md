@@ -123,7 +123,7 @@ Favourites Resource
 	
 	Adds a post to the user's list of favourites.
 	```
-	curl -X PUT -i http://localhost:5000/yilpil/favs/seven -d "id=4"
+	curl -X POST -i http://localhost:5000/yilpil/favs/seven -d "id=4"
 	```
 
 * ```favs/<string:user>, @auth_required, {id=int}, DELETE```
@@ -226,3 +226,12 @@ Index Resource
 	curl -X GET -i http://localhost:5000/yilpil/index -d "symbol=l"
 	```
 
+Auth Resource
+---------------
+
+* ```/auth/token/<string:username>, , @auth_required, GET```
+	
+	Returns an authorization token that can be used in future requests instead of the pair (user, pass).
+	```
+	curl -X  GET -u seven:123 -i http://localhost:5000/yilpil/auth/token/seven
+	```

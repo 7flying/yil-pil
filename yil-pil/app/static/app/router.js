@@ -21,6 +21,7 @@ define(["knockout", "crossroads", "hasher"], function(ko, crossroads, hasher) {
             user:           route('user/{name}', { page: 'user-page' }),
             search:         route('search/{query}', { page: 'search-page' }),
             tag:            route('tag/{name}', { page: 'tags-page' }),
+            settings:       route('settings/{user}', { page: 'settings-page'}),
             rankings:       route('rankings', { page: 'rankings-page' })
         }
     };
