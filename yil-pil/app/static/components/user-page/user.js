@@ -20,14 +20,14 @@ define(['knockout', 'text!./user.html', 'module', 'app/router', 'app/mediator',
 			var from = $('#text-from').val().match(/\d/g);
 			from = from.join("");
 			// Change order
-			from = from.substring(from.length -4, from.length)
-				+ from.substring(from.length -6, from.length -4)
+			from = from.substring(from.length - 4, from.length)
+				+ from.substring(from.length - 6, from.length - 4)
 				+ from.substring(0, from.length - 6);
 			var to = $('#text-to').val().match(/\d/g);
 			to = to.join("");
 			// Change order
-			to = to.substring(to.length -4, to.length)
-				+ to.substring(to.length -6, to.length -4)
+			to = to.substring(to.length - 4, to.length)
+				+ to.substring(to.length - 6, to.length - 4)
 				+ to.substring(0, to.length - 6);
 			if (from.length == 8 && to.length == 8) {
 				var url = '/yilpil/search/posts/date?user=' + self.user()
