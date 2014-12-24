@@ -146,6 +146,12 @@ define(["knockout"], function(ko) {
 
 				}
 			})
+		},
+
+
+		validateMustEqual: function(val, other) {
+			return val == other();
 		}
+
 	}
 });

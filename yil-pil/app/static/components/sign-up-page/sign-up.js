@@ -1,4 +1,5 @@
-define(['knockout', 'text!./sign-up.html', 'knockout.validation'], function(ko, template, validation) {
+define(['knockout', 'text!./sign-up.html', 'knockout.validation', 'app/mediator'],
+ function(ko, template, validation, mediator) {
 
 	ko.validation.rules.pattern.message = 'Invalid.';
 
@@ -10,10 +11,6 @@ define(['knockout', 'text!./sign-up.html', 'knockout.validation'], function(ko, 
 		messageTemplate: null
 	});
 
-	function mustEqual(val, other) {
-		return val == other();
-	};
-
 	function JoinViewModel(params) {
 		var self = this;
 		this.username = ko.observable().extend({
@@ -24,8 +21,8 @@ define(['knockout', 'text!./sign-up.html', 'knockout.validation'], function(ko, 
 		this.email = ko.observable().extend({
 			required: true,
 			pattern: {
-				message: 'Enter a valid email adress',
-				params: "@"
+				message: 'Enter a valid email address',
+				params: '@'
 			}
 		});
 		this.password = ko.observable().extend({
@@ -35,7 +32,7 @@ define(['knockout', 'text!./sign-up.html', 'knockout.validation'], function(ko, 
 		this.passAgain = ko.observable().extend({
 			required: true,
 			validation: {
-				validator: mustEqual,
+				validator: mediator.validateMustEqual,
 				message: 'Passwords do not match',
 				params: self.password
 			}
