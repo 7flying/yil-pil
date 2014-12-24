@@ -94,7 +94,7 @@ define(["knockout"], function(ko) {
 				}
 			});
 		},
-		/* Deletes a post from the user list of favourites*/
+		/* Deletes a post from the user list of favourites */
 		unlike: function(postId, user) {
 
 		},
@@ -116,6 +116,36 @@ define(["knockout"], function(ko) {
 					return window.location.href = '#post/' + data.post.id;
 				}
 			});
-		}	
+		},
+		/* Change an user's email. */
+		changeEmail: function(newMail, user, token) {
+			var url = 'yilpil/users/' + user + "?email=" + newMail;
+			$.ajax({
+				type: "PUT",
+				url: url,
+				beforeSend: function(xhr) {
+					xhr.setRequestHeader("Authorization", "Basic "
+					 + btoa(token + ":unused"));
+				},
+				success: function(data, textStatus, jqXHR) {
+
+				}
+			})
+		},
+		/* Change an user's password. */
+		changePass: function(newPass, user, token) {
+			var url = 'yilpil/users/' + user + "?password=" + password;
+			$.ajax({
+				type: "PUT",
+				url: url,
+				beforeSend: function(xhr) {
+					xhr.setRequestHeader("Authorization", "Basic "
+					 + btoa(token + ":unused"));
+				},
+				success: function(data, textStatus, jqXHR) {
+
+				}
+			})
+		}
 	}
 });
