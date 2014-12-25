@@ -339,7 +339,7 @@ def delete_tag_from_post(post_id, tag):
 		# Decrement the score
 		_inc_dec_tag(tag, False)
 		# Delete from the sorted set of tag-name -- post-ids
-		_remove_post_tag_name(post_id, tag_name)
+		_remove_post_tag_name(post_id, tag)
 		# Delete from the index of tags
 		_delete_symbol_index(tag[0])
 		# Delete from the specifig index of tag[0] -- tags
@@ -550,7 +550,7 @@ def _remove_post_tag_name(post_id, tag_name):
 	""" Removes a post-id form the set of tag-name -- post-ids. """
 	db.srem(tag_name + APPEND_TAG_NAME_POSTS, str(post_id))
 	if db.scard(tag_name + APPEND_TAG_NAME_POSTS) == 0:
-		sb.delte(tag_name + APPEND_TAG_NAME_POSTS)
+		db.delete(tag_name + APPEND_TAG_NAME_POSTS)
 
 def get_posts_with_tag(tag_name):
 	"""
@@ -792,7 +792,7 @@ def get_last_post_updates():
 			ret.append(post)
 	return ret
 
-def _delete_post_last_updates(posd_id):
+def _delete_post_last_updates(post_id):
 	""" Removes the post from the capped list of last updates if present. """
 	db.lrem(GLOBAL_POST_UPDATE_ID, 1, post_id)
 

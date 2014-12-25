@@ -7,7 +7,6 @@ var require = {
         "bootstrap-datetimepicker":
                                 "bower_modules/bootstrap-datetimepicker/src/js/bootstrap-datetimepicker",
         "hasher":               "bower_modules/hasher/dist/js/hasher.min",
-        "highlight":            "bower_modules/highlight/lib/highlight",
         "jquery":               "bower_modules/jquery/dist/jquery",
         "bootstrapvalidator":   "bower_modules/bootstrapvalidator/src/js/bootstrapValidator",
         "knockout":             "bower_modules/knockout/dist/knockout",

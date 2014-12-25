@@ -129,6 +129,21 @@ define(["knockout"], function(ko) {
 				}
 			});
 		},
+		/* Deletes a post.*/
+		deletePost: function(postId, user, token, success, error) {
+			var url = 'yilpil/post/' + postId;
+			$.ajax({
+				type: "DELETE",
+				url: url,
+				data: { 'username': user },
+				beforeSend: function(xhr) {
+					xhr.setRequestHeader("Authorization", "Basic "
+						+ btoa(token + ":unused"));
+				},
+				success: success,
+				error: error
+			});
+		},
 		/* Change an user's email. */
 		changeEmail: function(newMail, user, token, success, error) {
 			var url = 'yilpil/users/' + user + "?email=" + newMail;
@@ -160,7 +175,11 @@ define(["knockout"], function(ko) {
 		/* Custom validator to ensure that two elements are equal. */
 		validateMustEqual: function(val, other) {
 			return val == other();
+		},
+		/* Redirects to a user's profile page. */
+		redirectUserPage: function(user) {
+			console.log("redirecting");
+			return window.location.href = '#user/' + user;
 		}
-
 	}
 });

@@ -1,5 +1,5 @@
-define(['knockout', 'text!./post-editor.html', 'marked', 'highlight', 'app/mediator'],
-	function(ko, template, marked, hljs, mediator) {
+define(['knockout', 'text!./post-editor.html', 'marked', 'app/mediator'],
+	function(ko, template, marked, mediator ) {
 
 	// key listener
 	ko.bindingHandlers.executeOnEnter = {
@@ -23,9 +23,6 @@ define(['knockout', 'text!./post-editor.html', 'marked', 'highlight', 'app/media
 		breaks: false,
 		pedantic: false,
 		sanitize: true,
-		highlight: function(code) {
-			return hljs.highlightAuto(code).value;
-		},
 		smartLists: true,
 		smartypants: false
 	});
@@ -38,9 +35,6 @@ define(['knockout', 'text!./post-editor.html', 'marked', 'highlight', 'app/media
 	};
 
 	function PostEditorViewModel(params) {
-		$(function() {
-			hljs.initHighlightingOnLoad();
-		});
 		var self = this;
 		this.pageTitle = ko.observable();
 		this.setWarning = ko.observable(null);

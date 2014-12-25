@@ -8,7 +8,7 @@ define(['knockout', 'text!./user.html', 'module', 'app/router', 'app/mediator',
 		this.user = ko.observable(params.name);
 		this.tags = ko.observableArray();
 		this.gravatar = ko.observable();
-		this.favCount = ko.observable();
+		this.favCount = ko.observable(0);
 		this.displayTitle = ko.observable('Latest posts');
 		this.alertTitle = ko.observable("It seems that " + params.name
 			+ " hasn't post anything yet.");
