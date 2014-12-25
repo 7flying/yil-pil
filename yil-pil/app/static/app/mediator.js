@@ -69,6 +69,18 @@ define(["knockout"], function(ko) {
     		}
     		return null;
 		},
+		/* Requests an user creation */
+		createUser: function(username, email, pass, success, error) {
+			var url = 'yilpil/users/' + username;
+			var user = {'username' : username, 'email': email, "password": pass}
+			$.ajax({
+				type: "POST",
+				url: url,
+				data: user,
+				success: success,
+				error: error
+			});
+		},
 		/* Votes up or down a post. */
 		vote: function(postId, user, up, token) {
 			var url = '/yilpil/voting/' + postId + "?up=" + up.toString()
@@ -145,8 +157,7 @@ define(["knockout"], function(ko) {
 				error: error
 			});
 		},
-
-
+		/* Custom validator to ensure that two elements are equal. */
 		validateMustEqual: function(val, other) {
 			return val == other();
 		}

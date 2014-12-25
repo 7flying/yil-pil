@@ -39,9 +39,26 @@ define(['knockout', 'text!./sign-up.html', 'knockout.validation', 'app/mediator'
 		});
 		this.errors = validation.group(self);
 
+		var success = function(data) {
+			mediator.getToken(self.username(), self.password(),
+				successLogin, error);
+		};
+
+		var successLogin = function(data) {
+			document.cookie = "yt-token=" + data.token;
+			document.cookie = "yt-username=" + self.username();
+			return window.location.href = "#editor";
+		};
+
+		var error = function(jqXHR, textStatus, errorThrown) {
+			console.log("some error: "+ textStatus);
+		};
+
 		this.submit = function() {
 			if (self.errors().length == 0) {
 				console.log("Good")
+				mediator.createUser(self.username(), self.email(),
+					self.password(), success, error);
 			} else {
 				self.errors.showAllMessages();
 			}

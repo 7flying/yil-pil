@@ -189,7 +189,8 @@ class PostAPI(Resource):
 		post = {}
 		post['contents'] = args['contents']
 		post['title'] = args['title']
-		post['tags'] = args['tags']
+		post['tags'] = [] if args['tags'] == None or len(args['tags']) == 0 \
+			else args['tags']
 		user = args['username']
 		created_post = manager.insert_post(post, user)
 		return {'post': marshal(created_post, PostAPI.response_post_field)}
