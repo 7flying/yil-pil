@@ -1,6 +1,7 @@
 define(['knockout', 'text!./post-editor.html', 'marked', 'highlight', 'app/mediator'],
 	function(ko, template, marked, hljs, mediator) {
 
+	// key listener
 	ko.bindingHandlers.executeOnEnter = {
 		init: function(element, valueAccessor, allBindingsAccesor, viewModel) {
 			var allBindings = allBindingsAccesor();
@@ -14,6 +15,7 @@ define(['knockout', 'text!./post-editor.html', 'marked', 'highlight', 'app/media
 			});
 		}
 	};
+	// markdown
 	marked.setOptions({
 		renderer: new marked.Renderer(),
 		gfm: true,
@@ -42,6 +44,7 @@ define(['knockout', 'text!./post-editor.html', 'marked', 'highlight', 'app/media
 		var self = this;
 		this.pageTitle = ko.observable();
 		this.setWarning = ko.observable(null);
+		this.setContentWarning = ko.observable(null);
 		this.session = ko.observable(null);
 		this.mdTitle = ko.observable("");
 		this.mdContents = ko.observable("");
@@ -83,9 +86,13 @@ define(['knockout', 'text!./post-editor.html', 'marked', 'highlight', 'app/media
 			var data = {};
 			data['contents'] = self.mdContents();
 			data['title'] = self.mdTitle();
-			data['tags'] = self.mdTags().toString();
-			data['username'] = mediator.getCookie('yt-username');
-			mediator.createPost(data, mediator.getCookie('yt-token'));
+			data['tags'] = self.mdTags().length == 0 ? [] : self.mdTags.toString();
+			if (data['contents'].length == 0 || data['title'].length == 0)
+				self.setContentWarning(true);
+			else {
+				data['username'] = mediator.getCookie('yt-username');
+				mediator.createPost(data, mediator.getCookie('yt-token'));	
+			}
 		};
 
 		var setContent = function() {
