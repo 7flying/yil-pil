@@ -42,13 +42,16 @@ define(['knockout', 'text!./settings.html', 'knockout.validation', 'app/mediator
 		var success = function(data) {
 			self.setWarning(null);
 			self.setSuccess(true);
-			console.log("success");
 		};
 		var successPass = function(data) {
-			console.log("success pass");
 			success(data);
 			mediator.getToken(mediator.getCookie('yt-username'), self.newPassword());
 		};
+		var successEmail = function(data) {
+			success(data);
+			// Update gravatar
+			mediator.getAvatar(self.gravatar, mediator.getCookie('yt-username'));
+		}
 		var error = function(jqXHR, textStatus, errorThrown) {
 			self.setWarning(true);
 			self.setSuccess(null);
@@ -74,14 +77,14 @@ define(['knockout', 'text!./settings.html', 'knockout.validation', 'app/mediator
 				mediator.changeEmail(self.newEmail(),
 					mediator.getCookie('yt-username'),
 					mediator.getCookie('yt-token'),
-					success, error);
+					successEmail, error);
 			} else {
 				self.errorsEmail.showAllMessages();
 			}
 			
 		};
 
-		mediator.getAvatar(this.gravatar, params.user);
+		mediator.getAvatar(this.gravatar, mediator.getCookie('yt-username'));
 	}
 
 	return { viewModel: SettingsViewModel, template: template };
