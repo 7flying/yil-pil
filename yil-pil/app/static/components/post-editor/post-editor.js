@@ -86,7 +86,7 @@ define(['knockout', 'text!./post-editor.html', 'marked', 'highlight', 'app/media
 			var data = {};
 			data['contents'] = self.mdContents();
 			data['title'] = self.mdTitle();
-			data['tags'] = self.mdTags().length == 0 ? [] : self.mdTags.toString();
+			data['tags'] = self.mdTags().length == 0 ? [] : self.mdTags().toString();
 			if (data['contents'].length == 0 || data['title'].length == 0)
 				self.setContentWarning(true);
 			else {

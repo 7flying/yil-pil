@@ -2,13 +2,18 @@
 	<h2 data-bind='text: pageTitle'></h2>
 	<!-- ko if:  setWarning-->
 	<div class="alert alert-danger alert-dismissible" role="alert">
- 		<button type="button" class="close" data-dismiss="alert"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
- 		You need to be logged in to post. Please <a href="#login">log in</a> or <a href="#join">sign up</a>.
+ 		<button type="button" class="close" data-dismiss="alert">
+ 		<span aria-hidden="true">&times;</span>
+ 		<span class="sr-only">Close</span></button>
+ 		You need to be logged in to post. Please 
+ 		<a href="#login">log in</a> or <a href="#join">sign up</a>.
 	</div>
 	<!-- /ko-->
 	<!-- ko if:  setContentWarning-->
 	<div class="alert alert-danger alert-dismissible" role="alert">
- 		<button type="button" class="close" data-dismiss="alert"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
+ 		<button type="button" class="close" data-dismiss="alert">
+ 		<span aria-hidden="true">&times;</span>
+ 		<span class="sr-only">Close</span></button>
  		Neither the post title nor the contents can be empty.
 	</div>
 	<!-- /ko-->
@@ -25,13 +30,17 @@
 			</div>
 			<div class="panel-footer">
 				<div>
-					<input type="text" class="form-control" placeholder="Add tag" 
-					data-bind="value: tag, valueUpdate: 'input', executeOnEnter: addTag">
+					<input type="text" class="form-control" 
+					placeholder="Add tag" 
+					data-bind="value: tag, 
+					valueUpdate: 'input', executeOnEnter: addTag">
 				</div>
 				<div>
 					<span data-bind='foreach: mdTags'>
-						<span data-bind='click: $parent.removeTag' class="label label-default">
-							<span class="glyphicon glyphicon-remove" aria-hidden="true"></span>
+						<span data-bind='click: $parent.removeTag' 
+						class="label label-default">
+							<span class="glyphicon glyphicon-remove" 
+							aria-hidden="true"></span>
 							<span data-bind='text: $data'></span>
 						</span>
 					</span>
@@ -50,7 +59,8 @@
 			</div>
 			<div class="panel-footer">
 				<span data-bind='foreach: tags'>
-					<span class="label label-success" data-bind='text: $data'></span>
+					<span class="label label-success" 
+					data-bind='text: $data'></span>
 				</span>
 			</div>
 		</div>

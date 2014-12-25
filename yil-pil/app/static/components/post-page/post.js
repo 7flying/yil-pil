@@ -1,26 +1,45 @@
-define(['knockout', 'text!./post.html'], function(ko, template) {
+define(['knockout', 'text!./post.html', 'marked'], 
+	function(ko, template, marked) {
+
+	// markdown
+	marked.setOptions({
+		renderer: new marked.Renderer(),
+		gfm: true,
+		tables: true,
+		breaks: false,
+		pedantic: false,
+		sanitize: true,
+		smartLists: true,
+		smartypants: false
+	});
 
 	function PostViewModel(params) {
-
-		this.posts = ko.observableArray(); // Arrays are dynamically updated
-
-		var getPost = function(toStore) {
+		var self = this;
+		this.title = ko.observable();
+		this.author = ko.observable();
+		this.date = ko.observable();
+		this.contents = ko.observable();
+		this.votes = ko.observable();
+		this.tags = ko.observableArray();
+		var setContents = function(contents) {
+			$('#contents').empty();
+			$('#contents').append(contents);
+		};
+		var getPost = function() {
 			$.getJSON('/yilpil/post/' + params.postId, function(data){
 				var post = {};
-				post.title = data.post.title;
-				post.author = data.post.author;
-				post.contents = data.post.contents;
-				post.votes = data.post.votes;
-				post.date  = data.post.date;
-				post.tags = [];
+				self.title(data.post.title);
+				self.author(data.post.author);
+				self.contents(marked(data.post.contents));
+				setContents(self.contents());
+				self.votes(data.post.votes);
+				self.date(data.post.date);
+				self.tags([]);
 				while (data.post.tags.length > 0)
-					post.tags.push(data.post.tags.shift());
-				toStore.push(post);
+					self.tags.push(data.post.tags.shift());
 			});
 		};
-
-		getPost(this.posts);
-		
+		getPost();
 	}
 	
 	return { viewModel: PostViewModel, template: template };

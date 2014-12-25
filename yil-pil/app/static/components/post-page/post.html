@@ -1,35 +1,26 @@
-<div id='post' data-bind='foreach: posts'>
-	<div class="panel panel-default">
-		<div class="panel-heading" >
-			<h3  data-bind='text: title'></h3>
-			<span> by </span>
-			<a data-bind='html: author, attr: {href: "#user/" + author}'></a>	
-			<span> • Posted on </span>
-			<span data-bind='text: date'></span>
-		</div>
-		<div class="panel-body" data-bind='text: contents'></div>
-		<div class="panel-footer">
-			<button type="button" class="btn btn-default" aria-label="Left Align">
-				<span class=" glyphicon glyphicon-chevron-up" aria-hiden="true"></span>
-			</button>
-			<span class="badge" data-bind='text: votes'></span>
-			<button type="button" class="btn btn-default" aria-label="Left Align">
-				<span class=" glyphicon glyphicon-chevron-down" aria-hiden="true"></span>
-			</button>
-			
-			<button type="button" class="btn btn-default" aria-label="Left Align">
-				<span class="glyphicon glyphicon-heart" aria-hidden="true"> Like</span>
-			</button>
-			<span data-bind='foreach: tags'>
-				<span class="label label-success" data-bind='text: $data'></span>
-			</span>
-		</div>
+<div class="panel panel-default">
+	<div class="panel-heading" >
+		<h3  data-bind='text: title'></h3>
+		<span> by </span>
+		<a data-bind='html: author, attr: {href: "#user/" + author}'></a>	
+		<span> • Posted on </span>
+		<span data-bind='text: date'></span>
+	</div>
+	<div class="panel-body" id="contents"></div>
+	<div class="panel-footer">
+		<button type="button" class="btn btn-default" aria-label="Left Align">
+			<span class=" glyphicon glyphicon-chevron-up" aria-hiden="true"></span>
+		</button>
+		<span class="badge" data-bind='text: votes'></span>
+		<button type="button" class="btn btn-default" aria-label="Left Align">
+			<span class=" glyphicon glyphicon-chevron-down" aria-hiden="true"></span>
+		</button>
+		
+		<button type="button" class="btn btn-default" aria-label="Left Align">
+			<span class="glyphicon glyphicon-heart" aria-hidden="true"> Like</span>
+		</button>
+		<span data-bind='foreach: tags'>
+			<span class="label label-success" data-bind='text: $data'></span>
+		</span>
 	</div>
 </div>
-
-<!-- WORKING EXAMPLE \o/
-<div>
-	<h3>HELLO FROM POST</h3>
-	<p data-bind='text: id'></p>
-</div>
--->
