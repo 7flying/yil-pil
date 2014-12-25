@@ -17,14 +17,14 @@ define(['knockout', 'text!./settings.html', 'knockout.validation', 'app/mediator
 		this.gravatar = ko.observable();
 		this.newPassword = ko.observable().extend({
 			required: true,
-			minLength: 8
+			minLength: 3
 		});
 		this.newPasswordAgain = ko.observable().extend({
 			required: true,
 			validation: {
 				validator: mediator.validateMustEqual,
 				message: 'Passwords do not match',
-				params: self.password
+				params: self.newPassword
 			}
 		});
 		this.newEmail = ko.observable().extend({
@@ -34,17 +34,51 @@ define(['knockout', 'text!./settings.html', 'knockout.validation', 'app/mediator
 				params: '@'
 			}
 		});
+		this.setSuccess = ko.observable(null);
 		this.setWarning = ko.observable(null);
-		this.errors = validation.group(self);
+		this.errorsPass = validation.group([self.newPassword, self.newPasswordAgain]);
+		this.errorsEmail = validation.group([self.newEmail]);
+
+		var success = function(data) {
+			self.setWarning(null);
+			self.setSuccess(true);
+			console.log("success");
+		};
+		var successPass = function(data) {
+			console.log("success pass");
+			success(data);
+			mediator.getToken(mediator.getCookie('yt-username'), self.newPassword());
+		};
+		var error = function(jqXHR, textStatus, errorThrown) {
+			self.setWarning(true);
+			self.setSuccess(null);
+		};
 
 		this.submitPass = function() {
-			mediator.changePass(self.newPassword(),
-				mediator.getCookie('yt-username'),
-				mediator.getCookie('yt-token'));
+			self.setWarning(null);
+			self.setSuccess(null);
+			if (self.errorsPass().length == 0) {
+				mediator.changePass(self.newPassword(),
+					mediator.getCookie('yt-username'),
+					mediator.getCookie('yt-token'),
+					successPass, error);
+			} else {
+				self.errorsPass.showAllMessages();
+			}
 		};
 
 		this.submitEmail = function() {
-			mediator.changeEmail	
+			self.setWarning(null);
+			self.setSuccess(null);
+			if (self.errorsEmail().length == 0) {
+				mediator.changeEmail(self.newEmail(),
+					mediator.getCookie('yt-username'),
+					mediator.getCookie('yt-token'),
+					success, error);
+			} else {
+				self.errorsEmail.showAllMessages();
+			}
+			
 		};
 
 		mediator.getAvatar(this.gravatar, params.user);

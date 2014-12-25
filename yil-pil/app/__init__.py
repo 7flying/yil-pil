@@ -120,13 +120,13 @@ class UserAPI(Resource):
 		args = self.reqparse.parse_args()
 		ret = True
 		if args['password'] != None:
-			if manager.change_password(username, password):
+			if manager.change_password(username, args['password']):
 				user = manager.get_user(username)
 			else:
 				return jsonify(error=500,
 					message='Database error changing pass.')
 		if args['email'] != None:
-			if manager.change_email(username, email):
+			if manager.change_email(username, args['email']):
 				user = manager.get_user(username)
 			else:
 				return jsonify(error=500,

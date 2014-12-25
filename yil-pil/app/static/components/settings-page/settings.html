@@ -8,13 +8,22 @@
 				</div>
 			</div>
 		</div>
+		<!-- ko if:  setSuccess-->
+		<div class="alert alert-success alert-dismissible" role="alert">
+			<button type="button" class="close" data-dismiss="alert">
+				<span aria-hidden="true">&times;</span>
+				<span class="sr-only">Close</span>
+			</button>
+			<strong>Success!</strong> Your user details were updated.
+		</div>
+		<!-- /ko-->
 		<!-- ko if:  setWarning-->
 		<div class="alert alert-danger alert-dismissible" role="alert">
-	 		<button type="button" class="close" data-dismiss="alert">
-	 			<span aria-hidden="true">&times;</span>
-	 			<span class="sr-only">Close</span>
-	 		</button>
-	 		<strong>Warning!</strong> Incorrect username or password.
+			<button type="button" class="close" data-dismiss="alert">
+				<span aria-hidden="true">&times;</span>
+				<span class="sr-only">Close</span>
+			</button>
+			<strong>Warning!</strong> Some error occurred, please try again later.
 		</div>
 		<!-- /ko-->
 	</div>
@@ -50,11 +59,6 @@
 						<label>New email</label>
 						<input type="text" class="form-control" placeholder="user@example.com"
 						 data-bind="value: newEmail">
-					</div>
-					<div class="form-group">
-						<label for="inputPass">Password</label>
-						<input type="password" class="form-control" placeholder="Password"
-						 data-bind="value: password">
 					</div>
 					<div class="form-group">
 						<button class="btn btn-default" data-bind='click: submitEmail'>

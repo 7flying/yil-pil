@@ -118,7 +118,7 @@ define(["knockout"], function(ko) {
 			});
 		},
 		/* Change an user's email. */
-		changeEmail: function(newMail, user, token) {
+		changeEmail: function(newMail, user, token, success, error) {
 			var url = 'yilpil/users/' + user + "?email=" + newMail;
 			$.ajax({
 				type: "PUT",
@@ -127,14 +127,13 @@ define(["knockout"], function(ko) {
 					xhr.setRequestHeader("Authorization", "Basic "
 					 + btoa(token + ":unused"));
 				},
-				success: function(data, textStatus, jqXHR) {
-
-				}
-			})
+				success: success,
+				error: error
+			});
 		},
 		/* Change an user's password. */
-		changePass: function(newPass, user, token) {
-			var url = 'yilpil/users/' + user + "?password=" + password;
+		changePass: function(newPass, user, token, success, error) {
+			var url = 'yilpil/users/' + user + "?password=" + newPass;
 			$.ajax({
 				type: "PUT",
 				url: url,
@@ -142,10 +141,9 @@ define(["knockout"], function(ko) {
 					xhr.setRequestHeader("Authorization", "Basic "
 					 + btoa(token + ":unused"));
 				},
-				success: function(data, textStatus, jqXHR) {
-
-				}
-			})
+				success: success,
+				error: error
+			});
 		},
 
 
