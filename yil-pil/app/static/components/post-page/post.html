@@ -40,7 +40,7 @@
 </h2>
 <!-- /ko -->
 
-<div class="panel panel-default">
+<div class="panel panel-default" data-bind="visible: showPost">
 	<div class="panel-heading" >
 		<h3  data-bind='text: title'></h3>
 		<span> by </span>
@@ -72,4 +72,7 @@
 		</span>
 	</div>
 </div>
-	
+
+<div data-bind='visible: editPost'>
+	<post-editor></post-editor>
+</div>

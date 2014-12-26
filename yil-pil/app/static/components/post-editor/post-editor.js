@@ -37,11 +37,12 @@ define(['knockout', 'text!./post-editor.html', 'marked', 'app/mediator'],
 	function PostEditorViewModel(params) {
 		var self = this;
 		this.toEdit = params.toEdit;
-		console.log(toEdit);
-		this.pageTitle = ko.observable();
+		console.log(self.toEdit);
+		
 		this.setWarning = ko.observable(null);
 		this.setContentWarning = ko.observable(null);
 		this.session = ko.observable(null);
+		//this.mdTitle = ko.observable(self.toEdit == 'undefined' ? "" : "hello world!");
 		this.mdTitle = ko.observable("");
 		this.mdContents = ko.observable("");
 		this.mdTags = ko.observableArray([]);
@@ -54,7 +55,7 @@ define(['knockout', 'text!./post-editor.html', 'marked', 'app/mediator'],
 			self.title(newValue);
 		});
 
-		var titleConcat = "What have you learnt today";
+		// self.title(self.toEdit == 'undefined' ? "" : "hello world!");
 
 		var generateHTML = function(text) {
 			$('#preview-contents').empty();
@@ -93,13 +94,8 @@ define(['knockout', 'text!./post-editor.html', 'marked', 'app/mediator'],
 
 		var setContent = function() {
 			var cookie = mediator.getCookie("yt-username");
-			if (cookie != null) {
-				self.pageTitle(titleConcat + ", " + cookie + "?");
-				self.session(true);
-			} else {
-				self.pageTitle(titleConcat + "?");
-				self.setWarning(true);
-			}
+			self.session(cookie == null ? null : true);
+			self.setWarning(cookie == null ? true : null);
 		};
 		setContent();
 	}

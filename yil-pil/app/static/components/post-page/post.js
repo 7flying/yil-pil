@@ -26,6 +26,8 @@ define(['knockout', 'text!./post.html', 'marked', 'app/mediator'],
 		this.setSuccess = ko.observable(null);
 		this.setWarning = ko.observable(null);
 		this.setWarningSession = ko.observable(null);
+		this.editPost = ko.observable(true);
+		this.showPost = ko.observable(true);
 
 		var successDelete = function() {
 			self.setSuccess(true);
