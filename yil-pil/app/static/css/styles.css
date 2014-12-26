@@ -67,3 +67,8 @@
 .post-editor textarea {
     resize: vertical;
 }
+
+/* --- Validation --- */
+.validationMessage {
+    color: #d14;
+}

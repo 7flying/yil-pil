@@ -43,8 +43,8 @@ define(['knockout', 'text!./post.html', 'marked', 'app/mediator'],
 
 		this.deletePost = function() {
 			mediator.deletePost(self.id(),
-				mediator.getCookie('yt-username'),
-				mediator.getCookie('yt-token'), successDelete, errorDelete);
+			mediator.getCookie('yt-username'),
+			mediator.getCookie('yt-token'), successDelete, errorDelete);
 		};
 
 		this.editPost = function() {

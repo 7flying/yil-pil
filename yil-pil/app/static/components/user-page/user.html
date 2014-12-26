@@ -16,6 +16,7 @@
 				</div>
 			</div>
 		</div>
+		<hr>
 		<h4>Filter posts</h4>
 		<h5>Start date:</h5>
 		<div class="form-group">
@@ -42,6 +43,12 @@
 			<span class="glyphicon glyphicon-filter" aria-hidden="true"></span>
 			Filter
 		</button>
+		<!-- ko if:  setWarningDates-->
+		<div class="alert alert-warning" role="alert">
+			<strong>Warning!</strong> Please specify a date range.
+		</div>
+		<!-- /ko-->
+		<hr>
 		<h4>Tags used: </h4>
 		<div class="panel panel-default">
 			<ul class="list-group" data-bind='foreach: tags'>

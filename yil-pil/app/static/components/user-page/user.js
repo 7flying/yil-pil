@@ -13,37 +13,42 @@ define(['knockout', 'text!./user.html', 'module', 'app/router', 'app/mediator',
 		this.alertTitle = ko.observable("It seems that " + params.name
 			+ " hasn't post anything yet.");
 		this.page = ko.observable(1);
+		this.setWarningDates = ko.observable(null);
 		mediator.getFavCount(self.favCount, params.name);
 
 		// Filters the posts given two dates
 		this.filterPosts = function() {
-			self.userPosts([]);
 			var from = $('#text-from').val().match(/\d/g);
-			from = from.join("");
-			// Change order
-			from = from.substring(from.length - 4, from.length)
-				+ from.substring(from.length - 6, from.length - 4)
-				+ from.substring(0, from.length - 6);
-			var to = $('#text-to').val().match(/\d/g);
-			to = to.join("");
-			// Change order
-			to = to.substring(to.length - 4, to.length)
-				+ to.substring(to.length - 6, to.length - 4)
-				+ to.substring(0, to.length - 6);
-			if (from.length == 8 && to.length == 8) {
-				var url = '/yilpil/search/posts/date?user=' + self.user()
-				+ "&dateini=" + from + "&dateend=" + to;
-				$.getJSON(url, function(data) {
-					if (data.posts.length == 0) {
-						self.userPosts(null);
-						self.alertTitle("There aren't posts in that period.");
-					} else {
-						self.userPosts.removeAll();
-						self.displayTitle(data.posts.length + " posts found");
-					}
-					mediator.summarizePosts(data, self.userPosts);
-				});
-			}
+			if (from != null) {
+				self.setWarningDates(null);
+				self.userPosts([]);
+				from = from.join("");
+				// Change order
+				from = from.substring(from.length - 4, from.length)
+					+ from.substring(from.length - 6, from.length - 4)
+					+ from.substring(0, from.length - 6);
+				var to = $('#text-to').val().match(/\d/g);
+				to = to.join("");
+				// Change order
+				to = to.substring(to.length - 4, to.length)
+					+ to.substring(to.length - 6, to.length - 4)
+					+ to.substring(0, to.length - 6);
+				if (from.length == 8 && to.length == 8) {
+					var url = '/yilpil/search/posts/date?user=' + self.user()
+					+ "&dateini=" + from + "&dateend=" + to;
+					$.getJSON(url, function(data) {
+						if (data.posts.length == 0) {
+							self.userPosts(null);
+							self.alertTitle("There aren't posts in that period.");
+						} else {
+							self.userPosts.removeAll();
+							self.displayTitle(data.posts.length + " posts found");
+						}
+						mediator.summarizePosts(data, self.userPosts);
+					});
+				}
+			} else
+				self.setWarningDates(true);
 		};
 
 		// Shows the favourites

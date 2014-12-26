@@ -36,6 +36,8 @@ define(['knockout', 'text!./post-editor.html', 'marked', 'app/mediator'],
 
 	function PostEditorViewModel(params) {
 		var self = this;
+		this.toEdit = params.toEdit;
+		console.log(toEdit);
 		this.pageTitle = ko.observable();
 		this.setWarning = ko.observable(null);
 		this.setContentWarning = ko.observable(null);
