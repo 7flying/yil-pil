@@ -88,7 +88,7 @@ define(["knockout"], function(ko) {
 			});
 		},
 		/* Votes up or down a post. */
-		vote: function(postId, user, up, token, success) {
+		vote: function(postId, user, up, token, success, error) {
 			var url = '/yilpil/voting/' + postId + "?up=" + up.toString()
 				+ "&username=" + user;
 			$.ajax({
@@ -98,11 +98,12 @@ define(["knockout"], function(ko) {
 					xhr.setRequestHeader("Authorization", "Basic " + 
 						btoa(token + ":unused"));
 				},
-				success: success
+				success: success,
+				error: error
 			});
 		},
-		/* Adds a post to the user list of favourites*/
-		like: function(postId, user, token) {
+		/* Adds a post to the user list of favourites. */
+		like: function(postId, user, token, success) {
 			var url = '/yilpil/favs/' + user + "?id=" + postId;
 			$.ajax({
 				type: "POST",
@@ -110,7 +111,8 @@ define(["knockout"], function(ko) {
 				beforeSend: function(xhr) {
 					xhr.setRequestHeader("Authorization", "Basic " +
 						btoa(token + ":unused"));
-				}
+				},
+				success: success
 			});
 		},
 		/* Deletes a post from the user list of favourites */

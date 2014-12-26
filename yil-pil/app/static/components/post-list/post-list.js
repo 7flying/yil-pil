@@ -4,30 +4,62 @@ define(["knockout", "text!./post-list.html", "app/mediator"],
 		function PostListViewModel(params) {
 			var self = this;
 			this.posts = params.posts;
-			this.warningTitle = ko.observable();
-			this.setWarning = ko.observable(null);
+			this.setWarningSession = ko.observable(null);
+			this.setWarnAlreadyVoted = ko.observable(null);
+			this.setWarningGeneral = ko.observable(null);
+			this.setOkFavourite = ko.observable(null);
 			
+			var clearWarnings = function() {
+				self.setOkFavourite(null);
+				self.setWarnAlreadyVoted(null);
+				self.setWarningGeneral(null);
+				self.setWarningSession(null);
+			};
+
+			var favOk = function(data, textStatus, jqXHR) {
+				if (data.code == "201") {
+					self.setOkFavourite(true);
+					window.scrollTo(0,0);
+				}
+			};
+
 			this.like = function(post) {
+				clearWarnings();
 				var user = mediator.getCookie('yt-username');
 				var token = mediator.getCookie('yt-token');
 				if (user == null || token == null){
-					self.setWarning(true);
+					self.setWarningSession(true);
 					window.scrollTo(0,0);
 				} else {
-					self.setWarning(null);
-					mediator.like(post.id, user, token);
+					self.setWarningSession(null);
+					mediator.like(post.id, user, token, favOk);
 				}
 			};
+
+			var voteOk = function(data, textStatus, jqXHR) {
+				if (data.code == "405") {
+					// Already voted on that post
+					self.setWarnAlreadyVoted(true);
+					window.scrollTo(0,0);
+				} else {
+					window.location.reload();
+				}
+			};
+
+			var voteError = function(jqXHR, textStatus, errorThrown) {
+				self.setWarningGeneral(true);
+			};
+
 			var vote = function(post, up) {
+				clearWarnings();
 				var user = mediator.getCookie('yt-username');
 				var token = mediator.getCookie('yt-token');
 				if (user == null || token == null) {
-					self.setWarning(true);
+					self.setWarningSession(true);
 					window.scrollTo(0,0);
 				} else {
-					self.setWarning(null);
-					mediator.vote(post.id, user, up, token);
-					return window.location.href = '#post/' + post.id; //TODO
+					self.setWarningSession(null);
+					mediator.vote(post.id, user, up, token, voteOk, voteError);
 				} 
 			};
 			this.voteUp = function(post) {

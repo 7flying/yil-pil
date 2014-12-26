@@ -53,15 +53,17 @@ Post resource
 	
 	Creates a new post.
 	```	
-	curl -X POST -u seven:123 -i http://localhost:5000/yilpil/post/2 -d "title=Cool post!" -d "contents=how to jump" -d "tags=hello, he, some" -d "username=seven"
+	curl -X POST -u seven:123 -i http://localhost:5000/yilpil/post/2 -d "title=Cool post!" -d "contents=how to jump" -d "tags=hello:tag two:cool" -d "username=seven"
 	```
+	__NOTE__: each tag should be encoded in base64.
 
 * ```/post/<int:id>,  @auth_required, {title, contents, tags, username}, PUT```
 
 	Updates an existing post.
 	```
-	curl -X PUT -u seven:123 -i http://localhost:5000/yilpil/post/2 -d "title=sometittle!" -d "contents=how to jump" -d "tags=hello, he, some" -d "username=seven"
+	curl -X PUT -u seven:123 -i http://localhost:5000/yilpil/post/2 -d "title=sometittle!" -d "contents=how to jump" -d "tags=hello:tag two:cool" -d "username=seven"
 	```
+	__NOTE__: each tag should be encoded in base64.
 
 Posts resource
 --------------------

@@ -34,7 +34,9 @@ define(['knockout', 'text!./post.html', 'marked', 'app/mediator'],
 		// alerts
 		this.setSuccess = ko.observable(null);
 		this.setWarning = ko.observable(null);
+		this.setWarnAlreadyVoted = ko.observable(null);
 		this.setWarningSession = ko.observable(null);
+		this.setOkFavourite = ko.observable(null);
 
 		var successDelete = function() {
 			self.setSuccess(true);
@@ -68,7 +70,14 @@ define(['knockout', 'text!./post.html', 'marked', 'app/mediator'],
 			self.postOwner(true);
 		};
 
+		var favOk = function(data, textStatus, jqXHR) {
+			if (data.code == "201") {
+				self.setOkFavourite(true);
+			}
+		};
+
 		this.like = function() {
+			self.setOkFavourite(null);
 			var user = mediator.getCookie('yt-username');
 			var token = mediator.getCookie('yt-token');
 			if (user == null || token == null){
@@ -77,15 +86,28 @@ define(['knockout', 'text!./post.html', 'marked', 'app/mediator'],
 			}
 			else {
 				self.setWarningSession(null);
-				mediator.like(self.id(), user, token);
+				mediator.like(self.id(), user, token, favOk);
 			}
 		};
 
-		var voteOk = function() {
-			window.location.reload();
+		var voteOk = function(data, textStatus, jqXHR) {
+			self.setOkFavourite(null);
+			if (data.code == "405") {
+				 // Already voted on that post
+				self.setWarnAlreadyVoted(true);
+			} else {
+				window.location.reload();
+				self.setWarnAlreadyVoted(null);
+				self.setWarning(null);
+			}
+		};
+
+		var voteError = function(jqXHR, textStatus, errorThrown) {
+			self.setWarning(true);
 		};
 
 		var vote = function(up) {
+			self.setOkFavourite(null);
 			var user = mediator.getCookie('yt-username');
 			var token = mediator.getCookie('yt-token');
 			if (user == null || token == null) {
@@ -93,8 +115,7 @@ define(['knockout', 'text!./post.html', 'marked', 'app/mediator'],
 				window.scrollTo(0,0);
 			} else {
 				self.setWarningSession(null);
-				mediator.vote(self.id(), user, up, token, voteOk);
-				return window.location.href = '#post/' + self.id();
+				mediator.vote(self.id(), user, up, token, voteOk, voteOk);
 			} 
 		};
 		this.voteUp = function() {

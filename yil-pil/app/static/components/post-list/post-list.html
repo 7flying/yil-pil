@@ -1,15 +1,41 @@
-<!-- ko if: setWarning-->
+<!-- ko if: setWarningSession-->
 <div class="alert alert-danger" role="alert">
  	<span>You need to be loged in to perform that action. Please 
 	<a href="#login">log in</a> or <a href="#join">sign up</a>.</span>
 </div>
 <!-- /ko -->
+<!-- ko if: setWarnAlreadyVoted-->
+<div class="alert alert-warning alert-dismissible" role="alert">
+ 	<button type="button" class="close" data-dismiss="alert">
+ 		<span aria-hidden="true">&times;</span>
+ 			<span class="sr-only">Close</span>
+ 	</button>
+ 	<strong>Hey!</strong> You cannot vote twice.
+</div>
+<!-- /ko -->
+<!-- ko if:  setWarningGeneral-->
+<div class="alert alert-danger alert-dismissible" role="alert">
+	<button type="button" class="close" data-dismiss="alert">
+		<span aria-hidden="true">&times;</span>
+		<span class="sr-only">Close</span>
+	</button>
+	<strong>Warning!</strong> Some error occurred, please try again later.
+</div>
+<!-- /ko-->
+<!-- ko if:  setOkFavourite-->
+<div class="alert alert-success alert-dismissible" role="alert">
+	<button type="button" class="close" data-dismiss="alert">
+		<span aria-hidden="true">&times;</span>
+		<span class="sr-only">Close</span>
+	</button>
+	<strong>Success!</strong> The post has been added to your fav list.
+</div>
+<!-- /ko-->
 <div id='posts-list' data-bind='foreach: posts'>
 	<div class="panel panel-default">
 		<div class="panel-heading" >
 			<h3>
-				<a data-bind='html: title, attr: {href: "#post/" + id}'>
-				</a>
+				<a data-bind='html: title, attr: {href: "#post/" + id}'></a>
 			</h3>
 			<span> by </span>
 			<a data-bind='html: author, attr: {href: "#user/" + author}'></a>	
@@ -32,9 +58,8 @@
 			</button>
 			<button data-bind='click: $parent.like' type="button" 
 			class="btn btn-default" aria-label="Left Align">
-				<span class="glyphicon glyphicon-heart" 
-				aria-hidden="true"> Like
-				</span>
+				<span class="glyphicon glyphicon-heart text-danger" 
+				aria-hidden="true"></span> Like it
 			</button>
 			<span data-bind='foreach: tags'>
 				<a data-bind='attr: {href: "#tag/" + $data}'>
