@@ -10,9 +10,10 @@ define(["knockout", "text!./post-list.html", "app/mediator"],
 			this.like = function(post) {
 				var user = mediator.getCookie('yt-username');
 				var token = mediator.getCookie('yt-token');
-				if (user == null || token == null)
+				if (user == null || token == null){
 					self.setWarning(true);
-				else {
+					window.scrollTo(0,0);
+				} else {
 					self.setWarning(null);
 					mediator.like(post.id, user, token);
 				}
@@ -20,12 +21,12 @@ define(["knockout", "text!./post-list.html", "app/mediator"],
 			var vote = function(post, up) {
 				var user = mediator.getCookie('yt-username');
 				var token = mediator.getCookie('yt-token');
-				if (user == null || token == null)
+				if (user == null || token == null) {
 					self.setWarning(true);
-				else {
+					window.scrollTo(0,0);
+				} else {
 					self.setWarning(null);
 					mediator.vote(post.id, user, up, token);
-					return window.location.href = '#post/' + post.id;
 				} 
 			};
 			this.voteUp = function(post) {

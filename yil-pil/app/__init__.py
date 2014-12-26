@@ -15,7 +15,7 @@ from flask.ext.restful import Api, Resource, reqparse, fields, marshal
 from flask.ext.httpauth import HTTPBasicAuth
 from flask_sslify import SSLify
 from werkzeug.security import check_password_hash
-from itsdangerous import TimedJSONWebSignatureSerializer as Serializer
+from itsdangerous import TimedJSONWebSignatureSerializer as Serializer, BadSignature
 
 # Restful api
 api = Api(app)
@@ -60,7 +60,7 @@ def verify_auth_token(token):
     try:
         data = ser.loads(token)
         print data
-    except IOError:
+    except BadSignature:
         return None
     user = manager.get_user(data['id'])
     print user

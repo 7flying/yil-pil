@@ -24,6 +24,12 @@ define(["knockout"], function(ko) {
 				toStore = username.count;
 			});
 		},
+		/* Gets the number of favourites a user has. */
+		getFavCounte: function(username) {
+			$.getJSON('/yilpil/favs/' + username + '?count=true', function(data) {
+				return username.count;
+			});
+		},
 		/* Gets the most popular tags from the server. */
 		getPopularTags: function(toStore) {
 			$.getJSON('/yilpil/ranking?resource=tags', function(data) {
@@ -82,7 +88,7 @@ define(["knockout"], function(ko) {
 			});
 		},
 		/* Votes up or down a post. */
-		vote: function(postId, user, up, token) {
+		vote: function(postId, user, up, token, success) {
 			var url = '/yilpil/voting/' + postId + "?up=" + up.toString()
 				+ "&username=" + user;
 			$.ajax({
@@ -91,7 +97,8 @@ define(["knockout"], function(ko) {
 				beforeSend: function(xhr) {
 					xhr.setRequestHeader("Authorization", "Basic " + 
 						btoa(token + ":unused"));
-				}
+				},
+				success: success
 			});
 		},
 		/* Adds a post to the user list of favourites*/

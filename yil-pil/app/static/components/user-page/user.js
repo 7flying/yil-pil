@@ -8,11 +8,12 @@ define(['knockout', 'text!./user.html', 'module', 'app/router', 'app/mediator',
 		this.user = ko.observable(params.name);
 		this.tags = ko.observableArray();
 		this.gravatar = ko.observable();
-		this.favCount = ko.observable(0);
+		this.favCount = ko.observable();
 		this.displayTitle = ko.observable('Latest posts');
 		this.alertTitle = ko.observable("It seems that " + params.name
 			+ " hasn't post anything yet.");
 		this.page = ko.observable(1);
+		mediator.getFavCount(self.favCount, params.name);
 
 		// Filters the posts given two dates
 		this.filterPosts = function() {
@@ -47,14 +48,9 @@ define(['knockout', 'text!./user.html', 'module', 'app/router', 'app/mediator',
 
 		// Shows the favourites
 		this.showFavs = function() {
-			if (self.favCount() == 0) {
-				self.userPosts(null);
-				self.alertTitle(params.name + " hasn't liked anything yet.");
-			} else {
-				self.userPosts.removeAll();
-				self.displayTitle("Liked posts");
-				getFavourites(self.userPosts);
-			}
+			self.userPosts.removeAll();
+			self.displayTitle("Liked posts");
+			getFavourites(self.userPosts);
 		};
 
 		this.next = function() {
@@ -103,14 +99,18 @@ define(['knockout', 'text!./user.html', 'module', 'app/router', 'app/mediator',
 			var url = '/yilpil/favs/' + params.name;
 			$.getJSON(url, function(data) {
 				self.favCount(data.posts.length);
-				mediator.summarizePosts(data, self.userPosts);
+				if (self.favCount() == 0) {
+					self.userPosts(null);
+					self.alertTitle(params.name + " hasn't liked anything yet.");
+				} else
+					mediator.summarizePosts(data, self.userPosts);
 			});
 		};
 
 		getUserPosts(this.userPosts);
 		getUserTags(this.tags);
 		mediator.getAvatar(this.gravatar, params.name);
-		mediator.getFavCount(self.favCount, params.name);
+		
 
 	}
 	return { viewModel: UserViewModel, template: template };
