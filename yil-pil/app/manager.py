@@ -317,10 +317,13 @@ def insert_tag_post_tags(post_id, tag):
     """
     Inserts a tag to the post's set of tags.
     """
+    print "TEST before adding tag: "
+    get_post_tags(str(post_id))
     debug("INSERT TAG to post. tag:" + tag + " post #:" + str(post_id))
     # Element isn't inserted if present
     if _is_post_created(post_id):
-        db.sadd(get_post(post_id)[KEY_TAGS], tag)
+        db.sadd(db.hget(post_id + APPEND_KEY_POSTS, KEY_TAGS) + APPEND_KEY_TAG,
+                tag)
         # Add to global tags
         _insert_tags_global(tag)
         # Add to popular
@@ -331,6 +334,8 @@ def insert_tag_post_tags(post_id, tag):
         _insert_symbol_index(tag[0])
         # Insert to the specific index of tag[0] -- tags
         _insert_tag_index_letter_tags(tag)
+    print "TEST after adding tag: "
+    get_post_tags(str(post_id))
 
 def delete_tag_from_post(post_id, tag):
     """
@@ -353,10 +358,8 @@ def _is_post_created(post_id):
     Checks if a post, given its id is created.
     """
     if db.hexists(str(post_id) + APPEND_KEY_POSTS, KEY_TITLE) == 1:
-        debug("Post #" + str(post_id) + " EXITS")
         return True
     else:
-        debug("Post #" + str(post_id) + " does NOT EXITS")
         return False
 
 def get_post_tags(post_id): # OK
@@ -364,12 +367,11 @@ def get_post_tags(post_id): # OK
     Returns the tags of a post given its integer-id.
     An empty array is returned if there aren't tags for the given post.
     """
-    debug("GET TAGS FROM POST #" + str(post_id))
     tags = db.smembers(str(post_id) + APPEND_KEY_TAG)
     ensure_array = []
     for tag in tags:
         ensure_array.append(tag)
-    debug("\t TAGS: " + str(ensure_array))
+    debug("\t TAGS FROM POST #: " + str(post_id) + '\n' + str(ensure_array))
     return ensure_array
 
 def get_post(key): # OK
@@ -422,9 +424,7 @@ def insert_post(post, username): # OK
     """
     Inserts a new post in the db.
     """
-    debug("INSERT POST.")
-    debug("\t username: " + username)
-    debug("\t post: " + str(post))
+    debug("INSERT POST. username: " + username + "post: " + str(post))
     post_id = str(db.incr(POST_ID))
     db_post_id = post_id + APPEND_KEY_POSTS
     debug("\tASIGNED ID:" + str(post_id))
@@ -492,6 +492,8 @@ def update_post(post, post_id, username): #OK
         # The title has changed, so CHANGE in the structure of search-title
         debug("\t-UPDATE title")
         db.hset(post_id + APPEND_KEY_POSTS, KEY_TITLE, post[KEY_TITLE])
+        ## Add post's title to the title search sorted set
+        _insert_title_ss(post[KEY_TITLE], post_id)
     # The content has changed
     if post[KEY_CONTENTS] is not None:
         debug("\t-UPDATE contents")
@@ -500,18 +502,21 @@ def update_post(post, post_id, username): #OK
     if post[KEY_TAGS] is not None:
         debug("\t-UPDATE tags")
         # tag_id = db.hget(post_id + APPEND_KEY_POSTS, KEY_TAGS)
-        # Get the olg set of tags from the post
+        # Get the old set of tags from the post
         tags_used = dict([(i, False) for i in get_post_tags(post_id)])
         # Check the ones that are used and insert the new ones.
         for tag in post[KEY_TAGS]:
             # The tag does not exist
             if tags_used.get(tag) == None:
-                insert_tag_post_tags(post_id, tag)
+                if len(tag) > 0:
+                    debug("\t new tag on post: " + tag)
+                    insert_tag_post_tags(post_id, tag)
             else:
                 tags_used[tag] = True
         # If an old tag is not used it has been deleted.
         for tag in tags_used.keys():
             if not tags_used[tag]:
+                debug("\t deleting unused tag: " + tag)
                 delete_tag_from_post(post_id, tag)
 
     return get_post(post_id)
@@ -778,8 +783,8 @@ def search_posts_title(partial_title, page=0):
     for title in titles:
         temp = _get_posts_by_title(title)
         if len(temp) > 0:
-            for x in temp:
-                posts.append(x)
+            for results in temp:
+                posts.append(results)
     if page > 0 and len(posts) > 0:
         posts = _raw_paginate(posts, page)
     return posts

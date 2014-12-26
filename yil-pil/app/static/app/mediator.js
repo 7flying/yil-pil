@@ -151,6 +151,22 @@ define(["knockout"], function(ko) {
 				error: error
 			});
 		},
+		/* Updates a post. */
+		updatePost: function(post, token) {
+			var url = 'yilpil/post/' + post.id;
+			$.ajax({
+				type: "PUT",
+				url: url,
+				data: post,
+				beforeSend: function(xhr) {
+					xhr.setRequestHeader("Authorization", "Basic " +
+						btoa(token + ":unused"));
+				},
+				success: function(data, textStatus, jqXHR) {
+					window.location.reload();
+				}
+			});
+		},
 		/* Change an user's email. */
 		changeEmail: function(newMail, user, token, success, error) {
 			var url = 'yilpil/users/' + user + "?email=" + newMail;

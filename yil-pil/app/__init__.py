@@ -6,7 +6,7 @@ app = Flask(__name__, static_url_path='')
 app.config.from_object('config')
 
 from app.routes import index
-
+from base64 import b64decode
 import redis
 import manager
 from config import REDIS_HOST, REDIS_PORT, REDIS_DB, SECRET_KEY
@@ -167,8 +167,7 @@ class PostAPI(Resource):
         self.reqparse = reqparse.RequestParser()
         self.reqparse.add_argument('title', type=str, location='form')
         self.reqparse.add_argument('contents', type=str, location='form')
-        self.reqparse.add_argument('tags', type=str, action='append',
-            location='form')
+        self.reqparse.add_argument('tags', type=str, location='form')
         self.reqparse.add_argument('username', type=str, location='form')
         super(PostAPI, self).__init__()
 
@@ -188,8 +187,11 @@ class PostAPI(Resource):
         post = {}
         post['contents'] = args['contents']
         post['title'] = args['title']
-        post['tags'] = [] if args['tags'] == None or len(args['tags']) == 0 \
-            else args['tags']
+        if args['tags'] == None or len(args['tags']) == 0:
+            post['tags'] = []
+        else:
+            post['tags'] = list([b64decode(temp) \
+                for temp in args['tags'].split(':')])
         user = args['username']
         created_post = manager.insert_post(post, user)
         return {'post': marshal(created_post, PostAPI.response_post_field)}
@@ -206,12 +208,15 @@ class PostAPI(Resource):
             username = args['username']
             if 'title' in args.keys():
                 post['title'] = args['title']
-            if 'post' in args.keys():
+            if 'contents' in args.keys():
                 post['contents'] = args['contents']
             if 'tags' in args.keys():
-                post['tags'] = args['tags']
+                post['tags'] = list([b64decode(temp) \
+                    for temp in args['tags'].split(':')])
+            else:
+                post['tags'] = []
             post = manager.update_post(post, id, username)
-            return {'post': marshal(post, PostAPI.post_field)}
+            return {'post': marshal(post, PostAPI.response_post_field)}
         else:
             abort(404)
 

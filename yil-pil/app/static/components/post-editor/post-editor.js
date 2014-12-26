@@ -36,13 +36,10 @@ define(['knockout', 'text!./post-editor.html', 'marked', 'app/mediator'],
 
 	function PostEditorViewModel(params) {
 		var self = this;
-		this.toEdit = params.toEdit;
-		console.log(self.toEdit);
-		
-		this.setWarning = ko.observable(null);
+		// Check whether we are on edit or creation mode
+		var editMode = typeof params.title != 'undefined';
 		this.setContentWarning = ko.observable(null);
 		this.session = ko.observable(null);
-		//this.mdTitle = ko.observable(self.toEdit == 'undefined' ? "" : "hello world!");
 		this.mdTitle = ko.observable("");
 		this.mdContents = ko.observable("");
 		this.mdTags = ko.observableArray([]);
@@ -50,12 +47,20 @@ define(['knockout', 'text!./post-editor.html', 'marked', 'app/mediator'],
 		this.contents = ko.observable();
 		this.tags = ko.observableArray();
 		this.tag = ko.observable();
-
+		this.id = ko.observable(null);
+		try {
+			self.id(params.id());
+		} catch(err) {
+			self.id(null);
+		}
 		this.mdTitle.subscribe(function(newValue) {
 			self.title(newValue);
 		});
-
-		// self.title(self.toEdit == 'undefined' ? "" : "hello world!");
+		try {
+			self.mdTitle(params.title());
+		} catch(err) {
+			self.mdTitle("");
+		}
 
 		var generateHTML = function(text) {
 			$('#preview-contents').empty();
@@ -65,12 +70,30 @@ define(['knockout', 'text!./post-editor.html', 'marked', 'app/mediator'],
 		this.mdContents.subscribe(function(newValue) {
 			generateHTML(newValue);
 		});
+		// add content from arguments
+		try {
+			self.mdContents(params.contents());
+		} catch(err) {
+			self.mdContents("");
+		}
+		// add tags from arguments
+		try {
+			params.tags().forEach(function(item) {
+				self.tags.push(item);
+				self.mdTags.push(item);
+			});
+		} catch(err) {}
+
+		var storeTag = function(tag) {
+			self.mdTags.push(tag);
+			self.tags.push(tag);
+		};
 
 		this.addTag = function() {
 			// If the tag is repeated ignore it.
 			if (!self.mdTags().contains(self.tag())) {
-				self.mdTags.push(self.tag());
-				self.tags.push(self.tag());	
+				storeTag(self.tag());
+				$('#tagAdder').val('');
 			}
 		};
 
@@ -82,20 +105,38 @@ define(['knockout', 'text!./post-editor.html', 'marked', 'app/mediator'],
 		this.submit = function() {
 			var data = {};
 			data['contents'] = self.mdContents();
+			console.log(self.mdContents());
 			data['title'] = self.mdTitle();
-			data['tags'] = self.mdTags().length == 0 ? [] : self.mdTags().toString();
+			var temp = "";
+			var first = true;
+			// generate b64 of every tag and concatenate them
+			self.mdTags().forEach(function(item){
+				if (first) {
+					temp += btoa(item);
+					first = false;
+				} else
+					temp += ":" + btoa(item);
+				console.log(temp);
+			});
+			data['tags'] = temp;
 			if (data['contents'].length == 0 || data['title'].length == 0)
 				self.setContentWarning(true);
 			else {
 				data['username'] = mediator.getCookie('yt-username');
-				mediator.createPost(data, mediator.getCookie('yt-token'));	
+				if (editMode) {
+					data['id'] = self.id();
+					mediator.updatePost(data, mediator.getCookie('yt-token'));
+				} else {
+					// Creation mode
+					console.log("sending: " + data.toString());
+					mediator.createPost(data, mediator.getCookie('yt-token'));	
+				}
 			}
 		};
 
 		var setContent = function() {
 			var cookie = mediator.getCookie("yt-username");
 			self.session(cookie == null ? null : true);
-			self.setWarning(cookie == null ? true : null);
 		};
 		setContent();
 	}

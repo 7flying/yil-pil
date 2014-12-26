@@ -19,15 +19,22 @@ define(['knockout', 'text!./post.html', 'marked', 'app/mediator'],
 		this.title = ko.observable();
 		this.author = ko.observable();
 		this.date = ko.observable();
+		// contents in md
+		this.contentsRaw = ko.observable();
+		// contents in html
 		this.contents = ko.observable();
 		this.votes = ko.observable();
 		this.tags = ko.observableArray();
+		// edition post
+		this.post = ko.observable();
+		// control
 		this.postOwner = ko.observable(null);
+		this.editPostEnabled = ko.observable(null);
+		this.showPost = ko.observable(true);
+		// alerts
 		this.setSuccess = ko.observable(null);
 		this.setWarning = ko.observable(null);
 		this.setWarningSession = ko.observable(null);
-		this.editPost = ko.observable(true);
-		this.showPost = ko.observable(true);
 
 		var successDelete = function() {
 			self.setSuccess(true);
@@ -50,7 +57,15 @@ define(['knockout', 'text!./post.html', 'marked', 'app/mediator'],
 		};
 
 		this.editPost = function() {
+			self.showPost(null);
+			self.editPostEnabled(true);
+			self.postOwner(null);
+		};
 
+		this.cancelEdition = function() {
+			self.showPost(true);
+			self.editPostEnabled(null);
+			self.postOwner(true);
 		};
 
 		this.like = function() {
@@ -101,6 +116,7 @@ define(['knockout', 'text!./post.html', 'marked', 'app/mediator'],
 				self.id(data.post.id);
 				self.title(data.post.title);
 				self.author(data.post.author);
+				self.contentsRaw(data.post.contents);
 				self.contents(marked(data.post.contents));
 				setContents(self.contents());
 				self.votes(data.post.votes);
@@ -109,6 +125,7 @@ define(['knockout', 'text!./post.html', 'marked', 'app/mediator'],
 				while (data.post.tags.length > 0)
 					self.tags.push(data.post.tags.shift());
 				checkOwner();
+				self.post(post);
 			});
 			
 		};

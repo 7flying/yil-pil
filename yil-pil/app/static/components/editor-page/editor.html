@@ -1,5 +1,14 @@
 <div class="container">
 	<h2 data-bind='text: pageTitle'></h2>
-	<post-editor params='toEdit: "hey"'></post-editor>
+	<!-- ko if:  setWarning-->
+	<div class="alert alert-danger alert-dismissible" role="alert">
+		<button type="button" class="close" data-dismiss="alert">
+		<span aria-hidden="true">&times;</span>
+		<span class="sr-only">Close</span></button>
+		You need to be logged in to post. Please 
+		<a href="#login">log in</a> or <a href="#join">sign up</a>.
+	</div>
+	<!-- /ko-->
+	<post-editor></post-editor>
 	<br>
 </div>

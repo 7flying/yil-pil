@@ -4,6 +4,7 @@ define(['knockout', 'text!./editor.html', 'app/mediator'],
 	function EditorViewModel(params) {
 		var self = this;
 		this.pageTitle = ko.observable();
+		this.setWarning = ko.observable(null);
 
 		var titleConcat = "What have you learnt today";
 
@@ -12,6 +13,7 @@ define(['knockout', 'text!./editor.html', 'app/mediator'],
 			self.pageTitle(cookie == null 
 						   ? titleConcat + "?"
 						   : titleConcat + ", " + cookie + "?");
+			self.setWarning(cookie == null ? true : null);
 		};
 		setContent();
 	}

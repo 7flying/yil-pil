@@ -39,8 +39,16 @@
 	</button>
 </h2>
 <!-- /ko -->
-
-<div class="panel panel-default" data-bind="visible: showPost">
+<!-- ko if: editPostEnabled-->
+<div class="container">
+<button type="button" class="btn btn-default" aria-label="Left Align"
+	data-bind='click: cancelEdition'>
+	<i class="fa fa-remove"></i> Cancel</li>
+</button>
+</div>
+<!-- /ko -->
+<!-- ko if: showPost-->
+<div class="panel panel-default">
 	<div class="panel-heading" >
 		<h3  data-bind='text: title'></h3>
 		<span> by </span>
@@ -72,7 +80,9 @@
 		</span>
 	</div>
 </div>
+<!-- /ko -->
+<!-- ko if: editPostEnabled -->
+<post-editor params='{title: title, contents: contentsRaw, tags: tags, id: id}'>
+</post-editor>
+<!-- /ko -->
 
-<div data-bind='visible: editPost'>
-	<post-editor></post-editor>
-</div>

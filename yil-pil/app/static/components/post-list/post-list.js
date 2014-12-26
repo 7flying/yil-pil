@@ -27,6 +27,7 @@ define(["knockout", "text!./post-list.html", "app/mediator"],
 				} else {
 					self.setWarning(null);
 					mediator.vote(post.id, user, up, token);
+					return window.location.href = '#post/' + post.id; //TODO
 				} 
 			};
 			this.voteUp = function(post) {
