@@ -7,6 +7,3 @@ class ServerTestCase(unittest.TestCase):
 
 	def tearDown(self):
 		pass
-
-	def test_greedy(self):
-		self.assertTrue(True)

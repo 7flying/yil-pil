@@ -73,7 +73,7 @@ APPEND_POPULAR_POSTS_CATEGORY = ':popular-category'
 # The score is the time date concatenated ej: 20141109
 APPEND_SEARCH_POST_TIMEDATE = ':search-post-user-timedate'
 
-_DEBUG_ = True
+_DEBUG_ = False
 
 ## Notes:
 # - Change the hash of :search-posts-title-ids, we cannot remove posts since
@@ -121,6 +121,10 @@ def populate_test2():
         insert_post(post_tem, 'panfrosio')
 
     debug("Database created with testing data")
+
+def _clear_database():
+    """ Clears all data."""
+    db.flushdb()
 
 ### User related stuff ###
 
@@ -268,9 +272,12 @@ def add_favourite(username, post_id):
     """ Adds the specified post to the user's set of favourites. """
     if _is_user_created(username):
         post_id = str(post_id)
-        # If the id is already present the insertion is ignored
-        db.sadd(username + APPEND_KEY_FAVS, str(post_id))
-        return True
+        if _is_post_created(post_id):
+            # If the id is already present the insertion is ignored
+            db.sadd(username + APPEND_KEY_FAVS, str(post_id))
+            return True
+        else:
+            return False
     else:
         return False
 
@@ -317,7 +324,6 @@ def insert_tag_post_tags(post_id, tag):
     """
     Inserts a tag to the post's set of tags.
     """
-    print "TEST before adding tag: "
     get_post_tags(str(post_id))
     debug("INSERT TAG to post. tag:" + tag + " post #:" + str(post_id))
     # Element isn't inserted if present
@@ -334,7 +340,6 @@ def insert_tag_post_tags(post_id, tag):
         _insert_symbol_index(tag[0])
         # Insert to the specific index of tag[0] -- tags
         _insert_tag_index_letter_tags(tag)
-    print "TEST after adding tag: "
     get_post_tags(str(post_id))
 
 def delete_tag_from_post(post_id, tag):

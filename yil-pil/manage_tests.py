@@ -3,23 +3,22 @@ import os
 import unittest
 import coverage
 
-COV = None
-COV = coverage.coverage(branch=True, include='app/*')
-COV.start()
-
-def test(coverage=False):
+def test(cover=False):
     """ Runs the unit tests. """
     tests = unittest.TestLoader().discover('tests', pattern='*.py')
+    if cover:
+        cov = coverage.coverage(branch=True, include='app/*')
+        cov.start()
     unittest.TextTestRunner(verbosity=2).run(tests)
-    if COV:
-        COV.stop()
-        COV.save()
+    if cover:
+        cov.stop()
+        cov.save()
         print "Coverage Summary:"
-        COV.report()
+        cov.report()
         basedir = os.path.abspath(os.path.dirname(__file__))
         covdir = os.path.join(basedir, 'tmp/coverage')
-        COV.html_report(directory=covdir)
-        COV.erase()
+        cov.html_report(directory=covdir)
+        cov.erase()
 
 if __name__ == '__main__':
     test(True)
