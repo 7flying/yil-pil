@@ -67,8 +67,6 @@ class ManagerTestCase(unittest.TestCase):
 				 'tags' : ["node.js", "One tag more"]}
 		self.assertIsNotNone(manager.update_post(post, created_post['id'], 'user'))
 		
-		# Delete user
-		#self.assertTrue(manager.delete_user('user'))
 
 	def test_3_post_search(self):
 		# Posts by tag name
@@ -112,3 +110,16 @@ class ManagerTestCase(unittest.TestCase):
 		self.assertGreater(len(manager.get_popular_posts('How-to')), 0)
 		self.assertGreater(len(manager.get_popular_tags()), 0)
 
+	def test_6_deleting(self):
+		manager.populate_test2()
+		self.assertTrue(manager.delete_post('1', 'seven'))
+		self.assertFalse(manager._is_post_created('1'))
+		print manager.delete_user('seven')
+
+	def test_7_special(self):
+		# Add a fav and delete the post -> the fav should dissapear
+		manager.populate_test2()
+		self.assertTrue(manager.add_favourite('seven', '1'))
+		self.assertEqual(1, manager.get_favourite_count('seven'))
+		self.assertTrue(manager.delete_post('1', 'seven'))
+		self.assertEqual(0, len(manager.get_favourites('seven')))

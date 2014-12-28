@@ -79,7 +79,7 @@ _DEBUG_ = False
 # - Change the hash of :search-posts-title-ids, we cannot remove posts since
 # we do not know the key. Make a set for every title.
 
-def debug(to_print):
+def debug(to_print):  # pragma: no cover
     """ Debugs the manager. """
     if _DEBUG_:
         print "[ MANAGER ] ", to_print
@@ -263,7 +263,7 @@ def _delete_tag_from_all_user_posts(username, tag):
     Deletes a tag from all the posts a given user has.
     """
     debug("DELETE TAG FROM USER POSTS. tag:" + tag + ", user:" + username)
-    for post_id in db.smembers(username + APPEND_KEY_POSTS):
+    for post_id in db.lrange(username + APPEND_KEY_POSTS, 0, -1):
         delete_tag_from_post(post_id, tag)
 
 # User's favs
