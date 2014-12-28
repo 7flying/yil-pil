@@ -27,6 +27,7 @@ class ManagerTestCase(unittest.TestCase):
 		self.assertIsNone(manager.get_favourites('user'))
 		self.assertEqual(-1, manager.get_favourite_count('user'))
 		self.assertIsNone(manager.get_post('8'))
+		self.assertFalse(manager.delete_post('8', 'user'))
 		self.assertIsNone(manager.get_posts('user'))
 
 	def test_2_user_data(self):	
@@ -70,5 +71,44 @@ class ManagerTestCase(unittest.TestCase):
 		#self.assertTrue(manager.delete_user('user'))
 
 	def test_3_post_search(self):
-		pass
+		# Posts by tag name
+		self.assertIsNone(manager.search_tag_names_letter('He'))
+		self.assertIsNone(manager.search_tag_names_letter('H', -2))
+		self.assertIsNotNone(manager.search_tag_names_letter('H'))
+		self.assertIsNotNone(manager.search_tag_names_letter('H', 1))
+		# Posts by creation date
+		manager.populate_test2()
+		self.assertTrue(manager._is_user_created('seven'))
+		self.assertIsNotNone(manager.search_posts_user_date('seven', 20141101, 20150101, 0))
+		self.assertIsNotNone(manager.search_posts_user_date('seven', 20141101, 20150101, 1))
+		self.assertEqual(len(manager.search_posts_user_date('seven', 20141101, 20150101, 2)), 0)
+		self.assertIsNone(manager.search_posts_user_date('', 20141101, 20150101, 2))
+		# Search posts by title
+		self.assertEqual(len(manager.search_posts_title('Z')), 0)
+		self.assertEqual(len(manager.search_posts_title('How')), 2)
+		self.assertEqual(len(manager.search_posts_title('How', 3)), 0)
+		# Get posts with a certain tag
+		self.assertEqual(len(manager.get_posts_with_tag('node.js')), 2)
+		# Get index
+		self.assertGreater(len(manager.get_index_letter_tag()), 0)
+		self.assertGreater(len(manager.get_tags_by_index_letter('H')), 0)
+
+	def test_4_updates(self):
+		self.assertEqual(len(manager.get_last_post_updates()), 0)
+		manager.populate_test2()
+		self.assertGreater(len(manager.get_last_post_updates()), 0)
+
+	def test_5_voting_popular(self):
+		self.assertEqual(len(manager.get_top_posts()), 0)
+		self.assertEqual(len(manager.get_popular_posts('How-to')), 0)
+		manager.populate_test2()
+		self.assertFalse(manager.vote_positive('8', 'fake-User'))
+		self.assertFalse(manager.vote_negative('8', 'fake-User'))
+		self.assertTrue(manager.vote_positive('1', 'seven'))
+		self.assertFalse(manager.vote_positive('1', 'seven'))
+		self.assertTrue(manager.vote_negative('2', 'panfrosio'))
+		# get popular
+		self.assertGreater(len(manager.get_top_posts()), 0)
+		self.assertGreater(len(manager.get_popular_posts('How-to')), 0)
+		self.assertGreater(len(manager.get_popular_tags()), 0)
 

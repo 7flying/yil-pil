@@ -590,7 +590,7 @@ def _vote(post_id, voting_user, positive): #OK
     """ Private method for handling postivite and negative votes. """
     post_id = str(post_id)
     debug("VOTE POSITIVE. user:" + voting_user + ", post:" + post_id)
-    if _is_post_created(post_id):
+    if _is_post_created(post_id) and _is_user_created(voting_user):
         debug("\t CURRENT VOTES of USER.")
         debug("\t\t-user: " + voting_user)
         debug("\t\t-voted to: " + str(db.smembers(voting_user + APPEND_KEY_HAS_VOTED)))
