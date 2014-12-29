@@ -1,6 +1,9 @@
 import os
 
 DEBUG = True
+MANAGER_DEBUG = False
+API_DEBUG = False
+
 WTF_CSRF_ENABLED = False
 
 # Pagination

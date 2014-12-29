@@ -3,7 +3,7 @@ from __init__ import db
 from datetime import datetime
 import hashlib
 from werkzeug.security import generate_password_hash
-from config import API_PAGINATION, API_MAX_UPDATES
+from config import API_PAGINATION, API_MAX_UPDATES, MANAGER_DEBUG
 
 # Datetime format in posts
 FORMAT_TIME = "%d-%m-%Y %H:%M"
@@ -73,15 +73,13 @@ APPEND_POPULAR_POSTS_CATEGORY = ':popular-category'
 # The score is the time date concatenated ej: 20141109
 APPEND_SEARCH_POST_TIMEDATE = ':search-post-user-timedate'
 
-_DEBUG_ = False
-
 ## Notes:
 # - Change the hash of :search-posts-title-ids, we cannot remove posts since
 # we do not know the key. Make a set for every title.
 
 def debug(to_print):  # pragma: no cover
     """ Debugs the manager. """
-    if _DEBUG_:
+    if MANAGER_DEBUG:
         print "[ MANAGER ] ", to_print
 
 def populate_test2():

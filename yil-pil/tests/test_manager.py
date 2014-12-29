@@ -66,7 +66,7 @@ class ManagerTestCase(unittest.TestCase):
 				 'contents' : "MODIFY", \
 				 'tags' : ["node.js", "One tag more"]}
 		self.assertIsNotNone(manager.update_post(post, created_post['id'], 'user'))
-		
+
 
 	def test_3_post_search(self):
 		# Posts by tag name

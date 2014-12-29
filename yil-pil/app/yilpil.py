@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 from app import app, api, auth
 from app import manager
-from app.config import SECRET_KEY
+from app.config import SECRET_KEY, API_DEBUG
 from app.routes import index
 
 from flask import abort, jsonify
@@ -10,11 +10,9 @@ from flask.ext.restful import Resource, reqparse, fields, marshal
 from werkzeug.security import check_password_hash
 from itsdangerous import TimedJSONWebSignatureSerializer as Serializer, BadSignature
 
-_DEBUG_ = True
-
 def debug(to_print):
     """ Used to debug."""
-    if _DEBUG_:
+    if API_DEBUG:
         print "[ SERVER ] ", to_print
 
 @auth.verify_password
@@ -157,7 +155,7 @@ class PostAPI(Resource):
         debug("GET POST id: " + str(id))
         post = manager.get_post(id)
         if post == None:
-            abort(404)
+            return jsonify(error="Post-id not found", code="404")
         return {'post' : marshal(post, PostAPI.response_post_field)}
 
     @auth.login_required
