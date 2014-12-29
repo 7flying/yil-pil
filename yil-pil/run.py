@@ -1,4 +1,4 @@
-from app import app
+from app.yilpil import app as app
 from app import manager
 
 manager.populate_test2()

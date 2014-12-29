@@ -13,7 +13,7 @@ FORMAT_TIME_SEARCH = "%Y%m%d"
 KEY_PASSWORD = 'password'
 KEY_EMAIL = 'email'
 KEY_USER = 'name'
-KEY_HASH = 'hash'
+KEY_HASH = 'hash' # md5 of the user's email
 # In post-hash map, post-fields
 KEY_TITLE = 'title'
 KEY_CONTENTS = 'contents'
