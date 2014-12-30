@@ -147,7 +147,7 @@ class ServerTestCase(unittest.TestCase):
 	def test_5_user_tags(self):
 		response_json = json.loads(test_app.get('/yilpil/tags/seven').data)
 		self.assertTrue(list(response_json) > 0)
-	
+
 	def test_6_voting(self):
 		# Vote ok up
 		response_json = test_app.put('/yilpil/voting/1?up=true&username=seven',\
@@ -171,4 +171,87 @@ class ServerTestCase(unittest.TestCase):
 		self.assertTrue(response_json['code'] == "404")
 
 	def test_7_favourites(self):
-		pass
+		# Get favourite count
+		response_json = json.loads(test_app.get('/yilpil/favs/seven?count=true').data)
+		self.assertTrue(response_json['count'] == 0)
+		# User not found error on count
+		response_json = json.loads(test_app.get('/yilpil/favs/se?count=true').data)
+		self.assertTrue(response_json['code'] == '404')
+		# Get favourite list
+		response_json = json.loads(test_app.get('/yilpil/favs/seven').data)
+		self.assertTrue(len(response_json['posts']) == 0)
+		# User not found error on list
+		response_json = json.loads(test_app.get('/yilpil/favs/se').data)
+		self.assertTrue(response_json['code'] == '404')
+		# Add a favourite
+		response_json = json.loads(test_app.post('/yilpil/favs/seven?id=1',\
+			headers=self.get_auth_headers('seven', '123')).data)
+		self.assertTrue(response_json['code'] == '201')
+		# Fav count should be one
+		response_json = json.loads(test_app.get('/yilpil/favs/seven?count=true').data)
+		self.assertTrue(response_json['count'] == 1)
+		# Delete favourite
+		response_json = json.loads(test_app.delete('/yilpil/favs/seven?id=1',\
+			headers=self.get_auth_headers('seven', '123')).data)
+		self.assertTrue(response_json['code'] == '200')
+		# Fav count should be zero
+		response_json = json.loads(test_app.get('/yilpil/favs/seven?count=true').data)
+		self.assertTrue(response_json['count'] == 0)
+
+	def test_8_search_tags(self):
+		# Search by starting letter
+		response_json = json.loads(test_app.get('/yilpil/search/tag?letter=Z').data)
+		self.assertTrue(len(response_json['tags']) == 0)
+		response_json = json.loads(test_app.get('/yilpil/search/tag?letter=Z&page=1').data)
+		self.assertTrue(len(response_json['tags']) == 0)
+
+	def test_9_search_posts_date(self):
+		# Get the posts within two dates
+		response_json = json.loads(test_app.get(\
+			'/yilpil/search/posts/date?user=seven&dateini=20140101&dateend=20251205').data)
+		self.assertTrue(len(response_json['posts']) > 0)
+		# Get the posts made in a certain date
+		response_json = json.loads(test_app.get(\
+			'/yilpil/search/posts/date?user=seven&dateini=20140101').data)
+		self.assertIsNotNone(response_json.get('posts', None))
+		# Use pagination
+		response_json = json.loads(test_app.get(\
+			'/yilpil/search/posts/date?user=seven&dateini=20140101&page=1').data)
+		self.assertIsNotNone(response_json.get('posts', None))
+
+	def test_10_search_posts_partial_title(self):
+		response_json = json.loads(test_app.get('/yilpil/search/posts/title?title=how').data)
+		self.assertTrue(len(response_json['posts']) > 0)
+
+	def test_11_get_last_updates(self):
+		response_json = json.loads(test_app.get('/yilpil/updates?resource=posts').data)
+		self.assertTrue(len(response_json['posts']) > 0)
+
+	def test_12_rankings(self):
+		# Before voting no posts on the ranking
+		response_json = json.loads(test_app.get('/yilpil/ranking?resource=posts').data)
+		self.assertTrue(len(response_json['posts']) == 0)
+		# vote on a post, there should be a post on the ranking
+		response_json = test_app.put('/yilpil/voting/1?up=true&username=seven',\
+			headers=self.get_auth_headers('seven', '123'))
+		response_json = json.loads(response_json.data)
+		response_json = json.loads(test_app.get('/yilpil/ranking?resource=posts').data)
+		self.assertTrue(len(response_json['posts']) == 1)
+		# Pagination
+		response_json = json.loads(test_app.get('/yilpil/ranking?resource=posts&page=1').data)
+		self.assertIsNotNone(response_json['posts'])
+		# Get the ranking of a certain category
+		response_json = json.loads(test_app.get('/yilpil/ranking?resource=posts&category=how-to').data)
+		self.assertTrue(len(response_json['posts']) == 1)
+		# Get the popular tag list
+		response_json = json.loads(test_app.get('/yilpil/ranking?resource=tags').data)
+		# greater than zero because it depends on the number of posts, not votes
+		self.assertTrue(len(response_json['tags']) > 0)
+
+	def test_13_index(self):
+		# Request the global index
+		response_json = json.loads(test_app.get('/yilpil/index').data)
+		self.assertTrue(len(response_json['index']) > 0)
+		# Request the index given a letter
+		response_json = json.loads(test_app.get('/yilpil/index?symbol=L').data)
+		self.assertTrue(len(response_json['index']) > 0)
