@@ -38,11 +38,9 @@ def verify_auth_token(token):
     ser = Serializer(SECRET_KEY)
     try:
         data = ser.loads(token)
-        print data
     except BadSignature:
         return None
     user = manager.get_user(data['id'])
-    print user
     return user
 
 
@@ -92,7 +90,7 @@ class UserAPI(Resource):
         if manager.insert_user(user):
             return  jsonify(message="User created.", code=201)
         else:
-            return jsonify(error=500, message='Username taken.')
+            return jsonify(error=480, message='Username taken.')
     
     @auth.login_required
     def put(self, username): #OK
@@ -117,8 +115,12 @@ class UserAPI(Resource):
         debug("DELETE USER:" +  username)
         if manager.delete_user(username):
             return jsonify(message="User deleted.", code=200)
+        """
+        # No else needed, when the user is not on the db this method will throw
+        # an 'Unauthorized Access'
         else:
             return jsonify(message="User not found.", code=404)
+        """
 
 api.add_resource(UserAPI, '/yilpil/users/<string:username>', endpoint='users')
 
@@ -197,11 +199,12 @@ class PostAPI(Resource):
             post = manager.update_post(post, id, username)
             return {'post': marshal(post, PostAPI.response_post_field)}
         else:
-            abort(404)
+            abort(400)
 
     @auth.login_required
     def delete(self, id): # OK
         """ Deletes an existing post."""
+        print self.reqparse.parse_args()
         username = self.reqparse.parse_args()['username']
         if username != None and len(username) > 0:
             debug("DELETE POST id: " + str(id) + " user: " + username)

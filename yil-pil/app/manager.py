@@ -168,6 +168,7 @@ def change_email(username, new_email):
         # Generate the md5 also.
         db.hset(username + APPEND_KEY_USER, KEY_HASH,
                 hashlib.md5(new_email.encode('utf-8')).hexdigest())
+        return True
     else:
         return False
 

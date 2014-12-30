@@ -58,7 +58,7 @@ class ManagerTestCase(unittest.TestCase):
 						 db_user['hash'])
 		self.assertTrue(user['password'], manager.get_password('user'))
 		self.assertTrue(manager.change_password('user', '1234'))
-		self.assertIsNone(manager.change_email('user', 'some_email'))
+		self.assertTrue(manager.change_email('user', 'some_email'))
 		# User tags
 		self.assertIsNotNone(manager.get_user_tags('user'))
 		# Update post
@@ -114,7 +114,7 @@ class ManagerTestCase(unittest.TestCase):
 		manager.populate_test2()
 		self.assertTrue(manager.delete_post('1', 'seven'))
 		self.assertFalse(manager._is_post_created('1'))
-		print manager.delete_user('seven')
+		self.assertTrue(manager.delete_user('seven'))
 
 	def test_7_special(self):
 		# Add a fav and delete the post -> the fav should dissapear
