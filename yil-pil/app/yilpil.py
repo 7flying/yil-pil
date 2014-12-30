@@ -115,12 +115,10 @@ class UserAPI(Resource):
         debug("DELETE USER:" +  username)
         if manager.delete_user(username):
             return jsonify(message="User deleted.", code=200)
-        """
         # No else needed, when the user is not on the db this method will throw
         # an 'Unauthorized Access'
-        else:
-            return jsonify(message="User not found.", code=404)
-        """
+        #else:
+        #    return jsonify(message="User not found.", code=404)
 
 api.add_resource(UserAPI, '/yilpil/users/<string:username>', endpoint='users')
 
@@ -329,8 +327,10 @@ class FavouritesAPI(Resource):
         if args['id'] != None:
             if manager.delete_favourite(user, args['id']):
                 return jsonify(message="Favourite deleted.", code="200")
-            else:
-                return jsonify(error="User not found.", code="404")
+            # No else needed, when the user is not on the db this method will throw
+            # an 'Unauthorized Access'
+            #else:
+            #    return jsonify(message="User not found.", code=404)
 
     @auth.login_required
     def post(self, user):
@@ -339,8 +339,10 @@ class FavouritesAPI(Resource):
         if args['id'] != None:
             if manager.add_favourite(user, args['id']):
                 return jsonify(error="Favourite added.", code="201")
-            else:
-                return jsonify(error="User not found.", code="404")
+            # No else needed, when the user is not on the db this method will throw
+            # an 'Unauthorized Access'
+            #else:
+            #    return jsonify(message="User not found.", code=404)
 
 api.add_resource(FavouritesAPI, '/yilpil/favs/<string:user>', endpoint='favs')
 

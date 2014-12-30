@@ -26,15 +26,6 @@ class ServerTestCase(unittest.TestCase):
 			(token + ':unused').encode('utf-8')).decode('utf-8')}
 
 	def test_1_post(self):
-		"""
-		self.assertTrue(test_app.get('/').status_code == 302)
-		expected = {'user' : 'seven', \
-			'hash': md5('seven@gmail.com'.encode('utf-8')).hexdigest()}
-		login = {'user': 'seven', 'password': '123'}
-		response = test_app.get(\
-			'http://localhost:5000/yilpil/auth/token/seven', data=login)
-		"""
-
 		# GET
 		response_json = json.loads(test_app.get('/yilpil/post/0').data)
 		self.assertTrue(response_json['code'] == '404')
@@ -133,7 +124,7 @@ class ServerTestCase(unittest.TestCase):
 		self.assertTrue(response_json['post']['author'] == 'seven')
 
 	def test_4_posts(self):
-		# Errors
+		# Errors 40X
 		response_json = json.loads(test_app.get('/yilpil/posts').data)
 		self.assertTrue(response_json['status'] == 400)
 		response_json = json.loads(test_app.get('/yilpil/posts?page=0&username=seven&tag=w').data)
@@ -204,6 +195,10 @@ class ServerTestCase(unittest.TestCase):
 		self.assertTrue(len(response_json['tags']) == 0)
 		response_json = json.loads(test_app.get('/yilpil/search/tag?letter=Z&page=1').data)
 		self.assertTrue(len(response_json['tags']) == 0)
+		# Force 400
+		response_json = json.loads(test_app.get('/yilpil/search/tag?letter=ZS').data)
+		self.assertTrue(response_json['status'] == 400)
+
 
 	def test_9_search_posts_date(self):
 		# Get the posts within two dates
@@ -218,6 +213,10 @@ class ServerTestCase(unittest.TestCase):
 		response_json = json.loads(test_app.get(\
 			'/yilpil/search/posts/date?user=seven&dateini=20140101&page=1').data)
 		self.assertIsNotNone(response_json.get('posts', None))
+		# Force 400
+		response_json = json.loads(test_app.get(\
+			'/yilpil/search/posts/date?user=seven&dateini=20140101&dateend=20130110').data)
+		self.assertTrue(response_json['status'] == 400)
 
 	def test_10_search_posts_partial_title(self):
 		response_json = json.loads(test_app.get('/yilpil/search/posts/title?title=how').data)
@@ -226,6 +225,11 @@ class ServerTestCase(unittest.TestCase):
 	def test_11_get_last_updates(self):
 		response_json = json.loads(test_app.get('/yilpil/updates?resource=posts').data)
 		self.assertTrue(len(response_json['posts']) > 0)
+		# Force 40X
+		response_json = json.loads(test_app.get('/yilpil/updates?resource=fake').data)
+		self.assertTrue(response_json['status'] == 404)
+		response_json = json.loads(test_app.get('/yilpil/updates?resource=').data)
+		self.assertTrue(response_json['status'] == 400)
 
 	def test_12_rankings(self):
 		# Before voting no posts on the ranking
@@ -247,6 +251,11 @@ class ServerTestCase(unittest.TestCase):
 		response_json = json.loads(test_app.get('/yilpil/ranking?resource=tags').data)
 		# greater than zero because it depends on the number of posts, not votes
 		self.assertTrue(len(response_json['tags']) > 0)
+		# Force 40X
+		response_json = json.loads(test_app.get('/yilpil/ranking?resource=eeee').data)
+		self.assertTrue(response_json['status'] == 404)
+		response_json = json.loads(test_app.get('/yilpil/ranking?resource=').data)
+		self.assertTrue(response_json['status'] == 400)
 
 	def test_13_index(self):
 		# Request the global index
@@ -254,4 +263,7 @@ class ServerTestCase(unittest.TestCase):
 		self.assertTrue(len(response_json['index']) > 0)
 		# Request the index given a letter
 		response_json = json.loads(test_app.get('/yilpil/index?symbol=L').data)
-		self.assertTrue(len(response_json['index']) > 0)
+		self.assertTrue(len(response_json['tags']) > 0)
+		# Force 400
+		response_json = json.loads(test_app.get('/yilpil/index?symbol=LL').data)
+		self.assertTrue(response_json['status'] == 400)
