@@ -204,7 +204,6 @@ class PostAPI(Resource):
     @auth.login_required
     def delete(self, id): # OK
         """ Deletes an existing post."""
-        print self.reqparse.parse_args()
         username = self.reqparse.parse_args()['username']
         if username != None and len(username) > 0:
             debug("DELETE POST id: " + str(id) + " user: " + username)

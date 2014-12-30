@@ -131,3 +131,44 @@ class ServerTestCase(unittest.TestCase):
 			headers=self.get_token_headers(token_response['token']))
 		response_json = json.loads(response_json.data)
 		self.assertTrue(response_json['post']['author'] == 'seven')
+
+	def test_4_posts(self):
+		# Errors
+		response_json = json.loads(test_app.get('/yilpil/posts').data)
+		self.assertTrue(response_json['status'] == 400)
+		response_json = json.loads(test_app.get('/yilpil/posts?page=0&username=seven&tag=w').data)
+		self.assertTrue(response_json['status'] == 404)
+		# Ok
+		response_json = json.loads(test_app.get('/yilpil/posts?username=seven&page=1').data)
+		self.assertTrue(len(response_json['posts']) > 0)
+		response_json = json.loads(test_app.get('/yilpil/posts?tag=lorem').data)
+		self.assertTrue(len(response_json['posts']) > 0)
+
+	def test_5_user_tags(self):
+		response_json = json.loads(test_app.get('/yilpil/tags/seven').data)
+		self.assertTrue(list(response_json) > 0)
+	
+	def test_6_voting(self):
+		# Vote ok up
+		response_json = test_app.put('/yilpil/voting/1?up=true&username=seven',\
+			headers=self.get_auth_headers('seven', '123'))
+		response_json = json.loads(response_json.data)
+		self.assertTrue(response_json['code'] == "200")
+		# Vote ok down
+		response_json = test_app.put('/yilpil/voting/2?up=false&username=seven',\
+			headers=self.get_auth_headers('seven', '123'))
+		response_json = json.loads(response_json.data)
+		self.assertTrue(response_json['code'] == "200")
+		# Already voted
+		response_json = test_app.put('/yilpil/voting/1?up=true&username=seven',\
+			headers=self.get_auth_headers('seven', '123'))
+		response_json = json.loads(response_json.data)
+		self.assertTrue(response_json['code'] == "405")
+		# Post-id not found
+		response_json = test_app.put('/yilpil/voting/100000?up=true&username=seven',\
+			headers=self.get_auth_headers('seven', '123'))
+		response_json = json.loads(response_json.data)
+		self.assertTrue(response_json['code'] == "404")
+
+	def test_7_favourites(self):
+		pass
