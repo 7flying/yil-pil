@@ -352,10 +352,6 @@ def delete_tag_from_post(post_id, tag):
         _inc_dec_tag(tag, False)
         # Delete from the sorted set of tag-name -- post-ids
         _remove_post_tag_name(post_id, tag)
-        # Delete from the index of tags
-        _delete_symbol_index(tag[0])
-        # Delete from the specifig index of tag[0] -- tags
-        _delete_tag_index_letter_tags(tag)
 
 def _is_post_created(post_id):
     """
@@ -859,8 +855,20 @@ def _inc_dec_tag(tag_name, add=True):
             debug("DEC TAG USAGE: "+ tag_name)
             db.zincrby(POPULAR_TAGS, tag_name, -1)
             # Delete the tag from the list if it has a score of 0
-            if db.zrank(POPULAR_TAGS, tag_name) == 0:
+            #if db.zrank(POPULAR_TAGS, tag_name) == 0:
+            if _alternative_score(tag_name) == 0:
+                # Delete from the index of tags
+                _delete_symbol_index(tag_name[0])
+                # Delete from the specifig index of tag[0] -- tags
+                _delete_tag_index_letter_tags(tag_name)
                 db.zrem(POPULAR_TAGS, tag_name)
+
+def _alternative_score(tag_name):
+    """ An alternaive way of checking the score of a tag. """
+    result = db.zrangebyscore(POPULAR_TAGS, 0, 1, start=0,
+                              num=API_MAX_UPDATES, withscores=True)
+    result = [(name, score) for name, score in result if name == tag_name]
+    return result[0][1] if result != None and len(result) > 0 else -1
 
 def get_popular_tags():
     """ Returns the most popular tags."""
@@ -868,10 +876,10 @@ def get_popular_tags():
     result = db.zrevrangebyscore(POPULAR_TAGS, '+inf', 1, start=0,
                                  num=API_MAX_UPDATES, withscores=True)
     good_format = []
-    for tup in result:
+    for name, score in result:
         dic = {}
-        dic['name'] = tup[0]
-        dic['num'] = int(tup[1])
+        dic['name'] = name
+        dic['num'] = int(score)
         good_format.append(dic)
     return good_format
 

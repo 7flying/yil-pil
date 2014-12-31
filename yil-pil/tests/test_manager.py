@@ -8,7 +8,7 @@ import app.manager as manager
 class ManagerTestCase(unittest.TestCase):
 
 	def setup(self):
-		pass
+		manager._clear_database()
 
 	def tearDown(self):
 		manager._clear_database()
