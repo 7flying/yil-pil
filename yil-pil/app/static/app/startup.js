@@ -8,10 +8,8 @@ define(['jquery', 'knockout', './router', 'bootstrap', 'knockout-projections'], 
   ko.components.register('about-page', {
     template: { require: 'text!components/about-page/about.html' }
   });
-  ko.components.register('footer-credits', {
-    template: { require: 'text!components/footer-credits/footer.html' }
-  });
 
+  ko.components.register('footer-credits', { require: 'components/footer-credits/footer' });
   ko.components.register('sign-in-page', { require: 'components/sign-in-page/sign-in' });
   ko.components.register('sign-up-page', { require: 'components/sign-up-page/sign-up' });
   ko.components.register('post-page', { require: 'components/post-page/post' });

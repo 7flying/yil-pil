@@ -398,7 +398,6 @@ def get_post(key): # OK
 def _get_posts(username):
     """ Returns the posts ids of a user. """
     return db.lrange(username + APPEND_KEY_POSTS, 0, -1)
-    
 
 def get_posts(username, int_page=0): # OK
     """
@@ -699,7 +698,6 @@ def search_tag_names_letter(letter, page=0): #OK
                                                   ord(str(letter).upper())), page)
         else:
             # Bad request
-
             return None
     else:
         # Bad request, we are searching by a single letter.
