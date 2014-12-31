@@ -44,6 +44,15 @@
 	<strong>Success!</strong> The post has been added to your fav list.
 </div>
 <!-- /ko-->
+<!-- ko if:  setOkUnfavourite-->
+<div class="alert alert-success alert-dismissible" role="alert">
+	<button type="button" class="close" data-dismiss="alert">
+		<span aria-hidden="true">&times;</span>
+		<span class="sr-only">Close</span>
+	</button>
+	<strong>Success!</strong> The post has been deleted from your fav list.
+</div>
+<!-- /ko-->
 <!-- ko if: postOwner-->
 <h2>	
 	<button type="button" class="btn btn-default" aria-label="Left Align"
@@ -58,10 +67,10 @@
 <!-- /ko -->
 <!-- ko if: editPostEnabled-->
 <div class="container">
-<button type="button" class="btn btn-default" aria-label="Left Align"
-	data-bind='click: cancelEdition'>
-	<i class="fa fa-remove"></i> Cancel</li>
-</button>
+	<button type="button" class="btn btn-default" aria-label="Left Align"
+		data-bind='click: cancelEdition'>
+		<i class="fa fa-remove"></i> Cancel</li>
+	</button>
 </div>
 <!-- /ko -->
 <!-- ko if: showPost-->
@@ -86,12 +95,19 @@
 			<span class="glyphicon glyphicon-chevron-down" 
 			aria-hiden="true"></span>
 		</button>
-		
+		<!-- ko if: noFav-->
 		<button data-bind='click: like' type="button" class="btn btn-default"
 		 aria-label="Left Align">
 			<span class="glyphicon glyphicon-heart text-danger" 
 			aria-hidden="true"></span> Like it
 		</button>
+		<!-- /ko -->
+		<!-- ko if: isFav-->
+		<button data-bind='click: unlike' type="button" class="btn btn-default"
+		 aria-label="Left Align">
+  			<i class="fa fa-remove"></i> Unlike it
+		</button>
+		<!-- /ko -->
 		<span data-bind='foreach: tags'>
 			<a data-bind='attr: {href: "#tag/" + $data}'>
 				<span class="label label-success" data-bind='html: $data'></span>

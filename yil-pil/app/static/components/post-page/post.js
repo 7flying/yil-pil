@@ -31,12 +31,15 @@ define(['knockout', 'text!./post.html', 'marked', 'app/mediator'],
 		this.postOwner = ko.observable(null);
 		this.editPostEnabled = ko.observable(null);
 		this.showPost = ko.observable(true);
+		this.isFav = ko.observable(null);
+		this.noFav = ko.observable(true); // When the post isn't a fav
 		// alerts
 		this.setSuccess = ko.observable(null);
 		this.setWarning = ko.observable(null);
 		this.setWarnAlreadyVoted = ko.observable(null);
 		this.setWarningSession = ko.observable(null);
 		this.setOkFavourite = ko.observable(null);
+		this.setOkUnfavourite = ko.observable(null);
 
 		var successDelete = function() {
 			self.setSuccess(true);
@@ -73,6 +76,13 @@ define(['knockout', 'text!./post.html', 'marked', 'app/mediator'],
 		var favOk = function(data, textStatus, jqXHR) {
 			if (data.code == "201") {
 				self.setOkFavourite(true);
+				checkFavStatus();
+			}
+		};
+		var unfavOk = function(data, textStatus, jqXHR) {
+			if (data.code == "200") {
+				self.setOkUnfavourite(true);
+				checkFavStatus();
 			}
 		};
 
@@ -87,6 +97,20 @@ define(['knockout', 'text!./post.html', 'marked', 'app/mediator'],
 			else {
 				self.setWarningSession(null);
 				mediator.like(self.id(), user, token, favOk);
+			}
+		};
+
+		this.unlike = function() {
+			self.setOkUnfavourite(null);
+			var user = mediator.getCookie('yt-username');
+			var token = mediator.getCookie('yt-token');
+			if (user == null || token == null){
+				self.setWarningSession(true);
+				window.scrollTo(0,0);
+			}
+			else {
+				self.setWarningSession(null);
+				mediator.unlike(self.id(), user, token, unfavOk);
 			}
 		};
 
@@ -158,7 +182,31 @@ define(['knockout', 'text!./post.html', 'marked', 'app/mediator'],
 			else
 				self.postOwner(null);
 		};
+		// Chech witch fav button should be shown (fav or delete from favs)
+		var checkFavStatus = function() {
+			var user = mediator.getCookie('yt-username');
+			var token = mediator.getCookie('yt-token');
+			if (user != null && token != null) {
+				var url = '/yilpil/favs/' + user;
+				$.getJSON(url, function(data) {
+					var found = false;
+					while(!found & data.posts.length > 0) {
+						var temp = data.posts.shift();
+						if (temp.id == self.id())
+							found = true;
+					}
+					if (found) {
+						self.isFav(true);
+						self.noFav(null);
+					} else {
+						self.isFav(null);
+						self.noFav(true);
+					}
+				});
+			}	
+		};
 		getPost();
+		checkFavStatus();
 	}
 	
 	return { viewModel: PostViewModel, template: template };

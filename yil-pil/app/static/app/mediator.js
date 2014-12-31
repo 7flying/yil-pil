@@ -116,8 +116,17 @@ define(["knockout"], function(ko) {
 			});
 		},
 		/* Deletes a post from the user list of favourites */
-		unlike: function(postId, user) {
-
+		unlike: function(postId, user, token, success) {
+			var url = '/yilpil/favs/' + user + "?id=" + postId;
+			$.ajax({
+				type: "DELETE",
+				url: url,
+				beforeSend: function(xhr) {
+					xhr.setRequestHeader("Authorization", "Basic " +
+						btoa(token + ":unused"));
+				},
+				success: success
+			});
 		},
 		/* Creates a new post */
 		createPost: function(post, token) {
