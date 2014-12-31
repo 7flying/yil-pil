@@ -206,7 +206,7 @@ def delete_user(username): #OK -> DELETE ALL HIS/HER POSTS and stuff
         # Delete favourites
         db.delete(username + APPEND_KEY_FAVS)
         # Delete posts
-        user_posts = get_posts(username)
+        user_posts = _get_posts(username)
         for post in user_posts:
             delete_post(post, username)
         return db.delete(username + APPEND_KEY_USER) > 0
@@ -395,6 +395,11 @@ def get_post(key): # OK
     else:
         return None
 
+def _get_posts(username):
+    """ Returns the posts ids of a user. """
+    return db.lrange(username + APPEND_KEY_POSTS, 0, -1)
+    
+
 def get_posts(username, int_page=0): # OK
     """
     Returns all the posts written by a user, ordered by latest - oldest.
@@ -404,8 +409,7 @@ def get_posts(username, int_page=0): # OK
     if _is_user_created(username):
         if int_page == 0:
             # Return all the posts
-            posts_ids = db.lrange(username + APPEND_KEY_POSTS,
-                                  -1, db.llen(username + APPEND_KEY_POSTS))
+            posts_ids = db.lrange(username + APPEND_KEY_POSTS, 0, -1)
         else:
             # Get the posts specified in the pagination
             posts_ids = db.lrange(username + APPEND_KEY_POSTS,
@@ -466,7 +470,7 @@ def insert_post(post, username): # OK
         _insert_symbol_index(tag[0])
         # Insert to the specific index of tag[0] -- tags
         _insert_tag_index_letter_tags(tag)
-
+    # Add link to the tags in the post
     db.hset(db_post_id, KEY_TAGS, tag_id)
     # Add post id to the head of the user's post-list
     db.lpush(username + APPEND_KEY_POSTS, post_id)
@@ -857,10 +861,12 @@ def _inc_dec_tag(tag_name, add=True):
             # Delete the tag from the list if it has a score of 0
             #if db.zrank(POPULAR_TAGS, tag_name) == 0:
             if _alternative_score(tag_name) == 0:
-                # Delete from the index of tags
-                _delete_symbol_index(tag_name[0])
                 # Delete from the specifig index of tag[0] -- tags
                 _delete_tag_index_letter_tags(tag_name)
+                # Delete from the index of tags if the tag is the last on index
+                num = get_tags_by_index_letter(tag_name[0])
+                if num != None and len(num) == 0:
+                    _delete_symbol_index(tag_name[0])
                 db.zrem(POPULAR_TAGS, tag_name)
 
 def _alternative_score(tag_name):

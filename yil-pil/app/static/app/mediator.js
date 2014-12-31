@@ -87,6 +87,20 @@ define(["knockout"], function(ko) {
 				error: error
 			});
 		},
+		/* Deletes an account. */
+		deleteUser: function(username, token, success, error) {
+			var url = 'yilpil/users/' + username;
+			$.ajax({
+				type: "DELETE",
+				url: url,
+				beforeSend: function(xhr) {
+					xhr.setRequestHeader("Authorization", "Basic " + 
+						btoa(token + ":unused"));
+				},
+				success: success,
+				error: error
+			});
+		},
 		/* Votes up or down a post. */
 		vote: function(postId, user, up, token, success, error) {
 			var url = '/yilpil/voting/' + postId + "?up=" + up.toString()
@@ -209,6 +223,10 @@ define(["knockout"], function(ko) {
 		/* Custom validator to ensure that two elements are equal. */
 		validateMustEqual: function(val, other) {
 			return val == other();
+		},
+		/* Custom validator to delete accounts. */
+		validateDeleteAccount: function(val, other) {
+			return val == 'Delete my account';
 		},
 		/* Redirects to a user's profile page. */
 		redirectUserPage: function(user) {

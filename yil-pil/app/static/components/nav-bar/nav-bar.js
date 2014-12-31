@@ -43,7 +43,7 @@ define(['knockout', 'text!./nav-bar.html', 'app/mediator'],
 			} else
 				self.user(null);
 		};
-		setInterval(getUser, 3000);
+		setInterval(getUser, 1700);
 	}
 
 	return { viewModel: NavBarViewModel, template: template };

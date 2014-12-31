@@ -30,7 +30,7 @@ class ManagerTestCase(unittest.TestCase):
 		self.assertFalse(manager.delete_post('8', 'user'))
 		self.assertIsNone(manager.get_posts('user'))
 
-	def test_2_user_data(self):	
+	def test_2_user_data(self):
 		# User creation
 		user = {}
 		user['name'] = 'user'
@@ -115,6 +115,7 @@ class ManagerTestCase(unittest.TestCase):
 		self.assertTrue(manager.delete_post('1', 'seven'))
 		self.assertFalse(manager._is_post_created('1'))
 		self.assertTrue(manager.delete_user('seven'))
+		self.assertIsNone(manager.get_posts('seven'))
 
 	def test_7_special(self):
 		# Add a fav and delete the post -> the fav should dissapear

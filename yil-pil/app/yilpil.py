@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 from app import app, api, auth
 from app import manager
-from app.config import SECRET_KEY, API_DEBUG
+from config import SECRET_KEY, API_DEBUG
 from app.routes import index
 
 from flask import abort, jsonify

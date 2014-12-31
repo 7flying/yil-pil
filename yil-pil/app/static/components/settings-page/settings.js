@@ -34,10 +34,19 @@ define(['knockout', 'text!./settings.html', 'knockout.validation', 'app/mediator
 				params: '@'
 			}
 		});
+		this.confirmation = ko.observable().extend({
+			required: true,
+			validation: {
+				validator: mediator.validateDeleteAccount
+			}
+		});
 		this.setSuccess = ko.observable(null);
 		this.setWarning = ko.observable(null);
+		this.displayGoodbye = ko.observable(null);
+
 		this.errorsPass = validation.group([self.newPassword, self.newPasswordAgain]);
 		this.errorsEmail = validation.group([self.newEmail]);
+		this.errorsDelete = validation.group([self.confirmation]);
 
 		var success = function(data) {
 			self.setWarning(null);
@@ -51,7 +60,16 @@ define(['knockout', 'text!./settings.html', 'knockout.validation', 'app/mediator
 			success(data);
 			// Update gravatar
 			mediator.getAvatar(self.gravatar, mediator.getCookie('yt-username'));
-		}
+		};
+		var succesDelete = function(data) {
+			self.displayGoodbye(true);
+			setTimeout(function() {
+				document.cookie = 'yt-token=; expires=Thu, 01 Jan 1970 00:00:01 GMT;';
+				document.cookie = 'yt-username=; expires=Thu, 01 Jan 1970 00:00:01 GMT;'
+				// redirect to home
+				return window.location.href = '#';
+			}, 2000);
+		};
 		var error = function(jqXHR, textStatus, errorThrown) {
 			self.setWarning(true);
 			self.setSuccess(null);
@@ -82,6 +100,16 @@ define(['knockout', 'text!./settings.html', 'knockout.validation', 'app/mediator
 				self.errorsEmail.showAllMessages();
 			}
 			
+		};
+
+		this.deleteAccount = function() {
+			if (self.errorsDelete().length == 0) {
+				mediator.deleteUser(mediator.getCookie('yt-username'),
+									mediator.getCookie('yt-token'),
+									succesDelete, error);
+			} else {
+				self.errorsDelete.showAllMessages();
+			}
 		};
 
 		mediator.getAvatar(this.gravatar, mediator.getCookie('yt-username'));
