@@ -144,10 +144,10 @@ class PostAPI(Resource):
 
     def __init__(self):
         self.reqparse = reqparse.RequestParser()
-        self.reqparse.add_argument('title', type=str, location='form')
-        self.reqparse.add_argument('contents', type=str, location='form')
-        self.reqparse.add_argument('tags', type=str, location='form')
-        self.reqparse.add_argument('username', type=str, location='form')
+        self.reqparse.add_argument('title', type=str)
+        self.reqparse.add_argument('contents', type=str)
+        self.reqparse.add_argument('tags', type=str)
+        self.reqparse.add_argument('username', type=str)
         super(PostAPI, self).__init__()
 
     def get(self, id): #OK

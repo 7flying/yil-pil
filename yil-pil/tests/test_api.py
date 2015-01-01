@@ -70,6 +70,14 @@ class ServerTestCase(unittest.TestCase):
 			headers=self.get_auth_headers('seven', '123'))
 		response_json = json.loads(response_json.data)
 		self.assertTrue(response_json['status'] == 400)
+		# Try to delete a non existing post
+		response = test_app.delete('/yilpil/post/11111?username=seven', \
+			headers=self.get_auth_headers('seven', '123'))
+		self.assertTrue(response.data == '404')
+		# Delete post ok
+		response = test_app.delete('/yilpil/post/1?username=seven', \
+			headers=self.get_auth_headers('seven', '123'))
+		self.assertTrue(response.data == '200')
 
 	def test_2_user(self):
 		# GET
