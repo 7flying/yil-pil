@@ -1,12 +1,19 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<widget id="com.sevenflying.yilpil" version="0.0.1">
+<widget xmlns="http://www.w3.org/ns/widgets" 
+	 xmlns:gap="http://phonegap.com/ns/1.0" id="com.sevenflying.yilpil"
+	 version="0.0.1">
 	<name>Yil-Pil</name>
 	<description>
 		Yil-Pil is a note-taking app to record what you have daily learnt.
 	</description>
 	<author href="https://github.com/7flying/yil-pil">7flying</author>
 
-	<gap:platform name="android"/>
+	<preference name="permissions" value="none"/>
+	<preference name="android-minSdkVersion" value="17" />
+	<preference name="android-installLocation" value="auto" />
+
+	<gap:platform name="android" />
+	<access origin="*"/>
 
 </widget>
