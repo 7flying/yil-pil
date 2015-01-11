@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<widget id="com.sevenflying.yilpil" version="0.0.1">
+	<name>Yil-Pil</name>
+	<description>
+		Yil-Pil is a note-taking app to record what you have daily learnt.
+	</description>
+	<author href="https://github.com/7flying/yil-pil">7flying</author>
+
+	<gap:platform name="android"/>
+
+</widget>

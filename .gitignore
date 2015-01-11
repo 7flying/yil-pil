@@ -10,6 +10,8 @@ package.json
 docs/
 server/tmp/
 quick/
+tmp/
+.coverage
 
 # Python
 
