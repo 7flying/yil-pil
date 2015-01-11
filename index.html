@@ -12,11 +12,15 @@
       <link href="bower_modules/fontawesome/css/font-awesome.min.css" rel="stylesheet">
       <link href="css/styles.css" rel="stylesheet">
     <!-- endbuild -->
+    <script src="phonegap.js"></script>
     <!-- build:js -->
       <script src="app/require.config.js"></script>
       <script data-main="app/startup" src="bower_modules/requirejs/require.js"></script>
     <!-- endbuild -->
   </head>
+    <script type="text/javascript">
+            app.initialize();
+    </script>
   <body>
     <nav-bar params="route: route"></nav-bar>
     <div id="page" class="container" data-bind="component: { name: route().page, params: route }"></div>

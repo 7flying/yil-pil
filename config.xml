@@ -12,7 +12,9 @@
 	<preference name="permissions" value="none"/>
 	<preference name="android-minSdkVersion" value="17" />
 	<preference name="android-installLocation" value="auto" />
-
+	<preference name="orientation" value="default" />
+	<preference name="target-device" value="universal" />
+	<preference name="fullscreen" value="true" />
 	<gap:platform name="android" />
 	<access origin="*"/>
 
