@@ -1,0 +1,78 @@
+<div class="container" id="main-container">
+	<div class="col-xs-6 col-sm-3 sidebar-offcanvas">
+		<div class="thumbnail">
+			<img class="img-round" width="80px" height="80px" 
+			data-bind="attr: {src: gravatar}">
+			<div class="caption">
+						<hr>
+				<h3 data-bind='text: user'></h3>
+				<div>
+					<button class="btn btn-default" data-bind="click: showFavs">
+						<span>Show favourites  
+						<span class="glyphicon glyphicon-heart" 
+						aria-hidden="true">
+							</span>
+						</span>
+					</button>					
+				</div>
+			</div>
+		</div>
+		<hr>
+		<h4>Filter posts</h4>
+		<h5>Start date:</h5>
+		<div class="form-group">
+			<div class='input-group date' id='date-from'>
+				<input id='text-from' input type='text' class="form-control" 
+				data-date-format="DD/MM/YYYY"/>
+				<span class="input-group-addon">
+					<span class="glyphicon glyphicon-calendar"></span>
+				</span>
+			</div>
+		</div>
+		<h5>End date:</h5>
+		<div class="form-group">
+			<div class='input-group date' id='date-to'>
+				<input id='text-to' type='text' class="form-control" 
+				data-date-format="DD/MM/YYYY"/>
+				<span class="input-group-addon">
+					<span class="glyphicon glyphicon-calendar"></span>
+				</span>
+			</div>
+		</div>
+		<button data-bind="click: filterPosts"
+			type="button" class="btn btn-default" aria-label="Left Align">
+			<span class="glyphicon glyphicon-filter" aria-hidden="true"></span>
+			Filter
+		</button>
+		<!-- ko if:  setWarningDates-->
+		<div class="alert alert-warning" role="alert">
+			<strong>Warning!</strong> Please specify a date range.
+		</div>
+		<!-- /ko-->
+		<hr>
+		<h4>Tags used: </h4>
+		<div class="panel panel-default">
+			<ul class="list-group" data-bind='foreach: tags'>
+				<li class="list-group-item" data-bind='text: $data'></li>
+			</ul>
+		</div>
+	</div>
+	<div class="col-xs-12 col-sm-9">
+		<!-- ko if: userPosts -->
+		<h3 data-bind='text: displayTitle'></h3>
+		<post-list params='posts: userPosts'></post-list>
+		<nav>
+			<ul class="pager">
+				<li class="previous">
+				<a data-bind="click: previous">&larr;Older</a></li>
+				<li class="next"><a data-bind="click: next">Newer&rarr;</a></li>
+			</ul>
+		</nav>
+		<!-- /ko -->
+		<!-- ko ifnot: userPosts -->
+		<div class="alert alert-info" role="alert">
+			<span data-bind='text: alertTitle'></span>
+		</div>
+		<!-- /ko -->
+	</div>
+</div>

@@ -1,0 +1,17 @@
+<div class="container" id="main-container">
+	<div class="col-xs-12 col-sm-9">
+		<!-- ko if: postsByTag -->
+		<h3 data-bind='text: results'></h3>
+		<post-list params='posts: postsByTag'></post-list>
+		<!-- /ko -->
+		<!-- ko ifnot: results -->
+		<div class="alert alert-info" role="alert">
+			We couldn't find anything matching that.
+		</div>
+		<!-- /ko -->
+	</div>
+	<div class="col-xs-6 col-sm-3 sidebar-offcanvas">
+		<h4>Popular Tags</h4>
+		<tag-list></tag-list>
+	</div>
+</div>

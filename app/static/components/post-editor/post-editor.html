@@ -1,0 +1,65 @@
+<!-- ko if:  setContentWarning-->
+<div class="alert alert-danger alert-dismissible" role="alert">
+		<button type="button" class="close" data-dismiss="alert">
+		<span aria-hidden="true">&times;</span>
+		<span class="sr-only">Close</span></button>
+		Neither the post title nor the contents can be empty.
+</div>
+<!-- /ko-->
+<div class="col-md-6">
+	<h3>Markdown</h3>
+	<div class="panel panel-default">
+		<div class="panel-heading">
+			<input type="text" class="form-control" placeholder="Title" 
+			data-bind='textInput: mdTitle'>
+		</div>
+		<div class="panel-body post-editor">
+			<textarea class="form-control" rows="10"
+			 data-bind='textInput: mdContents'></textarea>
+		</div>
+		<div class="panel-footer">
+			<div>
+				<input id="tagAdder" type="text" class="form-control" 
+				placeholder="Add tag" 
+				data-bind="value: tag, 
+				valueUpdate: 'input', executeOnEnter: addTag">
+			</div>
+			<div>
+				<span data-bind='foreach: mdTags'>
+					<span data-bind='click: $parent.removeTag' 
+					class="label label-default">
+						<span class="glyphicon glyphicon-remove" 
+						aria-hidden="true"></span>
+						<span data-bind='text: $data'></span>
+					</span>
+				</span>
+			</div>
+		</div>
+	</div>
+	<!-- ko if: session -->
+	<div>
+		<button class="btn btn-default" data-bind='click: submit'>
+			Submit
+		</button>
+	</div>
+	<br>
+	<!-- /ko -->
+</div>
+<div class="col-md-6">
+	<h3>Preview</h3>
+	<div class="panel panel-default">
+		<div class="panel-heading">
+			<h4 type="text" data-bind='text: title'></h4>
+		</div>
+		<div class="panel-body post-editor">
+			<div id="preview-contents"></div>
+		</div>
+		<div class="panel-footer">
+			<span data-bind='foreach: tags'>
+				<span class="label label-success" 
+				data-bind='text: $data'></span>
+			</span>
+		</div>
+	</div>
+</div>
+

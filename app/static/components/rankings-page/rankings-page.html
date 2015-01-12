@@ -1,0 +1,31 @@
+<div class="container" id="main-container">
+	<div class="col-xs-6 col-sm-3 sidebar-offcanvas">
+		<div class="btn-group-vertical" role="group" aria-label=".">
+			 <button data-bind='click: getRankingGlobal' type="button" class="btn btn-default">Global Ranking</button>
+		</div>
+		<h4>Index</h4>
+		<div data-bind='foreach: index' class="btn-group" role="group" aria-label=".">
+			 <button data-bind='text: $data, click: $parent.getTags'type="button" class="btn btn-default"></button>
+		</div>
+		<!-- ko if: tagsInCat -->
+		<div>
+			<!-- ko if: categories -->
+			<h5>Categories</h5>
+			<!-- /ko -->
+			<div data-bind='foreach: tagsInCat' class="btn-group" role="group" aria-label=".">
+			 <button data-bind='text: $data, click: $parent.getRankingTag' type="button" class="btn btn-default"></button>
+			</div>
+		</div>
+		<!-- /ko -->
+	</div>
+	<div class="col-xs-12 col-sm-9">
+		<h3 data-bind='text: rankingTitle'></h3>
+		<!-- ko ifnot: results -->
+		<div class="alert alert-info" role="alert">
+			It seems that we haven't votes yet!
+		</div>
+		<!-- /ko -->
+		<post-list params='posts: rankingPosts'></post-list>
+	</div>
+</div>
+<br>
