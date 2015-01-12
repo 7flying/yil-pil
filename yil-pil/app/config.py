@@ -22,4 +22,4 @@ REDIS_PASSWORD = None if REDIS_HOST == 'localhost' else REDIS_URL.password
 
 # Sec
 SECRET_KEY = os.environ.get('SECRET_KEY') or 'super hard to guess secret string'
-SSL_DISABLE = bool(os.environ.get('SSL_DISABLE'))
+SSL_DISABLE = bool(os.environ.get('SSL_DISABLE', True))
