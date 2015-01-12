@@ -9,7 +9,8 @@ from app.routes import index
 from base64 import b64decode
 import redis
 import manager
-from app.config import REDIS_HOST, REDIS_PORT, REDIS_DB, SECRET_KEY, DEBUG
+from app.config import REDIS_HOST, REDIS_PORT, REDIS_DB, REDIS_PASSWORD, \
+    SECRET_KEY, DEBUG
 from flask import abort, jsonify
 from flask.ext.restful import Api, Resource, reqparse, fields, marshal
 from flask.ext.httpauth import HTTPBasicAuth
@@ -21,14 +22,15 @@ from itsdangerous import TimedJSONWebSignatureSerializer as Serializer, BadSigna
 api = Api(app)
 
 # Redis
-db = redis.StrictRedis(host=REDIS_HOST, port=REDIS_PORT, db=REDIS_DB)
+db = redis.StrictRedis(host=REDIS_HOST, port=REDIS_PORT, db=REDIS_DB,
+                       password=REDIS_PASSWORD)
 
 # Authentication
 auth = HTTPBasicAuth()
 
 if not DEBUG:
-	# SSL
-	sslify = SSLify(app, subdomains=True)
+    # SSL
+    sslify = SSLify(app, subdomains=True)
 
 if __name__ == '__main__':
     # Populate database with test data

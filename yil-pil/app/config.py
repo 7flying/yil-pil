@@ -1,4 +1,5 @@
 import os
+import urlparse
 
 DEBUG = True
 MANAGER_DEBUG = False
@@ -13,9 +14,12 @@ API_PAGINATION = 5
 API_MAX_UPDATES = 30
 
 # Database stuff
-REDIS_HOST = 'localhost'
-REDIS_PORT = '6379'
+REDIS_URL = urlparse.urlparse(os.environ.get('REDISTOGO_URL', 'redis://localhost'))
+REDIS_HOST = REDIS_URL.hostname
+REDIS_PORT = '6379' if REDIS_HOST == 'localhost' else REDIS_URL.port
 REDIS_DB = 0
+REDIS_PASSWORD = None if REDIS_HOST == 'localhost' else REDIS_URL.password
 
+print "DATA: ", REDIS_URL, REDIS_HOST, REDIS_PORT, REDIS_DB, REDIS_PASSWORD
 # Sec
 SECRET_KEY = os.environ.get('SECRET_KEY') or 'super hard to guess secret string'
