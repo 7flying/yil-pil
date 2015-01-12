@@ -10,12 +10,13 @@ from base64 import b64decode
 import redis
 import manager
 from app.config import REDIS_HOST, REDIS_PORT, REDIS_DB, REDIS_PASSWORD, \
-    SECRET_KEY, DEBUG
+    SECRET_KEY, DEBUG, SSL_DISABLE
 from flask import abort, jsonify
 from flask.ext.restful import Api, Resource, reqparse, fields, marshal
 from flask.ext.httpauth import HTTPBasicAuth
 from flask_sslify import SSLify
 from werkzeug.security import check_password_hash
+from werkzeug.contrib.fixers import ProxyFix
 from itsdangerous import TimedJSONWebSignatureSerializer as Serializer, BadSignature
 
 # Restful api
@@ -28,9 +29,11 @@ db = redis.StrictRedis(host=REDIS_HOST, port=REDIS_PORT, db=REDIS_DB,
 # Authentication
 auth = HTTPBasicAuth()
 
-if not DEBUG:
+if not DEBUG and not SSL_DISABLE:
     # SSL
     sslify = SSLify(app, subdomains=True)
+    # Reverse proxy stuff
+    app.wsgi_app = ProxyFix(app.wsgi_app)
 
 if __name__ == '__main__':
     # Populate database with test data

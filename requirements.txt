@@ -4,3 +4,4 @@ Flask-RESTful==0.2.12
 Flask-HTTPAuth==2.2.1
 Flask-SSLify==0.1.4
 redis==2.10
+gunicorn==19.1.1

@@ -1,7 +1,7 @@
 import os
 import urlparse
 
-DEBUG = True
+DEBUG = False
 MANAGER_DEBUG = False
 API_DEBUG = False
 
@@ -20,6 +20,6 @@ REDIS_PORT = '6379' if REDIS_HOST == 'localhost' else REDIS_URL.port
 REDIS_DB = 0
 REDIS_PASSWORD = None if REDIS_HOST == 'localhost' else REDIS_URL.password
 
-print "DATA: ", REDIS_URL, REDIS_HOST, REDIS_PORT, REDIS_DB, REDIS_PASSWORD
 # Sec
 SECRET_KEY = os.environ.get('SECRET_KEY') or 'super hard to guess secret string'
+SSL_DISABLE = bool(os.environ.get('SSL_DISABLE'))
