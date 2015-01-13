@@ -1,14 +1,6 @@
 # Client stuff
 client/
-bower_components/
-node_modules/
-static/css/
-static/bower_components/
-bower.json
-package.json
-
 docs/
-server/tmp/
 quick/
 
 # Python
