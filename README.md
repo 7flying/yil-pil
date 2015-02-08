@@ -1,7 +1,19 @@
 Yil-Pil
 =======
 
-WORK IN PROGRESS
+The note-taking app developed for 'Advanced Software Development' subject.
+
+Switch to the [static branch](https://github.com/7flying/yil-pil/tree/static) to obtain all the dependencies.
+
+## How to
+
+- Make sure that you have cloned the [static branch](https://github.com/7flying/yil-pil/tree/static).
+- Install all the requirements: ```sudo pip install -r requirements.txt```
+- Install Redis, see: [Redis quickstart](http://redis.io/topics/quickstart)
+- Start a redis server: ``` $ redis-server ```
+- Start Yil-Pil: ``` $ python run.py ```
+
+You can use the user interface or the REST-API.
 
 ##API Documentation
 
