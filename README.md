@@ -15,6 +15,20 @@ Switch to the [static branch](https://github.com/7flying/yil-pil/tree/static) to
 
 You can use the user interface or the REST-API.
 
+## How it looks like
+
+__Post Editor__
+
+![Markdown Editor](https://raw.githubusercontent.com/7flying/yil-pil/master/screenshots/markdown-editor.png)
+
+__Home__
+
+![Home](https://github.com/7flying/yil-pil/blob/master/screenshots/home.png)
+
+More on [screenshots](https://github.com/7flying/yil-pil/tree/master/screenshots)
+
+
+
 ##API Documentation
 
 Documentation format: 
