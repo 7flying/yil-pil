@@ -4,7 +4,6 @@ static_working/
 bower_components/
 node_modules/
 static/css/
-static/bower_components/
 bower.json
 package.json
 
