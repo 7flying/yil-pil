@@ -1,7 +1,18 @@
 Yil-Pil
 =======
 
-WORK IN PROGRESS
+The note-taking app developed for 'Advanced Software Development' subject.
+
+This static branch includes all the required libs.
+
+## How to
+
+- Install all the requirements: ```sudo pip install -r requirements.txt```
+- Install Redis, see: [Redis quickstart](http://redis.io/topics/quickstart)
+- Start a redis server: ``` $ redis-server ```
+- Start Yil-Pil: ``` $ python run.py ```
+
+You can use the user interface or the REST-API.
 
 ##API Documentation
 

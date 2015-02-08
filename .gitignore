@@ -1,9 +1,7 @@
 # Client stuff
 client/
 static_working/
-bower_components/
 node_modules/
-static/css/
 bower.json
 package.json
 

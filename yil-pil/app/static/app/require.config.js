@@ -5,7 +5,7 @@ var require = {
         "bootstrap":            "bower_modules/components-bootstrap/js/bootstrap.min",
         "crossroads":           "bower_modules/crossroads/dist/crossroads.min",
         "bootstrap-datetimepicker":
-                                "bower_modules/bootstrap-datetimepicker/src/js/bootstrap-datetimepicker",
+                                "bower_modules/bootstrap-datetimepicker/build/js/bootstrap-datetimepicker.min",
         "hasher":               "bower_modules/hasher/dist/js/hasher.min",
         "jquery":               "bower_modules/jquery/dist/jquery",
         "bootstrapvalidator":   "bower_modules/bootstrapvalidator/src/js/bootstrapValidator",
